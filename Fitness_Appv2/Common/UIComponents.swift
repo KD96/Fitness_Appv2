@@ -1,10 +1,302 @@
 import SwiftUI
 
-/// Componentes de UI reutilizables para la experiencia "PureLife"
-struct Components {
+/// Collection of modern UI components for enhancing the app's visual design
+struct UIComponents {
+    
+    // MARK: - Background Components
+    
+    /// Base view container for tab content to ensure consistent behavior
+    struct TabContentView<Content: View>: View {
+        let content: Content
+        var backgroundImage: String? = nil
+        var backgroundOpacity: Double = 0.07
+        var backgroundColor: Color? = nil
+        
+        @Environment(\.colorScheme) var colorScheme
+        
+        init(
+            backgroundImage: String? = nil,
+            backgroundOpacity: Double = 0.07,
+            backgroundColor: Color? = nil,
+            @ViewBuilder content: () -> Content
+        ) {
+            self.backgroundImage = backgroundImage
+            self.backgroundOpacity = backgroundOpacity
+            self.backgroundColor = backgroundColor
+            self.content = content()
+        }
+        
+        var body: some View {
+            ZStack {
+                // Base background color
+                (backgroundColor ?? PureLifeColors.adaptiveBackground(scheme: colorScheme))
+                    .edgesIgnoringSafeArea(.all)
+                
+                // Optional background image
+                if let imageName = backgroundImage, let uiImage = UIImage(named: imageName) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .opacity(backgroundOpacity)
+                        .blendMode(colorScheme == .dark ? .overlay : .multiply)
+                        .edgesIgnoringSafeArea(.all)
+                }
+                
+                // Main content
+                content
+                    .edgesIgnoringSafeArea(.bottom)
+            }
+        }
+    }
+    
+    /// A gradient background with an athlete image overlay
+    struct AthleteBackground: View {
+        var imageName: String = "athlete1"
+        var opacity: Double = 0.15
+        var gradientColors: [Color] = [
+            PureLifeColors.logoGreen.opacity(0.7),
+            PureLifeColors.background
+        ]
+        
+        @Environment(\.colorScheme) var colorScheme
+        
+        var body: some View {
+            ZStack {
+                // Base gradient
+                LinearGradient(
+                    gradient: Gradient(colors: gradientColors),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .edgesIgnoringSafeArea(.all)
+                
+                // Athlete image overlay with mask
+                if let uiImage = UIImage(named: imageName) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(maxWidth: .infinity)
+                        .opacity(opacity)
+                        .blendMode(colorScheme == .dark ? .overlay : .multiply)
+                        .edgesIgnoringSafeArea(.all)
+                }
+            }
+        }
+    }
+    
+    // MARK: - Card Components
+    
+    /// A modern card with optional athlete image background
+    struct ModernCard<Content: View>: View {
+        let content: Content
+        var cornerRadius: CGFloat = 24
+        var showAthlete: Bool = false
+        var athleteImage: String = "athlete1"
+        var athleteOpacity: Double = 0.08
+        
+        @Environment(\.colorScheme) var colorScheme
+        
+        init(
+            cornerRadius: CGFloat = 24,
+            showAthlete: Bool = false,
+            athleteImage: String = "athlete1",
+            athleteOpacity: Double = 0.08,
+            @ViewBuilder content: () -> Content
+        ) {
+            self.cornerRadius = cornerRadius
+            self.showAthlete = showAthlete
+            self.athleteImage = athleteImage
+            self.athleteOpacity = athleteOpacity
+            self.content = content()
+        }
+        
+        var body: some View {
+            ZStack {
+                // Card background
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .fill(PureLifeColors.adaptiveSurface(scheme: colorScheme))
+                    .shadow(
+                        color: colorScheme == .dark ? 
+                            Color.black.opacity(0.3) : 
+                            PureLifeColors.adaptiveCardShadow(scheme: colorScheme),
+                        radius: 15,
+                        x: 0,
+                        y: 5
+                    )
+                
+                // Athlete image if enabled
+                if showAthlete, let uiImage = UIImage(named: athleteImage) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .opacity(athleteOpacity)
+                        .blendMode(colorScheme == .dark ? .overlay : .multiply)
+                        .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+                }
+                
+                // Content layer
+                content
+            }
+        }
+    }
+    
+    /// Standard card with title and content
+    struct Card<Content: View>: View {
+        let title: String
+        let content: Content
+        var icon: String? = nil
+        var cornerRadius: CGFloat = 20
+        @Environment(\.colorScheme) var colorScheme
+        
+        init(title: String, icon: String? = nil, cornerRadius: CGFloat = 20, @ViewBuilder content: () -> Content) {
+            self.title = title
+            self.icon = icon
+            self.cornerRadius = cornerRadius
+            self.content = content()
+        }
+        
+        var body: some View {
+            VStack(alignment: .leading, spacing: Spacing.sm) {
+                // Header
+                if !title.isEmpty {
+                    HStack(spacing: Spacing.xs) {
+                        if let iconName = icon {
+                            Image(systemName: iconName)
+                                .font(.system(size: Typography.FontSize.md))
+                                .foregroundColor(PureLifeColors.logoGreen)
+                        }
+                        
+                        Text(title)
+                            .font(.system(size: Typography.FontSize.lg, weight: .bold, design: .rounded))
+                            .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
+                    }
+                }
+                
+                // Content
+                content
+            }
+            .padding(Spacing.cardPadding)
+            .background(PureLifeColors.adaptiveSurface(scheme: colorScheme))
+            .cornerRadius(cornerRadius)
+            .shadow(color: PureLifeColors.adaptiveCardShadow(scheme: colorScheme), radius: 8, x: 0, y: 4)
+        }
+    }
+    
+    // MARK: - Reward/Feature Cards
+    
+    /// A modern card with glassmorphism effect
+    struct GlassMorphicCard<Content: View>: View {
+        let content: Content
+        var cornerRadius: CGFloat = 24
+        var blurRadius: CGFloat = 5
+        
+        @Environment(\.colorScheme) var colorScheme
+        
+        init(
+            cornerRadius: CGFloat = 24,
+            blurRadius: CGFloat = 5,
+            @ViewBuilder content: () -> Content
+        ) {
+            self.cornerRadius = cornerRadius
+            self.blurRadius = blurRadius
+            self.content = content()
+        }
+        
+        var body: some View {
+            ZStack {
+                // Glass effect background
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .fill(PureLifeColors.adaptiveSurface(scheme: colorScheme).opacity(0.7))
+                    .background(
+                        PureLifeColors.adaptiveSurface(scheme: colorScheme)
+                            .opacity(0.2)
+                    )
+                    .blur(radius: blurRadius)
+                
+                // Border
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .strokeBorder(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                Color.white.opacity(colorScheme == .dark ? 0.1 : 0.5),
+                                Color.clear,
+                                PureLifeColors.logoGreen.opacity(0.2)
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
+                
+                // Content
+                content
+            }
+        }
+    }
+    
+    // MARK: - Profile Components
+    
+    /// Modern profile image with circular crop and decorative elements
+    struct ProfileImage: View {
+        var image: String
+        var size: CGFloat = 120
+        var showBorder: Bool = true
+        
+        @Environment(\.colorScheme) var colorScheme
+        
+        var body: some View {
+            ZStack {
+                // Main image
+                if let uiImage = UIImage(named: image) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: size, height: size)
+                        .clipShape(Circle())
+                } else {
+                    // Fallback to system image if custom image not available
+                    Circle()
+                        .fill(PureLifeColors.logoGreen.opacity(0.2))
+                        .frame(width: size, height: size)
+                    
+                    Image(systemName: "person.crop.circle.fill")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: size * 0.6)
+                        .foregroundColor(PureLifeColors.logoGreen)
+                }
+                
+                // Border if enabled
+                if showBorder {
+                    Circle()
+                        .strokeBorder(
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    PureLifeColors.logoGreen,
+                                    PureLifeColors.logoGreen.opacity(0.5)
+                                ]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 3
+                        )
+                        .frame(width: size, height: size)
+                }
+            }
+            .shadow(
+                color: PureLifeColors.logoGreen.opacity(0.3),
+                radius: 10,
+                x: 0,
+                y: 0
+            )
+        }
+    }
+    
     // MARK: - Buttons
     
-    /// Botón principal con estilo de acción primaria
+    /// Primary action button with prominent style
     struct PrimaryButton: View {
         let text: String
         let action: () -> Void
@@ -49,7 +341,7 @@ struct Components {
         }
     }
     
-    /// Botón secundario con estilo menos prominente
+    /// Secondary button with less prominent style
     struct SecondaryButton: View {
         let text: String
         let action: () -> Void
@@ -93,7 +385,7 @@ struct Components {
         }
     }
     
-    /// Botón de icono circular
+    /// Circular icon button
     struct IconButton: View {
         let iconName: String
         let action: () -> Void
@@ -113,53 +405,9 @@ struct Components {
         }
     }
     
-    // MARK: - Cards
-    
-    /// Tarjeta estándar con título y contenido
-    struct Card<Content: View>: View {
-        let title: String
-        let content: Content
-        var icon: String? = nil
-        var cornerRadius: CGFloat = 20
-        @Environment(\.colorScheme) var colorScheme
-        
-        init(title: String, icon: String? = nil, cornerRadius: CGFloat = 20, @ViewBuilder content: () -> Content) {
-            self.title = title
-            self.icon = icon
-            self.cornerRadius = cornerRadius
-            self.content = content()
-        }
-        
-        var body: some View {
-            VStack(alignment: .leading, spacing: Spacing.sm) {
-                // Header
-                if !title.isEmpty {
-                    HStack(spacing: Spacing.xs) {
-                        if let iconName = icon {
-                            Image(systemName: iconName)
-                                .font(.system(size: Typography.FontSize.md))
-                                .foregroundColor(PureLifeColors.logoGreen)
-                        }
-                        
-                        Text(title)
-                            .font(.system(size: Typography.FontSize.lg, weight: .bold, design: .rounded))
-                            .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
-                    }
-                }
-                
-                // Contenido
-                content
-            }
-            .padding(Spacing.cardPadding)
-            .background(PureLifeColors.adaptiveSurface(scheme: colorScheme))
-            .cornerRadius(cornerRadius)
-            .shadow(color: PureLifeColors.adaptiveCardShadow(scheme: colorScheme), radius: 8, x: 0, y: 4)
-        }
-    }
-    
     // MARK: - Input Fields
     
-    /// Campo de texto con estilo consistente
+    /// Styled text field with consistent design
     struct TextField: View {
         let placeholder: String
         @Binding var text: String
@@ -211,7 +459,7 @@ struct Components {
     
     // MARK: - Avatar & User Display
     
-    /// Avatar de usuario con iniciales
+    /// User avatar with initials
     struct UserAvatar: View {
         let initials: String
         var size: CGFloat = 40
@@ -231,9 +479,9 @@ struct Components {
         }
     }
     
-    /// Indicador de estado de carga
+    /// Loading state indicator
     struct LoadingIndicator: View {
-        var message: String = "Cargando..."
+        var message: String = "Loading..."
         var color: Color = PureLifeColors.logoGreen
         @Environment(\.colorScheme) var colorScheme
         
@@ -254,7 +502,7 @@ struct Components {
     
     // MARK: - Data Visualization
     
-    /// Barra de progreso
+    /// Progress bar component
     struct ProgressBar: View {
         let value: Double
         var backgroundColor: Color = PureLifeColors.logoGreen.opacity(0.2)
@@ -284,7 +532,7 @@ struct Components {
         }
     }
     
-    /// Tarjeta de estadística con icono, valor y etiqueta
+    /// Statistic card with icon, value and label
     struct StatCard: View {
         let icon: String
         let title: String
@@ -296,7 +544,7 @@ struct Components {
         
         var body: some View {
             VStack(alignment: .leading, spacing: Spacing.sm) {
-                // Icono y título
+                // Icon and title
                 HStack(spacing: Spacing.xs) {
                     ZStack {
                         Circle()
@@ -313,12 +561,12 @@ struct Components {
                         .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                 }
                 
-                // Valor principal
+                // Main value
                 Text(value)
                     .font(.system(size: Typography.FontSize.xxl, weight: .bold, design: .rounded))
                     .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
                 
-                // Tendencia
+                // Trend
                 if let trend = trend, let label = trendLabel {
                     HStack(spacing: Spacing.xxs) {
                         Image(systemName: "arrow.up")
@@ -344,13 +592,13 @@ struct Components {
     
     // MARK: - Empty States
     
-    /// Vista para estados vacíos con icono y mensajes
+    /// Empty state view with icon and messages
     struct EmptyState: View {
         let icon: String
         let title: String
         let message: String
         var action: (() -> Void)? = nil
-        var actionTitle: String = "Acción"
+        var actionTitle: String = "Action"
         @Environment(\.colorScheme) var colorScheme
         
         var body: some View {
@@ -391,7 +639,7 @@ struct Components {
     
     // MARK: - Messages & Alerts
     
-    /// Banner de información o notificación
+    /// Information or notification banner
     struct Banner: View {
         enum BannerType {
             case info, success, warning, error

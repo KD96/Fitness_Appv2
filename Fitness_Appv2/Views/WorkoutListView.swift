@@ -70,11 +70,9 @@ struct WorkoutListView: View {
     }
     
     var body: some View {
-        ZStack {
-            // Modern background
-            PureLifeColors.adaptiveBackground(scheme: colorScheme)
-                .ignoresSafeArea()
-            
+        UIComponents.TabContentView(
+            backgroundColor: PureLifeColors.adaptiveBackground(scheme: colorScheme)
+        ) {
             VStack(spacing: 0) {
                 // Custom header with search bar
                 VStack(spacing: 16) {

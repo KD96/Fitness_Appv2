@@ -31,11 +31,9 @@ struct CommunityView: View {
     }
     
     var body: some View {
-        ZStack {
-            // Modern background
-            PureLifeColors.adaptiveBackground(scheme: colorScheme)
-                .ignoresSafeArea()
-            
+        UIComponents.TabContentView(
+            backgroundColor: PureLifeColors.adaptiveBackground(scheme: colorScheme)
+        ) {
             VStack(spacing: 0) {
                 // Header with logo and user
                 PureLifeHeader(showUserAvatar: true, userInitials: String(dataStore.currentUser.firstName.prefix(1)))

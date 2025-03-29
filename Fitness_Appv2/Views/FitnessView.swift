@@ -10,11 +10,11 @@ struct FitnessView: View {
     
     var body: some View {
         NavigationView {
-            ZStack {
-                // Modern background with subtle gradient
-                PureLifeColors.adaptiveBackground(scheme: colorScheme)
-                    .ignoresSafeArea()
-                
+            UIComponents.TabContentView(
+                backgroundImage: "athlete_banner",
+                backgroundOpacity: 0.07,
+                backgroundColor: PureLifeColors.adaptiveBackground(scheme: colorScheme)
+            ) {
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 28) {
                         // Header with logo and avatar
@@ -23,10 +23,15 @@ struct FitnessView: View {
                         }
                         .padding(.bottom, 10)
                         
+                        // Hero section with welcome and athlete images
+                        heroSection
+                        
                         // User stats card with modern design
                         userStatsCard
                             .padding(.horizontal, 20)
-                            .modifier(PureLifeColors.modernCard(cornerRadius: 24, padding: 0, scheme: colorScheme))
+                        
+                        // Featured workout types with athlete images
+                        featuredWorkoutTypesSection
                         
                         // Weekly activity card
                         weeklyActivityCard
@@ -37,7 +42,7 @@ struct FitnessView: View {
                             healthConnectBanner
                         }
                         
-                        // Recently completed workouts
+                        // Recently completed workouts with modern cards
                         recentWorkoutsSection
                     }
                     .padding(.top, 16)
@@ -59,74 +64,163 @@ struct FitnessView: View {
     
     // MARK: - UI Components
     
-    private var userStatsCard: some View {
-        VStack(spacing: 18) {
-            // User greeting section
-            HStack(spacing: 12) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Hello, \(dataStore.currentUser.firstName)")
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
-                        .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
-                    
-                    Text("Your fitness journey")
-                        .font(.system(size: 15, design: .rounded))
-                        .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
-                }
+    private var heroSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Hello, \(dataStore.currentUser.firstName)")
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
                 
-                Spacer()
-                
-                ZStack {
-                    Circle()
-                        .fill(PureLifeColors.logoGreen.opacity(0.2))
-                        .frame(width: 50, height: 50)
-                    
-                    Text(String(dataStore.currentUser.firstName.prefix(1)))
-                        .font(.system(size: 22, weight: .semibold, design: .rounded))
-                        .foregroundColor(PureLifeColors.logoGreen)
-                }
+                Text("Ready for your daily workout?")
+                    .font(.system(size: 16, design: .rounded))
+                    .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
             }
-            .padding(.horizontal, 24)
-            .padding(.top, 24)
+            .padding(.horizontal, 20)
             
-            // Divider with gradient
-            Rectangle()
-                .fill(PureLifeColors.adaptiveDivider(scheme: colorScheme))
-                .frame(height: 1)
+            // Athlete carousel
+            AthleteCarouselView(images: ["athlete1", "athlete2"], height: 180)
+        }
+    }
+    
+    private var userStatsCard: some View {
+        UIComponents.GlassMorphicCard(cornerRadius: 24) {
+            VStack(spacing: 18) {
+                // Stats counters
+                HStack(spacing: 0) {
+                    // Token balance
+                    statItem(
+                        title: "Tokens",
+                        value: "\(Int(dataStore.currentUser.tokenBalance))",
+                        icon: "crown.fill",
+                        color: PureLifeColors.logoGreen
+                    )
+                    
+                    // Vertical divider
+                    Rectangle()
+                        .fill(PureLifeColors.adaptiveDivider(scheme: colorScheme))
+                        .frame(width: 1, height: 36)
+                    
+                    // Workout count
+                    statItem(
+                        title: "Workouts",
+                        value: "\(dataStore.totalWorkoutsCompleted)",
+                        icon: "figure.run",
+                        color: PureLifeColors.logoGreen
+                    )
+                    
+                    // Vertical divider
+                    Rectangle()
+                        .fill(PureLifeColors.adaptiveDivider(scheme: colorScheme))
+                        .frame(width: 1, height: 36)
+                    
+                    // Calories
+                    statItem(
+                        title: "Calories",
+                        value: "\(dataStore.totalCaloriesBurned)",
+                        icon: "flame.fill",
+                        color: Color.orange
+                    )
+                }
+                .padding(.horizontal, 24)
+                .padding(.vertical, 20)
+            }
+        }
+    }
+    
+    private func statItem(title: String, value: String, icon: String, color: Color) -> some View {
+        VStack(spacing: 8) {
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.system(size: 15))
+                    .foregroundColor(color)
+                
+                Text(value)
+                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                    .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
+            }
+            
+            Text(title)
+                .font(.system(size: 14, design: .rounded))
+                .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
+        }
+        .frame(maxWidth: .infinity)
+    }
+    
+    private var featuredWorkoutTypesSection: some View {
+        VStack(alignment: .leading, spacing: 15) {
+            Text("Workout Categories")
+                .font(.system(size: 20, weight: .bold, design: .rounded))
+                .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
                 .padding(.horizontal, 20)
             
-            // Stats counters
-            HStack(spacing: 0) {
-                // Token balance
-                VStack(spacing: 6) {
-                    Text("\(Int(dataStore.currentUser.tokenBalance))")
-                        .font(.system(size: 30, weight: .bold, design: .rounded))
-                        .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
-                    
-                    Text("Total tokens")
-                        .font(.system(size: 14, design: .rounded))
-                        .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 16) {
+                    workoutTypeCard(.running)
+                    workoutTypeCard(.strength)
+                    workoutTypeCard(.yoga)
+                    workoutTypeCard(.cycling)
+                    workoutTypeCard(.swimming)
                 }
-                .frame(maxWidth: .infinity)
-                
-                // Vertical divider
-                Rectangle()
-                    .fill(PureLifeColors.adaptiveDivider(scheme: colorScheme))
-                    .frame(width: 1, height: 36)
-                
-                // Workout count
-                VStack(spacing: 6) {
-                    Text("\(dataStore.totalWorkoutsCompleted)")
-                        .font(.system(size: 30, weight: .bold, design: .rounded))
-                        .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
-                    
-                    Text("Workouts")
-                        .font(.system(size: 14, design: .rounded))
-                        .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
-                }
-                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 5)
             }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 24)
+        }
+    }
+    
+    private func workoutTypeCard(_ type: WorkoutType) -> some View {
+        Button(action: {
+            // Show workout creation with pre-selected type
+            showingNewWorkout = true
+        }) {
+            VStack(alignment: .center, spacing: 10) {
+                // Athletic image or icon based on type
+                if let image = UIImage(named: AthleteCarouselView.getWorkoutTypeImages(type).first ?? "") {
+                    Image(uiImage: image)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 70, height: 70)
+                        .clipShape(Circle())
+                        .overlay(
+                            Circle()
+                                .stroke(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [
+                                            PureLifeColors.logoGreen,
+                                            PureLifeColors.logoGreen.opacity(0.5)
+                                        ]),
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    lineWidth: 2
+                                )
+                        )
+                } else {
+                    ZStack {
+                        Circle()
+                            .fill(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        PureLifeColors.logoGreen.opacity(0.2),
+                                        PureLifeColors.logoGreen.opacity(0.1)
+                                    ]),
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .frame(width: 70, height: 70)
+                        
+                        Image(systemName: type.icon)
+                            .font(.system(size: 30))
+                            .foregroundColor(PureLifeColors.logoGreen)
+                    }
+                }
+                
+                Text(type.rawValue.capitalized)
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
+            }
+            .frame(width: 100)
+            .padding(.vertical, 10)
         }
     }
     
@@ -136,7 +230,7 @@ struct FitnessView: View {
             VStack(spacing: 12) {
                 HStack {
                     Text("Activity Progress")
-                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                        .font(.system(size: 20, weight: .bold, design: .rounded))
                         .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
                     
                     Spacer()
@@ -176,13 +270,12 @@ struct FitnessView: View {
                 }
             }
             .padding(.horizontal, 24)
-            .padding(.top, 6)
+            .padding(.top, 24)
             
             // Chart view
             WeeklyActivityView()
-                .frame(height: 220)
                 .padding(.horizontal, 12)
-                .padding(.bottom, 16)
+                .padding(.bottom, 24)
         }
         .modifier(PureLifeColors.modernCard(cornerRadius: 24, padding: 0, scheme: colorScheme))
     }
@@ -191,53 +284,50 @@ struct FitnessView: View {
         Button(action: {
             showingHealthKitAuth = true
         }) {
-            HStack(spacing: 16) {
-                // Icon with gradient background
-                ZStack {
-                    Circle()
-                        .fill(
-                            LinearGradient(
-                                gradient: Gradient(colors: [Color.red.opacity(0.7), Color.red.opacity(0.5)]),
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
+            UIComponents.ModernCard(cornerRadius: 24) {
+                HStack(spacing: 16) {
+                    // Icon with gradient background
+                    ZStack {
+                        Circle()
+                            .fill(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [Color.red.opacity(0.7), Color.red.opacity(0.5)]),
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
                             )
-                        )
-                        .frame(width: 48, height: 48)
+                            .frame(width: 48, height: 48)
+                        
+                        Image(systemName: "heart.text.square.fill")
+                            .font(.system(size: 22))
+                            .foregroundColor(.white)
+                    }
                     
-                    Image(systemName: "heart.text.square.fill")
-                        .font(.system(size: 22))
-                        .foregroundColor(.white)
-                }
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Use your real health data")
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
-                        .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Use your real health data")
+                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                            .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
+                        
+                        Text("Connect to Apple Health")
+                            .font(.system(size: 14, design: .rounded))
+                            .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
+                    }
                     
-                    Text("Connect to Apple Health")
-                        .font(.system(size: 14, design: .rounded))
-                        .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
-                }
-                
-                Spacer()
-                
-                // Chevron with circle background
-                ZStack {
-                    Circle()
-                        .strokeBorder(PureLifeColors.adaptiveDivider(scheme: colorScheme), lineWidth: 1)
-                        .frame(width: 28, height: 28)
+                    Spacer()
                     
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
+                    // Chevron with circle background
+                    ZStack {
+                        Circle()
+                            .strokeBorder(PureLifeColors.adaptiveDivider(scheme: colorScheme), lineWidth: 1)
+                            .frame(width: 28, height: 28)
+                        
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
+                    }
                 }
+                .padding(20)
             }
-            .padding(20)
-            .background(
-                RoundedRectangle(cornerRadius: 24)
-                    .fill(PureLifeColors.adaptiveSurface(scheme: colorScheme))
-                    .shadow(color: PureLifeColors.adaptiveCardShadow(scheme: colorScheme), radius: 8, x: 0, y: 4)
-            )
             .padding(.horizontal, 20)
         }
     }
@@ -262,13 +352,21 @@ struct FitnessView: View {
                         Image(systemName: "plus.circle.fill")
                             .font(.system(size: 15))
                     }
-                    .foregroundColor(PureLifeColors.logoGreen)
+                    .foregroundColor(.white)
                     .padding(.vertical, 8)
                     .padding(.horizontal, 14)
                     .background(
-                        Capsule()
-                            .fill(PureLifeColors.logoGreen.opacity(0.12))
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                PureLifeColors.logoGreen,
+                                PureLifeColors.logoGreen.opacity(0.8)
+                            ]),
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
                     )
+                    .cornerRadius(20)
+                    .shadow(color: PureLifeColors.logoGreen.opacity(0.3), radius: 5, x: 0, y: 2)
                 }
             }
             .padding(.horizontal, 20)
@@ -284,16 +382,41 @@ struct FitnessView: View {
     
     private var emptyWorkoutsView: some View {
         VStack(spacing: 18) {
-            ZStack {
-                Circle()
-                    .fill(PureLifeColors.logoGreen.opacity(0.08))
-                    .frame(width: 100, height: 100)
-                
-                Image(systemName: "figure.run")
-                    .font(.system(size: 48))
-                    .foregroundColor(PureLifeColors.logoGreen.opacity(0.6))
+            // Add athlete image for empty state
+            if let image = UIImage(named: "athlete2") {
+                Image(uiImage: image)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 150, height: 150)
+                    .clipShape(Circle())
+                    .overlay(
+                        Circle()
+                            .stroke(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        PureLifeColors.logoGreen,
+                                        PureLifeColors.logoGreen.opacity(0.5)
+                                    ]),
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 3
+                            )
+                    )
+                    .shadow(color: PureLifeColors.logoGreen.opacity(0.3), radius: 10, x: 0, y: 0)
+                    .padding(.top, 20)
+            } else {
+                ZStack {
+                    Circle()
+                        .fill(PureLifeColors.logoGreen.opacity(0.08))
+                        .frame(width: 100, height: 100)
+                    
+                    Image(systemName: "figure.run")
+                        .font(.system(size: 48))
+                        .foregroundColor(PureLifeColors.logoGreen.opacity(0.6))
+                }
+                .padding(.top, 20)
             }
-            .padding(.top, 20)
             
             VStack(spacing: 8) {
                 Text("No workouts yet")
@@ -311,20 +434,26 @@ struct FitnessView: View {
             Button(action: {
                 showingNewWorkout = true
             }) {
-                Text("Add Your First Workout")
-                    .font(.system(size: 16, weight: .semibold, design: .rounded))
-                    .foregroundColor(.white)
-                    .padding(.vertical, 14)
-                    .padding(.horizontal, 32)
-                    .background(
-                        LinearGradient(
-                            gradient: Gradient(colors: [PureLifeColors.logoGreen, PureLifeColors.logoGreenDark]),
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
+                HStack {
+                    Text("Add Your First Workout")
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundColor(.white)
+                    
+                    Image(systemName: "plus.circle.fill")
+                        .font(.system(size: 18))
+                        .foregroundColor(.white)
+                }
+                .padding(.vertical, 16)
+                .padding(.horizontal, 32)
+                .background(
+                    LinearGradient(
+                        gradient: Gradient(colors: [PureLifeColors.logoGreen, PureLifeColors.logoGreenDark]),
+                        startPoint: .leading,
+                        endPoint: .trailing
                     )
-                    .cornerRadius(28)
-                    .shadow(color: PureLifeColors.logoGreen.opacity(0.3), radius: 10, x: 0, y: 5)
+                )
+                .cornerRadius(28)
+                .shadow(color: PureLifeColors.logoGreen.opacity(0.3), radius: 10, x: 0, y: 5)
             }
             .padding(.top, 10)
             .padding(.bottom, 30)
@@ -337,11 +466,10 @@ struct FitnessView: View {
     private var recentWorkoutsList: some View {
         VStack(spacing: 16) {
             ForEach(dataStore.currentUser.completedWorkouts.sorted(by: { $0.date > $1.date }).prefix(3)) { workout in
-                WorkoutRowView(workout: workout)
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        selectedWorkout = workout
-                    }
+                ModernWorkoutCard(workout: workout, onTap: {
+                    selectedWorkout = workout
+                }, showDetails: false, imageHeight: 100)
+                .padding(.horizontal, 20)
             }
             
             // View all button
@@ -362,7 +490,6 @@ struct FitnessView: View {
             .padding(.top, 8)
             .padding(.bottom, 20)
         }
-        .padding(.horizontal, 20)
     }
 }
 

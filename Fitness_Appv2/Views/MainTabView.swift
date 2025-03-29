@@ -37,6 +37,7 @@ struct MainTabView: View {
                     .tag(3)
             }
             .accentColor(PureLifeColors.logoGreen)
+            .edgesIgnoringSafeArea(.all)
             .onAppear {
                 configureTabBar()
             }
@@ -47,18 +48,20 @@ struct MainTabView: View {
                 configureTabBar()
             }
         }
+        .edgesIgnoringSafeArea(.bottom)
+        .background(PureLifeColors.adaptiveBackground(scheme: colorScheme).edgesIgnoringSafeArea(.all))
     }
     
     private func configureTabBar() {
-        // Solución más directa para el modo oscuro
+        // Solución para el modo oscuro/claro
         if #available(iOS 15.0, *) {
             let tabBarAppearance = UITabBarAppearance()
             
-            // Configuración explícita basada en modo oscuro/claro
+            // Configuración basada en modo oscuro/claro
             if colorScheme == .dark {
                 // Modo oscuro - colores específicos
-                tabBarAppearance.configureWithOpaqueBackground()
-                tabBarAppearance.backgroundColor = UIColor.black
+                tabBarAppearance.configureWithDefaultBackground()
+                tabBarAppearance.backgroundColor = UIColor(PureLifeColors.adaptiveSurface(scheme: .dark))
                 
                 // Colores personalizados para elementos
                 let itemAppearance = UITabBarItemAppearance()
@@ -73,7 +76,7 @@ struct MainTabView: View {
             } else {
                 // Modo claro
                 tabBarAppearance.configureWithDefaultBackground()
-                tabBarAppearance.backgroundColor = UIColor.white
+                tabBarAppearance.backgroundColor = UIColor(PureLifeColors.adaptiveSurface(scheme: .light))
                 
                 // Colores personalizados para elementos
                 let itemAppearance = UITabBarItemAppearance()
@@ -87,17 +90,18 @@ struct MainTabView: View {
                 tabBarAppearance.compactInlineLayoutAppearance = itemAppearance
             }
             
+            // Aplicar apariencia y hacer que sea translúcido
             UITabBar.appearance().standardAppearance = tabBarAppearance
             UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
-            UITabBar.appearance().isTranslucent = false
+            UITabBar.appearance().isTranslucent = true
         } else {
             // Configuración para iOS 14 y anteriores
-            UITabBar.appearance().isTranslucent = false
+            UITabBar.appearance().isTranslucent = true
             
             if colorScheme == .dark {
-                UITabBar.appearance().barTintColor = UIColor.black
+                UITabBar.appearance().barTintColor = UIColor(PureLifeColors.adaptiveSurface(scheme: .dark))
             } else {
-                UITabBar.appearance().barTintColor = UIColor.white
+                UITabBar.appearance().barTintColor = UIColor(PureLifeColors.adaptiveSurface(scheme: .light))
             }
             
             // Actualizar el estilo de interfaz para iOS 14

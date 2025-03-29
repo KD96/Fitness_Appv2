@@ -15,14 +15,14 @@ struct WorkoutDetailView: View {
                 headerSection
                 
                 // Workout details and stats
-                Components.Card(title: "Workout Details", icon: "chart.bar.fill") {
+                UIComponents.Card(title: "Workout Details", icon: "chart.bar.fill") {
                     detailsSection
                 }
                 .padding(.horizontal, Spacing.screenHorizontalPadding)
                 
                 // Notes section if available
                 if let notes = workout.notes, !notes.isEmpty {
-                    Components.Card(title: "Notes", icon: "note.text") {
+                    UIComponents.Card(title: "Notes", icon: "note.text") {
                         Typography.paragraph(
                             Text(notes)
                         )
@@ -66,7 +66,7 @@ struct WorkoutDetailView: View {
     // MARK: - UI Components
     
     private var headerSection: some View {
-        Components.Card(title: "", cornerRadius: 16) {
+        UIComponents.Card(title: "", cornerRadius: 16) {
             HStack(spacing: 15) {
                 // Icono del tipo de workout
                 ZStack {
@@ -170,7 +170,7 @@ struct WorkoutDetailView: View {
     
     private var actionsSection: some View {
         VStack(spacing: Spacing.md) {
-            Components.PrimaryButton(
+            UIComponents.PrimaryButton(
                 text: "Complete Workout",
                 action: {
                     withAnimation(.spring()) {
@@ -182,7 +182,7 @@ struct WorkoutDetailView: View {
             )
             
             HStack(spacing: Spacing.md) {
-                Components.SecondaryButton(
+                UIComponents.SecondaryButton(
                     text: "Edit",
                     action: {
                         // Edit workout logic would go here
@@ -190,7 +190,7 @@ struct WorkoutDetailView: View {
                     iconName: "pencil"
                 )
                 
-                Components.SecondaryButton(
+                UIComponents.SecondaryButton(
                     text: "Delete",
                     action: {
                         withAnimation {
@@ -204,7 +204,7 @@ struct WorkoutDetailView: View {
     }
     
     private var backButton: some View {
-        Components.IconButton(
+        UIComponents.IconButton(
             iconName: "chevron.left",
             action: {
                 withAnimation {
