@@ -28,7 +28,7 @@ struct RewardView: View {
                         // Balance card
                         ZStack(alignment: .bottom) {
                             // Card background
-                            Components.Card(title: "", cornerRadius: 25, scheme: colorScheme) {
+                            Components.Card(title: "", cornerRadius: 25) {
                                 VStack(spacing: 10) {
                                     Text("Token Balance")
                                         .font(.system(size: 16, weight: .medium, design: .rounded))

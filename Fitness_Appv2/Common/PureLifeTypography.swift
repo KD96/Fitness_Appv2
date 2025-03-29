@@ -31,6 +31,9 @@ enum Typography {
         
         /// Título principal (32pt)
         static let xxxxl: CGFloat = 32
+        
+        /// Título hero (40pt)
+        static let xxxxxl: CGFloat = 40
     }
     
     // MARK: - Font Weights
@@ -68,6 +71,22 @@ enum Typography {
         static let loose: CGFloat = 1.8
     }
     
+    // MARK: - Letter Spacing
+    
+    enum LetterSpacing {
+        /// Apretado (-0.5)
+        static let tight: CGFloat = -0.5
+        
+        /// Normal (0)
+        static let normal: CGFloat = 0
+        
+        /// Ligeramente expandido (0.5)
+        static let wide: CGFloat = 0.5
+        
+        /// Expandido para títulos y etiquetas (1.0)
+        static let expanded: CGFloat = 1.0
+    }
+    
     // MARK: - Text Styles
     
     /// Fuente de sistema redondeada con tamaño y peso personalizados
@@ -81,81 +100,162 @@ enum Typography {
         let weight: Font.Weight
         let lineHeight: CGFloat
         let color: Color
+        let tracking: CGFloat
+        
+        init(
+            size: CGFloat,
+            weight: Font.Weight = .regular,
+            lineHeight: CGFloat = LineHeight.relaxed,
+            color: Color = PureLifeColors.textPrimary,
+            tracking: CGFloat = LetterSpacing.normal
+        ) {
+            self.size = size
+            self.weight = weight
+            self.lineHeight = lineHeight
+            self.color = color
+            self.tracking = tracking
+        }
         
         func body(content: Content) -> some View {
             content
                 .font(.system(size: size, weight: weight, design: .rounded))
                 .lineSpacing((lineHeight - 1.0) * size)
+                .tracking(tracking)
                 .foregroundColor(color)
         }
     }
     
-    // MARK: - Typography Presets
+    // MARK: - Modern Typography Presets
     
-    /// Estilo para títulos principales
+    /// Título hero para pantallas principales
+    static func hero(_ content: some View, color: Color = PureLifeColors.textPrimary) -> some View {
+        content
+            .font(font(size: FontSize.xxxxxl, weight: FontWeight.bold))
+            .tracking(LetterSpacing.tight)
+            .foregroundColor(color)
+    }
+    
+    /// Título principal grande 
     static func h1(_ content: some View, color: Color = PureLifeColors.textPrimary) -> some View {
         content
             .font(font(size: FontSize.xxxxl, weight: FontWeight.bold))
+            .tracking(LetterSpacing.tight)
             .foregroundColor(color)
     }
     
-    /// Estilo para títulos secundarios
+    /// Título secundario
     static func h2(_ content: some View, color: Color = PureLifeColors.textPrimary) -> some View {
         content
             .font(font(size: FontSize.xxxl, weight: FontWeight.bold))
+            .tracking(LetterSpacing.tight)
             .foregroundColor(color)
     }
     
-    /// Estilo para títulos de sección
+    /// Título de sección
     static func h3(_ content: some View, color: Color = PureLifeColors.textPrimary) -> some View {
         content
             .font(font(size: FontSize.xxl, weight: FontWeight.bold))
+            .tracking(LetterSpacing.tight)
             .foregroundColor(color)
     }
     
-    /// Estilo para subtítulos
+    /// Título para tarjetas y subsecciones
     static func h4(_ content: some View, color: Color = PureLifeColors.textPrimary) -> some View {
         content
-            .font(font(size: FontSize.xl, weight: FontWeight.bold))
+            .font(font(size: FontSize.xl, weight: FontWeight.semibold))
+            .tracking(LetterSpacing.normal)
             .foregroundColor(color)
     }
     
-    /// Estilo para texto de cuerpo grande
+    /// Título para elementos pequeños
+    static func h5(_ content: some View, color: Color = PureLifeColors.textPrimary) -> some View {
+        content
+            .font(font(size: FontSize.lg, weight: FontWeight.semibold))
+            .tracking(LetterSpacing.normal)
+            .foregroundColor(color)
+    }
+    
+    /// Texto de cuerpo grande (enfatizado)
     static func bodyLarge(_ content: some View, color: Color = PureLifeColors.textPrimary) -> some View {
         content
             .font(font(size: FontSize.md, weight: FontWeight.medium))
+            .tracking(LetterSpacing.normal)
             .foregroundColor(color)
     }
     
-    /// Estilo para texto de cuerpo estándar
+    /// Texto de cuerpo estándar
     static func body(_ content: some View, color: Color = PureLifeColors.textPrimary) -> some View {
         content
             .font(font(size: FontSize.base, weight: FontWeight.regular))
+            .tracking(LetterSpacing.normal)
             .foregroundColor(color)
     }
     
-    /// Estilo para texto pequeño
+    /// Texto pequeño para información secundaria
     static func small(_ content: some View, color: Color = PureLifeColors.textSecondary) -> some View {
         content
             .font(font(size: FontSize.sm, weight: FontWeight.regular))
+            .tracking(LetterSpacing.normal)
             .foregroundColor(color)
     }
     
-    /// Estilo para etiquetas y metadatos
+    /// Texto para etiquetas y metadatos (todo en mayúsculas)
     static func caption(_ content: some View, color: Color = PureLifeColors.textSecondary) -> some View {
         content
             .font(font(size: FontSize.xs, weight: FontWeight.medium))
+            .tracking(LetterSpacing.expanded)
             .foregroundColor(color)
             .textCase(.uppercase)
     }
     
-    /// Párrafo con buen espaciado para lectura
-    static func paragraph(_ content: some View) -> some View {
+    /// Texto destacado con acento visual
+    static func highlight(_ content: some View) -> some View {
+        content
+            .font(font(size: FontSize.base, weight: FontWeight.semibold))
+            .foregroundColor(PureLifeColors.logoGreen)
+    }
+    
+    /// Párrafo con buen espaciado para lecturas largas
+    static func paragraph(_ content: some View, color: Color = PureLifeColors.textPrimary) -> some View {
         content.modifier(ParagraphStyle(
             size: FontSize.base,
             weight: FontWeight.regular,
             lineHeight: LineHeight.relaxed,
-            color: PureLifeColors.textPrimary
+            color: color
         ))
+    }
+    
+    // MARK: - Botones y elementos interactivos
+    
+    /// Estilo para botones principales
+    static func primaryButton(_ content: some View) -> some View {
+        content
+            .font(font(size: FontSize.md, weight: FontWeight.semibold))
+            .tracking(LetterSpacing.wide)
+    }
+    
+    /// Estilo para botones secundarios
+    static func secondaryButton(_ content: some View) -> some View {
+        content
+            .font(font(size: FontSize.md, weight: FontWeight.medium))
+            .tracking(LetterSpacing.wide)
+    }
+    
+    /// Etiqueta para elementos interactivos
+    static func actionLabel(_ content: some View, color: Color = PureLifeColors.logoGreen) -> some View {
+        content
+            .font(font(size: FontSize.sm, weight: FontWeight.semibold))
+            .tracking(LetterSpacing.normal)
+            .foregroundColor(color)
+    }
+    
+    // MARK: - Adaptative Typography
+    
+    /// Texto adaptativo que cambia según el modo claro/oscuro
+    static func adaptiveText(_ content: some View, lightColor: Color, darkColor: Color, scheme: ColorScheme) -> some View {
+        content
+            .foregroundColor(
+                scheme == .dark ? darkColor : lightColor
+            )
     }
 } 

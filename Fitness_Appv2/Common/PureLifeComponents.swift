@@ -11,13 +11,14 @@ struct Components {
         var iconName: String? = nil
         var isLoading: Bool = false
         var isDisabled: Bool = false
+        @Environment(\.colorScheme) var colorScheme
         
         var body: some View {
             Button(action: isDisabled ? {} : action) {
                 HStack(spacing: Spacing.xs) {
                     if isLoading {
                         ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: PureLifeColors.primaryButtonText))
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
                             .scaleEffect(0.8)
                     } else if let icon = iconName {
                         Image(systemName: icon)
@@ -31,12 +32,18 @@ struct Components {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, Spacing.md)
                 .background(
-                    isDisabled 
-                    ? PureLifeColors.primaryButtonBackground.opacity(0.5)
-                    : PureLifeColors.primaryButtonBackground
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            isDisabled ? PureLifeColors.logoGreen.opacity(0.5) : PureLifeColors.logoGreen,
+                            isDisabled ? PureLifeColors.logoGreenDark.opacity(0.5) : PureLifeColors.logoGreenDark
+                        ]),
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
                 )
-                .foregroundColor(PureLifeColors.primaryButtonText)
-                .cornerRadius(Spacing.buttonCornerRadius)
+                .foregroundColor(.white)
+                .cornerRadius(28)
+                .shadow(color: PureLifeColors.logoGreen.opacity(0.3), radius: 8, x: 0, y: 4)
             }
             .disabled(isDisabled || isLoading)
         }
@@ -49,13 +56,14 @@ struct Components {
         var iconName: String? = nil
         var isLoading: Bool = false
         var isDisabled: Bool = false
+        @Environment(\.colorScheme) var colorScheme
         
         var body: some View {
             Button(action: isDisabled ? {} : action) {
                 HStack(spacing: Spacing.xs) {
                     if isLoading {
                         ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: PureLifeColors.secondaryButtonText))
+                            .progressViewStyle(CircularProgressViewStyle(tint: PureLifeColors.logoGreen))
                             .scaleEffect(0.8)
                     } else if let icon = iconName {
                         Image(systemName: icon)
@@ -68,17 +76,18 @@ struct Components {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, Spacing.md)
-                .background(
-                    isDisabled 
-                    ? PureLifeColors.secondaryButtonBackground.opacity(0.5)
-                    : PureLifeColors.secondaryButtonBackground
+                .background(PureLifeColors.adaptiveSurface(scheme: colorScheme))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 28)
+                        .strokeBorder(
+                            PureLifeColors.logoGreen.opacity(isDisabled ? 0.5 : 1),
+                            lineWidth: 1.5
+                        )
                 )
                 .foregroundColor(
-                    isDisabled 
-                    ? PureLifeColors.secondaryButtonText.opacity(0.5)
-                    : PureLifeColors.secondaryButtonText
+                    PureLifeColors.logoGreen.opacity(isDisabled ? 0.5 : 1)
                 )
-                .cornerRadius(Spacing.buttonCornerRadius)
+                .cornerRadius(28)
             }
             .disabled(isDisabled || isLoading)
         }
@@ -89,7 +98,7 @@ struct Components {
         let iconName: String
         let action: () -> Void
         var iconColor: Color = PureLifeColors.logoGreen
-        var backgroundColor: Color = PureLifeColors.logoGreenLight.opacity(0.3)
+        var backgroundColor: Color = PureLifeColors.logoGreen.opacity(0.12)
         var size: CGFloat = 40
         
         var body: some View {
@@ -111,14 +120,13 @@ struct Components {
         let title: String
         let content: Content
         var icon: String? = nil
-        var cornerRadius: CGFloat = Spacing.cornerRadius
-        var scheme: ColorScheme? = nil
+        var cornerRadius: CGFloat = 20
+        @Environment(\.colorScheme) var colorScheme
         
-        init(title: String, icon: String? = nil, cornerRadius: CGFloat = Spacing.cornerRadius, scheme: ColorScheme? = nil, @ViewBuilder content: () -> Content) {
+        init(title: String, icon: String? = nil, cornerRadius: CGFloat = 20, @ViewBuilder content: () -> Content) {
             self.title = title
             self.icon = icon
             self.cornerRadius = cornerRadius
-            self.scheme = scheme
             self.content = content()
         }
         
@@ -135,9 +143,7 @@ struct Components {
                         
                         Text(title)
                             .font(.system(size: Typography.FontSize.lg, weight: .bold, design: .rounded))
-                            .foregroundColor(scheme != nil ? 
-                                             PureLifeColors.adaptiveTextPrimary(scheme: scheme!) : 
-                                             PureLifeColors.textPrimary)
+                            .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
                     }
                 }
                 
@@ -145,14 +151,9 @@ struct Components {
                 content
             }
             .padding(Spacing.cardPadding)
-            .background(scheme != nil ? 
-                        PureLifeColors.adaptiveSurface(scheme: scheme!) : 
-                        PureLifeColors.cardBackground)
+            .background(PureLifeColors.adaptiveSurface(scheme: colorScheme))
             .cornerRadius(cornerRadius)
-            .shadow(color: scheme != nil ? 
-                    PureLifeColors.adaptiveCardShadow(scheme: scheme!) : 
-                    PureLifeColors.cardShadow, 
-                    radius: 5, x: 0, y: 2)
+            .shadow(color: PureLifeColors.adaptiveCardShadow(scheme: colorScheme), radius: 8, x: 0, y: 4)
         }
     }
     
@@ -167,32 +168,33 @@ struct Components {
         var isSecure: Bool = false
         var errorMessage: String? = nil
         var onSubmit: (() -> Void)? = nil
+        @Environment(\.colorScheme) var colorScheme
         
         var body: some View {
             VStack(alignment: .leading, spacing: Spacing.xxs) {
                 HStack(spacing: Spacing.xs) {
                     if let iconName = icon {
                         Image(systemName: iconName)
-                            .foregroundColor(PureLifeColors.textSecondary)
+                            .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                             .frame(width: 24)
                     }
                     
                     if isSecure {
                         SecureField(placeholder, text: $text)
-                            .foregroundColor(PureLifeColors.inputText)
+                            .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
                     } else {
                         SwiftUI.TextField(placeholder, text: $text)
-                            .foregroundColor(PureLifeColors.inputText)
+                            .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
                             .keyboardType(keyboardType)
                     }
                 }
                 .padding(Spacing.sm)
-                .background(PureLifeColors.inputBackground)
-                .cornerRadius(Spacing.cornerRadius)
+                .background(PureLifeColors.adaptiveSurfaceSecondary(scheme: colorScheme))
+                .cornerRadius(16)
                 .overlay(
-                    RoundedRectangle(cornerRadius: Spacing.cornerRadius)
+                    RoundedRectangle(cornerRadius: 16)
                         .strokeBorder(
-                            errorMessage != nil ? PureLifeColors.error : PureLifeColors.inputBorder,
+                            errorMessage != nil ? PureLifeColors.error : PureLifeColors.adaptiveDivider(scheme: colorScheme),
                             lineWidth: 1
                         )
                 )
@@ -214,16 +216,17 @@ struct Components {
         let initials: String
         var size: CGFloat = 40
         var fontSize: CGFloat = 16
+        @Environment(\.colorScheme) var colorScheme
         
         var body: some View {
             ZStack {
                 Circle()
-                    .fill(PureLifeColors.logoGreenLight.opacity(0.2))
+                    .fill(PureLifeColors.logoGreen.opacity(0.2))
                     .frame(width: size, height: size)
                 
                 Text(initials)
                     .font(.system(size: fontSize, weight: .semibold, design: .rounded))
-                    .foregroundColor(PureLifeColors.logoGreenDark)
+                    .foregroundColor(PureLifeColors.logoGreen)
             }
         }
     }
@@ -232,6 +235,7 @@ struct Components {
     struct LoadingIndicator: View {
         var message: String = "Cargando..."
         var color: Color = PureLifeColors.logoGreen
+        @Environment(\.colorScheme) var colorScheme
         
         var body: some View {
             VStack(spacing: Spacing.sm) {
@@ -241,10 +245,10 @@ struct Components {
                 
                 Text(message)
                     .font(.system(size: Typography.FontSize.sm, weight: .medium, design: .rounded))
-                    .foregroundColor(PureLifeColors.textSecondary)
+                    .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.black.opacity(0.05))
+            .background(PureLifeColors.adaptiveBackground(scheme: colorScheme).opacity(0.8))
         }
     }
     
@@ -253,7 +257,7 @@ struct Components {
     /// Barra de progreso
     struct ProgressBar: View {
         let value: Double
-        var backgroundColor: Color = PureLifeColors.elevatedSurface
+        var backgroundColor: Color = PureLifeColors.logoGreen.opacity(0.2)
         var foregroundColor: Color = PureLifeColors.logoGreen
         var height: CGFloat = 8
         
@@ -265,7 +269,13 @@ struct Components {
                         .cornerRadius(height / 2)
                     
                     Rectangle()
-                        .fill(foregroundColor)
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(colors: [foregroundColor, foregroundColor.opacity(0.8)]),
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
                         .frame(width: min(CGFloat(self.value) * geometry.size.width, geometry.size.width))
                         .cornerRadius(height / 2)
                 }
@@ -282,27 +292,31 @@ struct Components {
         var trend: String? = nil
         var trendLabel: String? = nil
         var iconColor: Color = PureLifeColors.logoGreen
+        @Environment(\.colorScheme) var colorScheme
         
         var body: some View {
             VStack(alignment: .leading, spacing: Spacing.sm) {
                 // Icono y título
                 HStack(spacing: Spacing.xs) {
-                    Image(systemName: icon)
-                        .font(.system(size: Typography.FontSize.md))
-                        .foregroundColor(iconColor)
-                        .frame(width: 32, height: 32)
-                        .background(iconColor.opacity(0.1))
-                        .cornerRadius(8)
+                    ZStack {
+                        Circle()
+                            .fill(iconColor.opacity(0.15))
+                            .frame(width: 40, height: 40)
+                        
+                        Image(systemName: icon)
+                            .font(.system(size: Typography.FontSize.md))
+                            .foregroundColor(iconColor)
+                    }
                     
                     Text(title)
                         .font(.system(size: Typography.FontSize.base, weight: .medium, design: .rounded))
-                        .foregroundColor(PureLifeColors.textSecondary)
+                        .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                 }
                 
                 // Valor principal
                 Text(value)
                     .font(.system(size: Typography.FontSize.xxl, weight: .bold, design: .rounded))
-                    .foregroundColor(PureLifeColors.textPrimary)
+                    .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
                 
                 // Tendencia
                 if let trend = trend, let label = trendLabel {
@@ -317,14 +331,14 @@ struct Components {
                         
                         Text(label)
                             .font(.system(size: Typography.FontSize.xs, design: .rounded))
-                            .foregroundColor(PureLifeColors.textSecondary)
+                            .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                     }
                 }
             }
             .padding(Spacing.md)
-            .background(PureLifeColors.cardBackground)
-            .cornerRadius(Spacing.cornerRadius)
-            .shadow(color: PureLifeColors.cardShadow, radius: 5, x: 0, y: 2)
+            .background(PureLifeColors.adaptiveSurface(scheme: colorScheme))
+            .cornerRadius(20)
+            .shadow(color: PureLifeColors.adaptiveCardShadow(scheme: colorScheme), radius: 8, x: 0, y: 4)
         }
     }
     
@@ -337,24 +351,30 @@ struct Components {
         let message: String
         var action: (() -> Void)? = nil
         var actionTitle: String = "Acción"
+        @Environment(\.colorScheme) var colorScheme
         
         var body: some View {
             VStack(spacing: Spacing.lg) {
                 Spacer()
                 
-                Image(systemName: icon)
-                    .font(.system(size: 60))
-                    .foregroundColor(PureLifeColors.logoGreenLight)
-                    .padding(Spacing.md)
+                ZStack {
+                    Circle()
+                        .fill(PureLifeColors.logoGreen.opacity(0.1))
+                        .frame(width: 120, height: 120)
+                    
+                    Image(systemName: icon)
+                        .font(.system(size: 50))
+                        .foregroundColor(PureLifeColors.logoGreen.opacity(0.8))
+                }
                 
                 Text(title)
                     .font(.system(size: Typography.FontSize.xl, weight: .bold, design: .rounded))
-                    .foregroundColor(PureLifeColors.textPrimary)
+                    .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
                     .multilineTextAlignment(.center)
                 
                 Text(message)
                     .font(.system(size: Typography.FontSize.base, design: .rounded))
-                    .foregroundColor(PureLifeColors.textSecondary)
+                    .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, Spacing.xxl)
                 
@@ -399,22 +419,29 @@ struct Components {
         let title: String
         var message: String? = nil
         var onDismiss: (() -> Void)? = nil
+        @Environment(\.colorScheme) var colorScheme
         
         var body: some View {
             HStack(alignment: .top, spacing: Spacing.sm) {
-                Image(systemName: type.icon)
-                    .foregroundColor(type.color)
-                    .font(.system(size: Typography.FontSize.lg))
+                ZStack {
+                    Circle()
+                        .fill(type.color.opacity(0.15))
+                        .frame(width: 32, height: 32)
+                    
+                    Image(systemName: type.icon)
+                        .foregroundColor(type.color)
+                        .font(.system(size: Typography.FontSize.md))
+                }
                 
                 VStack(alignment: .leading, spacing: Spacing.xxs) {
                     Text(title)
                         .font(.system(size: Typography.FontSize.base, weight: .bold, design: .rounded))
-                        .foregroundColor(PureLifeColors.textPrimary)
+                        .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
                     
                     if let message = message {
                         Text(message)
                             .font(.system(size: Typography.FontSize.sm, design: .rounded))
-                            .foregroundColor(PureLifeColors.textSecondary)
+                            .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                     }
                 }
                 
@@ -424,13 +451,17 @@ struct Components {
                     Button(action: onDismiss) {
                         Image(systemName: "xmark")
                             .font(.system(size: Typography.FontSize.md))
-                            .foregroundColor(PureLifeColors.textSecondary)
+                            .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                     }
                 }
             }
             .padding(Spacing.md)
-            .background(type.color.opacity(0.1))
-            .cornerRadius(Spacing.cornerRadius)
+            .background(PureLifeColors.adaptiveSurface(scheme: colorScheme))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .strokeBorder(type.color.opacity(0.3), lineWidth: 1)
+            )
+            .cornerRadius(16)
         }
     }
 } 

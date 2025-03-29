@@ -2,360 +2,443 @@ import SwiftUI
 
 struct WorkoutListView: View {
     @EnvironmentObject var dataStore: AppDataStore
-    @State private var showingDetail = false
+    @State private var showingNewWorkout = false
     @State private var selectedWorkout: Workout?
     @State private var searchText = ""
-    @State private var showingFilter = false
-    @State private var selectedWorkoutType: WorkoutType?
+    @State private var selectedFilterOption: FilterOption = .all
+    @State private var showingFilterOptions = false
     @Environment(\.colorScheme) var colorScheme
     
-    var body: some View {
-        NavigationView {
-            ZStack {
-                // Fondo principal
-                PureLifeColors.adaptiveBackground(scheme: colorScheme).ignoresSafeArea()
-                
-                VStack(spacing: 0) {
-                    // Header personalizado
-                    headerView
-                    
-                    // Barra de búsqueda y filtros
-                    searchAndFilterBar
-                    
-                    // Lista de entrenamientos
-                    if filteredWorkouts.isEmpty {
-                        emptyStateView
-                    } else {
-                        workoutListView
-                    }
-                }
-            }
-            .navigationBarHidden(true)
-            .sheet(isPresented: $showingDetail) {
-                if let workout = selectedWorkout {
-                    WorkoutDetailView(workout: workout)
-                        .environmentObject(dataStore)
-                }
+    enum FilterOption: String, CaseIterable, Identifiable {
+        case all = "All Workouts"
+        case running = "Running"
+        case cycling = "Cycling"
+        case walking = "Walking"
+        case weightTraining = "Weight Training"
+        case highIntensity = "HIIT"
+        case yoga = "Yoga"
+        
+        var id: String { self.rawValue }
+        
+        var icon: String {
+            switch self {
+            case .all: return "figure.mixed.cardio"
+            case .running: return "figure.run"
+            case .cycling: return "figure.outdoor.cycle"
+            case .walking: return "figure.walk"
+            case .weightTraining: return "dumbbell.fill"
+            case .highIntensity: return "heart.circle.fill"
+            case .yoga: return "figure.mind.and.body"
             }
         }
-        .accentColor(PureLifeColors.logoGreen)
-    }
-    
-    // MARK: - Computed Properties
-    
-    // Calcular las iniciales del nombre del usuario
-    private var userInitials: String {
-        let name = dataStore.currentUser.name
-        let components = name.components(separatedBy: " ")
-        if components.count > 1, 
-           let first = components.first?.prefix(1), 
-           let last = components.last?.prefix(1) {
-            return "\(first)\(last)"
-        } else if let first = name.first {
-            return String(first)
+        
+        // Convert FilterOption to equivalent WorkoutType
+        var workoutType: WorkoutType? {
+            switch self {
+            case .all: return nil
+            case .running: return .running
+            case .cycling: return .cycling
+            case .walking: return .walking
+            case .weightTraining: return .strength
+            case .highIntensity: return .hiit
+            case .yoga: return .yoga
+            }
         }
-        return "U"
     }
     
     var filteredWorkouts: [Workout] {
-        var workouts = dataStore.currentUser.completedWorkouts
+        let workouts = dataStore.currentUser.completedWorkouts.sorted(by: { $0.date > $1.date })
         
-        // Aplicar filtro por tipo si está seleccionado
-        if let type = selectedWorkoutType {
-            workouts = workouts.filter { $0.type == type }
+        // Use workoutType mapping for more reliable filtering
+        let filteredByType: [Workout]
+        if selectedFilterOption == .all {
+            filteredByType = workouts
+        } else if let workoutType = selectedFilterOption.workoutType {
+            filteredByType = workouts.filter { $0.type == workoutType }
+        } else {
+            filteredByType = workouts
         }
         
-        // Aplicar filtro de búsqueda si hay texto
-        if !searchText.isEmpty {
-            workouts = workouts.filter {
-                $0.name.localizedCaseInsensitiveContains(searchText) ||
-                $0.type.rawValue.localizedCaseInsensitiveContains(searchText)
+        if searchText.isEmpty {
+            return filteredByType
+        } else {
+            return filteredByType.filter { workout in
+                workout.type.rawValue.lowercased().contains(searchText.lowercased()) ||
+                workout.notes?.lowercased().contains(searchText.lowercased()) ?? false
             }
         }
-        
-        // Ordenar por fecha, más reciente primero
-        return workouts.sorted(by: { $0.date > $1.date })
     }
     
-    // MARK: - UI Components
-    
-    private var headerView: some View {
-        VStack(spacing: 12) {
-            // Logo
-            PureLifeHeader(showUserAvatar: true, userInitials: userInitials)
-            .padding(.bottom, 10)
+    var body: some View {
+        ZStack {
+            // Modern background
+            PureLifeColors.adaptiveBackground(scheme: colorScheme)
+                .ignoresSafeArea()
             
-            // Título de página
-            HStack {
-                Text("Workout History")
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
-                
-                Spacer()
-            }
-            .padding(.horizontal, 24)
-        }
-        .padding(.top, 20)
-        .padding(.bottom, 12)
-    }
-    
-    private var searchAndFilterBar: some View {
-        VStack(spacing: 16) {
-            // Barra de búsqueda
-            HStack {
-                Image(systemName: "magnifyingglass")
-                    .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
-                
-                TextField("Search workouts", text: $searchText)
-                    .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
-                    .accentColor(PureLifeColors.logoGreen)
-                
-                if !searchText.isEmpty {
-                    Button(action: {
-                        searchText = ""
-                    }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
-                    }
-                }
-            }
-            .padding(.vertical, 12)
-            .padding(.horizontal, 16)
-            .background(PureLifeColors.adaptiveSurface(scheme: colorScheme))
-            .cornerRadius(12)
-            .shadow(color: PureLifeColors.adaptiveCardShadow(scheme: colorScheme), radius: 5, x: 0, y: 2)
-            .padding(.horizontal, 24)
-            
-            // Filtros por tipo de entrenamiento
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
-                    // Filtro "All"
-                    Button(action: {
-                        withAnimation(.spring()) {
-                            selectedWorkoutType = nil
-                        }
-                    }) {
-                        Text("All")
-                            .font(.system(size: 14, weight: .medium, design: .rounded))
-                            .foregroundColor(selectedWorkoutType == nil ? PureLifeColors.logoGreen : PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
-                            .padding(.vertical, 8)
-                            .padding(.horizontal, 16)
-                            .background(
-                                selectedWorkoutType == nil ?
-                                PureLifeColors.logoGreen.opacity(0.3) :
-                                PureLifeColors.adaptiveElevatedSurface(scheme: colorScheme)
-                            )
-                            .cornerRadius(20)
-                    }
+            VStack(spacing: 0) {
+                // Custom header with search bar
+                VStack(spacing: 16) {
+                    // Logo and profile
+                    PureLifeHeader(showUserAvatar: true, userInitials: String(dataStore.currentUser.firstName.prefix(1)))
                     
-                    // Filtros para cada tipo de entrenamiento
-                    ForEach(WorkoutType.allCases, id: \.self) { type in
-                        Button(action: {
-                            withAnimation(.spring()) {
-                                if selectedWorkoutType == type {
-                                    selectedWorkoutType = nil
-                                } else {
-                                    selectedWorkoutType = type
+                    // Search and filter area
+                    HStack(spacing: 12) {
+                        // Search field
+                        HStack(spacing: 8) {
+                            Image(systemName: "magnifyingglass")
+                                .font(.system(size: 16))
+                                .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
+                            
+                            TextField("Search workouts", text: $searchText)
+                                .font(.system(size: 16, design: .rounded))
+                                .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
+                            
+                            if !searchText.isEmpty {
+                                Button(action: {
+                                    searchText = ""
+                                }) {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .font(.system(size: 14))
+                                        .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                                 }
                             }
-                        }) {
-                            HStack(spacing: 5) {
-                                Image(systemName: type.icon)
-                                    .font(.system(size: 12))
-                                
-                                Text(type.rawValue)
-                                    .font(.system(size: 14, weight: .medium, design: .rounded))
-                            }
-                            .foregroundColor(selectedWorkoutType == type ? PureLifeColors.logoGreen : PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
-                            .padding(.vertical, 8)
-                            .padding(.horizontal, 16)
-                            .background(
-                                selectedWorkoutType == type ?
-                                PureLifeColors.logoGreen.opacity(0.3) :
-                                PureLifeColors.adaptiveElevatedSurface(scheme: colorScheme)
-                            )
-                            .cornerRadius(20)
                         }
-                    }
-                }
-                .padding(.horizontal, 24)
-            }
-        }
-        .padding(.vertical, 8)
-    }
-    
-    private var workoutListView: some View {
-        ScrollView(showsIndicators: false) {
-            LazyVStack(spacing: 16) {
-                // Si hay filtros activos, mostrar texto informativo
-                if !searchText.isEmpty || selectedWorkoutType != nil {
-                    HStack {
-                        Text(filterInfoText)
-                            .font(.system(size: 14, weight: .medium, design: .rounded))
-                            .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
+                        .padding(12)
+                        .background(PureLifeColors.adaptiveSurface(scheme: colorScheme))
+                        .cornerRadius(16)
                         
-                        Spacer()
-                        
+                        // Filter button
                         Button(action: {
-                            searchText = ""
-                            selectedWorkoutType = nil
+                            withAnimation {
+                                showingFilterOptions.toggle()
+                            }
                         }) {
-                            Text("Clear All")
-                                .font(.system(size: 14, weight: .medium, design: .rounded))
-                                .foregroundColor(PureLifeColors.logoGreen)
+                            Image(systemName: "line.3.horizontal.decrease.circle.fill")
+                                .font(.system(size: 22))
+                                .foregroundColor(selectedFilterOption != .all ? PureLifeColors.logoGreen : PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
+                                .frame(width: 40, height: 40)
+                                .background(PureLifeColors.adaptiveSurface(scheme: colorScheme))
+                                .cornerRadius(14)
                         }
                     }
-                    .padding(.horizontal, 24)
-                    .padding(.top, 8)
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 16)
+                .padding(.bottom, 8)
+                
+                // Filter options row (collapsible)
+                if showingFilterOptions {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 10) {
+                            ForEach(FilterOption.allCases) { option in
+                                Button(action: {
+                                    selectedFilterOption = option
+                                }) {
+                                    HStack(spacing: 6) {
+                                        Image(systemName: option.icon)
+                                            .font(.system(size: 14))
+                                        
+                                        Text(option.rawValue)
+                                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                                    }
+                                    .padding(.vertical, 10)
+                                    .padding(.horizontal, 14)
+                                    .foregroundColor(selectedFilterOption == option ? 
+                                                    .white : 
+                                                    PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
+                                    .background(
+                                        Capsule()
+                                            .fill(selectedFilterOption == option ? 
+                                                 PureLifeColors.logoGreen : 
+                                                 PureLifeColors.adaptiveSurfaceSecondary(scheme: colorScheme))
+                                    )
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 8)
+                    }
+                    .transition(.move(edge: .top).combined(with: .opacity))
                 }
                 
-                // Listar entrenamientos
-                ForEach(filteredWorkouts) { workout in
-                    WorkoutCard(workout: workout, onSelect: {
-                        selectedWorkout = workout
-                        showingDetail = true
-                    })
-                    .padding(.horizontal, 24)
+                // Workout counter and add button
+                HStack {
+                    Text("\(filteredWorkouts.count) \(filteredWorkouts.count == 1 ? "Workout" : "Workouts")")
+                        .font(.system(size: 15, weight: .medium, design: .rounded))
+                        .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
+                    
+                    Spacer()
+                    
+                    Button(action: {
+                        showingNewWorkout = true
+                    }) {
+                        HStack(spacing: 6) {
+                            Text("Add")
+                                .font(.system(size: 15, weight: .medium, design: .rounded))
+                            
+                            Image(systemName: "plus.circle.fill")
+                                .font(.system(size: 16))
+                        }
+                        .foregroundColor(PureLifeColors.logoGreen)
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 14)
+                        .background(
+                            Capsule()
+                                .fill(PureLifeColors.logoGreen.opacity(0.12))
+                        )
+                    }
                 }
-                .padding(.bottom, 20)
+                .padding(.horizontal, 20)
+                .padding(.top, 16)
+                .padding(.bottom, 8)
+                
+                // Workouts list or empty state
+                if filteredWorkouts.isEmpty {
+                    emptyWorkoutsView
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: 16) {
+                            ForEach(filteredWorkouts) { workout in
+                                WorkoutCardView(workout: workout)
+                                    .contentShape(Rectangle())
+                                    .onTapGesture {
+                                        selectedWorkout = workout
+                                    }
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.top, 8)
+                        .padding(.bottom, 30)
+                    }
+                }
             }
-            .padding(.top, 12)
+        }
+        .navigationBarHidden(true)
+        .sheet(isPresented: $showingNewWorkout) {
+            NewWorkoutView()
+        }
+        .sheet(item: $selectedWorkout) { workout in
+            WorkoutDetailView(workout: workout)
         }
     }
     
-    private var filterInfoText: String {
-        var text = "Showing "
-        
-        if let type = selectedWorkoutType {
-            text += "\(type.rawValue) workouts"
-        } else {
-            text += "all workouts"
-        }
-        
-        if !searchText.isEmpty {
-            text += " matching '\(searchText)'"
-        }
-        
-        return text
-    }
+    // MARK: - Supporting Views
     
-    private var emptyStateView: some View {
+    private var emptyWorkoutsView: some View {
         VStack(spacing: 20) {
-            Image(systemName: "figure.run.circle")
-                .font(.system(size: 70))
-                .foregroundColor(PureLifeColors.logoGreen.opacity(0.5))
-                .padding(.bottom, 10)
+            Spacer()
             
-            Text("No workouts found")
-                .font(.system(size: 20, weight: .bold, design: .rounded))
-                .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
-            
-            if !searchText.isEmpty || selectedWorkoutType != nil {
-                Text("Try changing your filters")
-                    .font(.system(size: 16, weight: .medium, design: .rounded))
-                    .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
-                    .multilineTextAlignment(.center)
+            ZStack {
+                Circle()
+                    .fill(PureLifeColors.logoGreen.opacity(0.08))
+                    .frame(width: 100, height: 100)
                 
-                Button(action: {
-                    searchText = ""
-                    selectedWorkoutType = nil
-                }) {
-                    Text("Clear Filters")
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundColor(.white)
-                        .padding(.vertical, 12)
-                        .padding(.horizontal, 24)
-                        .background(PureLifeColors.logoGreen)
-                        .cornerRadius(12)
-                }
-                .padding(.top, 8)
-            } else {
-                Text("Track your first workout to get started")
-                    .font(.system(size: 16, weight: .medium, design: .rounded))
-                    .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40)
-                
-                NavigationLink(destination: NewWorkoutView()) {
-                    Text("Add Workout")
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundColor(.white)
-                        .padding(.vertical, 12)
-                        .padding(.horizontal, 24)
-                        .background(PureLifeColors.logoGreen)
-                        .cornerRadius(12)
-                }
-                .padding(.top, 8)
+                Image(systemName: "figure.run")
+                    .font(.system(size: 48))
+                    .foregroundColor(PureLifeColors.logoGreen.opacity(0.6))
             }
+            
+            VStack(spacing: 8) {
+                Text(searchText.isEmpty ? "No workouts yet" : "No matching workouts")
+                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                    .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
+                
+                Text(searchText.isEmpty ? 
+                    "Start your fitness journey by adding your first workout" : 
+                    "Try adjusting your search or filters")
+                    .font(.system(size: 15, design: .rounded))
+                    .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 40)
+            }
+            
+            if searchText.isEmpty && selectedFilterOption == .all {
+                Button(action: {
+                    showingNewWorkout = true
+                }) {
+                    Text("Add Your First Workout")
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundColor(.white)
+                        .padding(.vertical, 14)
+                        .padding(.horizontal, 32)
+                        .background(
+                            LinearGradient(
+                                gradient: Gradient(colors: [PureLifeColors.logoGreen, PureLifeColors.logoGreenDark]),
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .cornerRadius(28)
+                        .shadow(color: PureLifeColors.logoGreen.opacity(0.3), radius: 10, x: 0, y: 5)
+                }
+                .padding(.top, 12)
+            }
+            
+            Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(20)
     }
 }
 
-// MARK: - WorkoutCard Component
-
-struct WorkoutCard: View {
+struct WorkoutCardView: View {
     let workout: Workout
-    var onSelect: () -> Void
     @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
-        Button(action: onSelect) {
-            HStack(spacing: 16) {
-                // Icono del tipo de ejercicio
-                Image(systemName: workout.type.icon)
-                    .font(.system(size: 18))
-                    .foregroundColor(.white)
-                    .frame(width: 42, height: 42)
-                    .background(PureLifeColors.logoGreen)
-                    .cornerRadius(12)
+        VStack(alignment: .leading, spacing: 14) {
+            // Workout top section with type and date
+            HStack {
+                // Workout type icon
+                ZStack {
+                    Circle()
+                        .fill(iconBackgroundColor)
+                        .frame(width: 44, height: 44)
+                    
+                    Image(systemName: iconName)
+                        .font(.system(size: 20))
+                        .foregroundColor(.white)
+                }
                 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(workout.name)
-                        .font(.system(size: 17, weight: .semibold, design: .rounded))
+                    Text(workout.type.rawValue)
+                        .font(.system(size: 18, weight: .bold, design: .rounded))
                         .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
-                        .lineLimit(1)
                     
-                    Text(workout.type.rawValue.capitalized)
+                    Text(formattedDate)
                         .font(.system(size: 14, design: .rounded))
                         .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                 }
                 
                 Spacer()
                 
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text(formattedDate(workout.date))
-                        .font(.system(size: 14, design: .rounded))
-                        .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
+                // Chevron with circle background
+                ZStack {
+                    Circle()
+                        .strokeBorder(PureLifeColors.adaptiveDivider(scheme: colorScheme), lineWidth: 1)
+                        .frame(width: 28, height: 28)
                     
-                    // Stats mini-row
-                    HStack(spacing: 16) {
-                        Label("\(workout.durationMinutes) min", systemImage: "clock")
-                            .font(.system(size: 12, design: .rounded))
-                            .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
-                        
-                        Label("\(Int(workout.caloriesBurned)) cal", systemImage: "flame.fill")
-                            .font(.system(size: 12, design: .rounded))
-                            .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
-                    }
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                 }
             }
-            .padding(16)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(PureLifeColors.adaptiveSurface(scheme: colorScheme))
-                    .shadow(color: PureLifeColors.adaptiveCardShadow(scheme: colorScheme), radius: 4, x: 0, y: 2)
-            )
+            
+            // Divider with gradient
+            Rectangle()
+                .fill(PureLifeColors.adaptiveDivider(scheme: colorScheme))
+                .frame(height: 1)
+            
+            // Metrics grid
+            LazyVGrid(columns: [
+                GridItem(.flexible(), spacing: 12),
+                GridItem(.flexible(), spacing: 12),
+                GridItem(.flexible(), spacing: 12)
+            ], spacing: 16) {
+                // Duration
+                metricItem(
+                    value: formattedDuration,
+                    label: "Duration",
+                    icon: "clock.fill"
+                )
+                
+                // Calories
+                metricItem(
+                    value: "\(Int(workout.caloriesBurned))",
+                    label: "Calories",
+                    icon: "flame.fill"
+                )
+                
+                // Distance
+                metricItem(
+                    value: workout.distance != nil ? String(format: "%.1f km", workout.distance!) : "N/A",
+                    label: "Distance",
+                    icon: "location.fill"
+                )
+            }
+            
+            // Notes section if available
+            if let notes = workout.notes, !notes.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Notes")
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
+                    
+                    Text(notes)
+                        .font(.system(size: 14, design: .rounded))
+                        .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
+                        .lineLimit(2)
+                }
+                .padding(.top, 4)
+            }
         }
-        .buttonStyle(PlainButtonStyle())
+        .padding(20)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(PureLifeColors.adaptiveSurface(scheme: colorScheme))
+                .shadow(color: PureLifeColors.adaptiveCardShadow(scheme: colorScheme), radius: 8, x: 0, y: 4)
+        )
     }
     
-    private func formattedDate(_ date: Date) -> String {
+    // MARK: - Helper methods
+    
+    private func metricItem(value: String, label: String, icon: String) -> some View {
+        VStack(spacing: 8) {
+            HStack(spacing: 4) {
+                Image(systemName: icon)
+                    .font(.system(size: 10))
+                    .foregroundColor(PureLifeColors.logoGreen)
+                
+                Text(label)
+                    .font(.system(size: 12, design: .rounded))
+                    .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
+            }
+            
+            Text(value)
+                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
+        }
+    }
+    
+    private var iconName: String {
+        switch workout.type.rawValue.lowercased() {
+        case "running": return "figure.run"
+        case "cycling": return "figure.outdoor.cycle"
+        case "walking": return "figure.walk"
+        case "weight training": return "dumbbell.fill"
+        case "hiit": return "heart.circle.fill"
+        case "yoga": return "figure.mind.and.body"
+        default: return "figure.mixed.cardio"
+        }
+    }
+    
+    private var iconBackgroundColor: Color {
+        switch workout.type.rawValue.lowercased() {
+        case "running": return Color.blue
+        case "cycling": return Color.green
+        case "walking": return Color.orange
+        case "weight training": return Color.purple
+        case "hiit": return Color.red
+        case "yoga": return Color(hex: "#8A6CEA")
+        default: return PureLifeColors.logoGreen
+        }
+    }
+    
+    private var formattedDate: String {
         let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
+        formatter.dateFormat = "E, MMM d, yyyy · h:mm a"
+        return formatter.string(from: workout.date)
+    }
+    
+    private var formattedDuration: String {
+        let hours = Int(workout.durationMinutes) / 60
+        let minutes = Int(workout.durationMinutes) % 60
+        
+        if hours > 0 {
+            return "\(hours)h \(minutes)m"
+        } else {
+            return "\(minutes)m"
+        }
     }
 }
 
@@ -372,5 +455,31 @@ struct WorkoutListView_Previews: PreviewProvider {
                 .preferredColorScheme(.dark)
                 .previewDisplayName("Dark Mode")
         }
+    }
+}
+
+extension Color {
+    init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let a, r, g, b: UInt64
+        switch hex.count {
+        case 3: // RGB (12-bit)
+            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+        case 6: // RGB (24-bit)
+            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+        case 8: // ARGB (32-bit)
+            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+        default:
+            (a, r, g, b) = (1, 1, 1, 0)
+        }
+        self.init(
+            .sRGB,
+            red: Double(r) / 255,
+            green: Double(g) / 255,
+            blue: Double(b) / 255,
+            opacity: Double(a) / 255
+        )
     }
 } 
