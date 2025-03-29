@@ -12,6 +12,12 @@ struct Fitness_Appv2App: App {
     // Crear una instancia del AppDataStore que será compartida en toda la app
     @StateObject var dataStore = AppDataStore()
     
+    init() {
+        // Cambiar el nombre que aparece en la barra de navegación
+        UINavigationBar.appearance().largeTitleTextAttributes = [.foregroundColor: UIColor(PureLifeColors.textPrimary)]
+        UINavigationBar.appearance().titleTextAttributes = [.foregroundColor: UIColor(PureLifeColors.textPrimary)]
+    }
+    
     var body: some Scene {
         WindowGroup {
             MainTabView()

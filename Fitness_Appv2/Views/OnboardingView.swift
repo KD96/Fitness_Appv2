@@ -5,7 +5,7 @@ struct OnboardingView: View {
     @Binding var isShowingOnboarding: Bool
     @State private var currentPage = 0
     @State private var userName = ""
-    @State private var selectedGoal: UserPreferences.FitnessGoal = .general
+    @State private var selectedGoal: UserPreferences.FitnessGoal = .loseWeight
     @State private var selectedActivities: [WorkoutType] = []
     
     // Colores de PureLife
@@ -32,17 +32,14 @@ struct OnboardingView: View {
                             .foregroundColor(pureLifeBlack)
                     }
                     
-                    Text("Your fitness journey starts here")
-                        .font(.subheadline)
-                        .foregroundColor(pureLifeBlack.opacity(0.8))
-                        .padding(.bottom, 30)
+                    logoView
                 }
                 .padding(.top, 50)
                 
                 // Page content
                 TabView(selection: $currentPage) {
                     // Welcome page
-                    welcomePage
+                    welcomeView
                         .tag(0)
                     
                     // Name page
@@ -64,14 +61,7 @@ struct OnboardingView: View {
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                 
                 // Page indicators
-                HStack(spacing: 8) {
-                    ForEach(0..<5) { index in
-                        Circle()
-                            .fill(currentPage == index ? pureLifeBlack : Color.gray.opacity(0.3))
-                            .frame(width: 8, height: 8)
-                    }
-                }
-                .padding(.vertical)
+                pageControl
                 
                 // Navigation buttons
                 HStack {
@@ -125,26 +115,27 @@ struct OnboardingView: View {
     
     // MARK: - Content Pages
     
-    private var welcomePage: some View {
-        VStack(spacing: 30) {
-            Image(systemName: "figure.mixed.cardio")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 150, height: 150)
-                .foregroundColor(pureLifeBlack)
+    private var welcomeView: some View {
+        VStack {
+            Spacer()
             
-            Text("Welcome to PureLife")
-                .font(.title)
-                .fontWeight(.bold)
-                .foregroundColor(pureLifeBlack)
+            VStack(spacing: 30) {
+                // Logo
+                Image("Logo")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(height: 80)
+                
+                Text("Track your fitness journey, earn rewards, and connect with friends.")
+                    .font(.system(size: 18, weight: .medium, design: .rounded))
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(PureLifeColors.textSecondary)
+                    .padding(.horizontal, 30)
+            }
+            .padding(.horizontal, 20)
             
-            Text("Track your fitness journey, earn rewards, and connect with friends - all in one place.")
-                .font(.body)
-                .multilineTextAlignment(.center)
-                .foregroundColor(pureLifeBlack.opacity(0.8))
-                .padding(.horizontal, 30)
+            Spacer()
         }
-        .padding()
     }
     
     private var namePage: some View {
@@ -284,7 +275,28 @@ struct OnboardingView: View {
         .padding()
     }
     
+    private var logoView: some View {
+        VStack(spacing: 10) {
+            Text("Track your fitness journey, earn rewards, and connect with friends.")
+                .font(.system(size: 18, weight: .medium, design: .rounded))
+                .multilineTextAlignment(.center)
+                .foregroundColor(PureLifeColors.textSecondary)
+                .padding(.horizontal, 30)
+        }
+    }
+    
     // MARK: - Helper Views
+    
+    private var pageControl: some View {
+        HStack(spacing: 8) {
+            ForEach(0..<5) { i in
+                Circle()
+                    .fill(currentPage == i ? pureLifeBlack : pureLifeBlack.opacity(0.2))
+                    .frame(width: 8, height: 8)
+            }
+        }
+        .padding(.bottom, 20)
+    }
     
     private struct GoalOptionButton: View {
         let goal: UserPreferences.FitnessGoal

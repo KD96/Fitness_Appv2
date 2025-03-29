@@ -37,7 +37,7 @@ struct WorkoutListView: View {
                 }
             }
         }
-        .accentColor(PureLifeColors.pureGreen)
+        .accentColor(PureLifeColors.logoGreen)
     }
     
     // MARK: - Computed Properties
@@ -80,36 +80,9 @@ struct WorkoutListView: View {
     
     private var headerView: some View {
         VStack(spacing: 12) {
-            // Logo y título
-            HStack {
-                HStack(spacing: 0) {
-                    Text("pure")
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
-                        .foregroundColor(PureLifeColors.logoGreen)
-                    
-                    Text("life")
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
-                        .foregroundColor(PureLifeColors.textPrimary)
-                    
-                    Text(".")
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
-                        .foregroundColor(PureLifeColors.logoGreen)
-                }
-                
-                Spacer()
-                
-                // Icono de usuario
-                ZStack {
-                    Circle()
-                        .fill(PureLifeColors.pureGreenLight.opacity(0.2))
-                        .frame(width: 40, height: 40)
-                    
-                    Text(userInitials)
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundColor(PureLifeColors.pureGreenDark)
-                }
-            }
-            .padding(.horizontal, 24)
+            // Logo
+            PureLifeHeader(showUserAvatar: true, userInitials: userInitials)
+            .padding(.bottom, 10)
             
             // Título de página
             HStack {
@@ -134,7 +107,7 @@ struct WorkoutListView: View {
                 
                 TextField("Search workouts", text: $searchText)
                     .foregroundColor(PureLifeColors.textPrimary)
-                    .accentColor(PureLifeColors.pureGreen)
+                    .accentColor(PureLifeColors.logoGreen)
                 
                 if !searchText.isEmpty {
                     Button(action: {
@@ -163,12 +136,12 @@ struct WorkoutListView: View {
                     }) {
                         Text("All")
                             .font(.system(size: 14, weight: .medium, design: .rounded))
-                            .foregroundColor(selectedWorkoutType == nil ? PureLifeColors.textPrimary : PureLifeColors.textSecondary)
+                            .foregroundColor(selectedWorkoutType == nil ? PureLifeColors.logoGreen : PureLifeColors.textSecondary)
                             .padding(.vertical, 8)
                             .padding(.horizontal, 16)
                             .background(
                                 selectedWorkoutType == nil ?
-                                PureLifeColors.pureGreenLight :
+                                PureLifeColors.logoGreen.opacity(0.3) :
                                 PureLifeColors.elevatedSurface
                             )
                             .cornerRadius(20)
@@ -192,12 +165,12 @@ struct WorkoutListView: View {
                                 Text(type.rawValue)
                                     .font(.system(size: 14, weight: .medium, design: .rounded))
                             }
-                            .foregroundColor(selectedWorkoutType == type ? PureLifeColors.textPrimary : PureLifeColors.textSecondary)
+                            .foregroundColor(selectedWorkoutType == type ? PureLifeColors.logoGreen : PureLifeColors.textSecondary)
                             .padding(.vertical, 8)
                             .padding(.horizontal, 16)
                             .background(
                                 selectedWorkoutType == type ?
-                                PureLifeColors.pureGreenLight :
+                                PureLifeColors.logoGreen.opacity(0.3) :
                                 PureLifeColors.elevatedSurface
                             )
                             .cornerRadius(20)
@@ -228,7 +201,7 @@ struct WorkoutListView: View {
                         }) {
                             Text("Clear filters")
                                 .font(.system(size: 12, weight: .semibold, design: .rounded))
-                                .foregroundColor(PureLifeColors.pureGreen)
+                                .foregroundColor(PureLifeColors.logoGreen)
                         }
                     }
                     .padding(.horizontal, 24)
@@ -272,7 +245,7 @@ struct WorkoutListView: View {
             
             Image(systemName: "figure.run")
                 .font(.system(size: 60))
-                .foregroundColor(PureLifeColors.pureGreenLight)
+                .foregroundColor(PureLifeColors.logoGreen.opacity(0.3))
             
             Text("No workouts found")
                 .font(.system(size: 20, weight: .bold, design: .rounded))
@@ -290,10 +263,10 @@ struct WorkoutListView: View {
                 }) {
                     Text("Clear filters")
                         .font(.system(size: 16, weight: .bold, design: .rounded))
-                        .foregroundColor(PureLifeColors.textPrimary)
+                        .foregroundColor(PureLifeColors.logoGreen)
                         .padding(.vertical, 12)
                         .padding(.horizontal, 30)
-                        .background(PureLifeColors.pureGreenLight)
+                        .background(PureLifeColors.logoGreen.opacity(0.3))
                         .cornerRadius(16)
                 }
                 .padding(.top, 10)
@@ -307,10 +280,10 @@ struct WorkoutListView: View {
                 NavigationLink(destination: NewWorkoutView()) {
                     Text("Add Workout")
                         .font(.system(size: 16, weight: .bold, design: .rounded))
-                        .foregroundColor(PureLifeColors.textPrimary)
+                        .foregroundColor(PureLifeColors.logoGreen)
                         .padding(.vertical, 12)
                         .padding(.horizontal, 30)
-                        .background(PureLifeColors.pureGreenLight)
+                        .background(PureLifeColors.logoGreen.opacity(0.3))
                         .cornerRadius(16)
                 }
                 .padding(.top, 10)

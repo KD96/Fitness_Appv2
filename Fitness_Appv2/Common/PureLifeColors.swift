@@ -2,253 +2,119 @@ import SwiftUI
 
 /// Sistema de colores para la experiencia "PureLife"
 struct PureLifeColors {
-    // MARK: - Colores de fondo
+    // MARK: - Primary Palette
     
-    /// Color de fondo principal
-    static let background = Color(red: 252/255, green: 252/255, blue: 252/255)
-    
-    /// Color de fondo oscuro para secciones de contraste
-    static let darkBackground = Color(red: 28/255, green: 28/255, blue: 30/255)
-    
-    /// Color del logo - verde menta claro
+    /// Verde principal de la marca, verde mint
     static let logoGreen = Color(red: 199/255, green: 227/255, blue: 214/255)
     
-    /// Color de superficie, usado para tarjetas y elementos elevados
+    /// Variante más oscura del verde de la marca
+    static let logoGreenDark = logoGreen.opacity(0.8)
+    
+    /// Versión más clara para fondos y áreas grandes
+    static let logoGreenLight = logoGreen.opacity(0.3)
+    
+    // MARK: - Background Colors
+    
+    /// Fondo principal de la app (claro)
+    static let background = Color(red: 250/255, green: 250/255, blue: 250/255)
+    
+    /// Fondo oscuro para modo oscuro o áreas de contraste
+    static let darkBackground = Color(red: 28/255, green: 28/255, blue: 30/255)
+    
+    // MARK: - Surface Colors
+    
+    /// Superficie principal para tarjetas y elementos elevados
     static let surface = Color.white
     
-    /// Color de superficie cuando se necesita un fondo más oscuro
-    static let darkSurface = Color(red: 40/255, green: 42/255, blue: 46/255)
-    
-    /// Color de superficie secundaria, un tono suave del verde del logo
-    static let secondarySurface = Color(red: 245/255, green: 250/255, blue: 248/255)
-    
-    /// Color para elementos que necesitan un poco más de contraste
+    /// Superficie con elevación para elementos secundarios
     static let elevatedSurface = Color(red: 245/255, green: 245/255, blue: 245/255)
     
-    // MARK: - Colores de acento
+    /// Superficie oscura para modo oscuro o áreas de contraste
+    static let darkSurface = Color(red: 44/255, green: 44/255, blue: 46/255)
     
-    /// Color principal verde de PureLife - más cercano al verde del logo
-    static let pureGreen = Color(red: 170/255, green: 220/255, blue: 200/255)
+    /// Superficie oscura secundaria
+    static let darkSurfaceSecondary = Color(red: 54/255, green: 54/255, blue: 56/255)
     
-    /// Variante más oscura del verde principal
-    static let pureGreenDark = Color(red: 130/255, green: 195/255, blue: 170/255)
+    // MARK: - Text Colors
     
-    /// Variante más clara del verde principal (más cercana al logo)
-    static let pureGreenLight = Color(red: 199/255, green: 227/255, blue: 214/255)
+    /// Texto principal
+    static let textPrimary = Color.black
     
-    // MARK: - Colores para estado
+    /// Texto secundario para labels menos importantes
+    static let textSecondary = Color(red: 120/255, green: 120/255, blue: 128/255)
     
-    /// Color para éxito o confirmación
-    static let success = Color(red: 82/255, green: 196/255, blue: 109/255)
+    /// Texto para modo oscuro
+    static let darkTextPrimary = Color.white
+    
+    /// Texto secundario para modo oscuro
+    static let darkTextSecondary = Color(red: 180/255, green: 180/255, blue: 190/255)
+    
+    // MARK: - UI Element Colors
+    
+    /// Color para divisores y bordes
+    static let divider = Color(red: 224/255, green: 224/255, blue: 224/255)
+    
+    /// Gradiente principal para botones y acentos
+    static let accentGradient = LinearGradient(
+        gradient: Gradient(colors: [logoGreen, logoGreenLight]),
+        startPoint: .leading,
+        endPoint: .trailing
+    )
+    
+    // MARK: - Semantic Colors
+    
+    /// Color para elementos de éxito
+    static let success = Color(red: 72/255, green: 190/255, blue: 126/255)
     
     /// Color para advertencias
-    static let warning = Color(red: 255/255, green: 159/255, blue: 10/255)
+    static let warning = Color(red: 245/255, green: 158/255, blue: 11/255)
     
     /// Color para errores
-    static let error = Color(red: 235/255, green: 80/255, blue: 70/255)
+    static let error = Color(red: 239/255, green: 68/255, blue: 68/255)
     
-    // MARK: - Colores para texto
+    /// Color para información
+    static let info = Color(red: 59/255, green: 130/255, blue: 246/255)
     
-    /// Texto principal, negro con alta legibilidad
-    static let textPrimary = Color(red: 30/255, green: 30/255, blue: 30/255)
+    // MARK: - UI Component Aliases
     
-    /// Texto secundario
-    static let textSecondary = Color(red: 90/255, green: 90/255, blue: 95/255)
+    // Botones
+    static let primaryButtonBackground = logoGreen
+    static let primaryButtonText = Color.white
+    static let secondaryButtonBackground = logoGreenLight
+    static let secondaryButtonText = logoGreenDark
     
-    /// Texto terciario, para elementos menos importantes
-    static let textTertiary = Color(red: 150/255, green: 150/255, blue: 155/255)
+    // Tarjetas
+    static let cardBackground = surface
+    static let cardBorder = divider
+    static let cardShadow = Color.black.opacity(0.04)
     
-    /// Color para texto sobre fondos oscuros
-    static let textOnDark = Color.white
+    // Campos de texto
+    static let inputBackground = elevatedSurface
+    static let inputBorder = divider
+    static let inputText = textPrimary
+    static let inputPlaceholder = textSecondary
     
-    /// Color para divisores
-    static let divider = Color(red: 240/255, green: 240/255, blue: 240/255)
+    // Estados de navegación
+    static let tabBarActive = logoGreen
+    static let tabBarInactive = textSecondary
+    static let navigationBarBackground = surface
     
-    // MARK: - Gradientes
+    // MARK: - Card Styles
     
-    /// Gradiente principal de acento - más sutil
-    static let accentGradient = LinearGradient(
-        gradient: Gradient(colors: [pureGreenLight, pureGreen]),
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
-    
-    /// Gradiente para tarjetas premium
-    static let premiumGradient = LinearGradient(
-        gradient: Gradient(colors: [
-            pureGreenLight,
-            pureGreen.opacity(0.9)
-        ]),
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
-}
-
-/// Componentes UI para el sistema de diseño "PureLife"
-struct PureLifeUI {
-    // MARK: - Modificadores para tarjetas
-    
-    /// Crea una tarjeta con estilo estándar de PureLife - más minimalista
-    static func card<Content: View>(@ViewBuilder content: () -> Content) -> some View {
-        content()
-            .padding(.vertical, 18)
-            .padding(.horizontal, 18)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(PureLifeColors.surface)
-                    .shadow(color: Color.black.opacity(0.03), radius: 8, x: 0, y: 2)
-            )
+    /// Card style - aplicar a un contenedor con .modifier(PureLifeColors.cardStyle())
+    static func cardStyle(cornerRadius: CGFloat = 16) -> some ViewModifier {
+        CardStyle(cornerRadius: cornerRadius)
     }
     
-    /// Crea una tarjeta con borde sutil
-    static func outlinedCard<Content: View>(@ViewBuilder content: () -> Content) -> some View {
-        content()
-            .padding(.vertical, 18)
-            .padding(.horizontal, 18)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(PureLifeColors.surface)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .strokeBorder(
-                                PureLifeColors.divider,
-                                lineWidth: 1
-                            )
-                    )
-            )
-    }
-    
-    /// Crea una tarjeta con acento verde
-    static func accentedCard<Content: View>(@ViewBuilder content: () -> Content) -> some View {
-        content()
-            .padding(.vertical, 18)
-            .padding(.horizontal, 18)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(PureLifeColors.surface)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(
-                                PureLifeColors.pureGreenLight,
-                                lineWidth: 2
-                            )
-                    )
-                    .shadow(color: PureLifeColors.pureGreenLight.opacity(0.1), radius: 8, x: 0, y: 2)
-            )
-    }
-    
-    // MARK: - Botones
-    
-    /// Estilo para botón principal - más minimalista
-    static func primaryButton<Content: View>(@ViewBuilder content: () -> Content) -> some View {
-        content()
-            .foregroundColor(PureLifeColors.textPrimary)
-            .padding(.vertical, 16)
-            .frame(maxWidth: .infinity)
-            .background(PureLifeColors.pureGreenLight)
-            .cornerRadius(12)
-    }
-    
-    /// Estilo para botón secundario - más minimalista
-    static func secondaryButton<Content: View>(@ViewBuilder content: () -> Content) -> some View {
-        content()
-            .foregroundColor(PureLifeColors.pureGreenDark)
-            .padding(.vertical, 16)
-            .frame(maxWidth: .infinity)
-            .background(PureLifeColors.secondarySurface)
-            .cornerRadius(12)
-    }
-    
-    /// Estilo para botón sutil
-    static func subtleButton<Content: View>(@ViewBuilder content: () -> Content) -> some View {
-        content()
-            .foregroundColor(PureLifeColors.textSecondary)
-            .padding(.vertical, 8)
-            .padding(.horizontal, 16)
-            .background(PureLifeColors.elevatedSurface)
-            .cornerRadius(8)
-    }
-    
-    // MARK: - Tipografía
-    
-    /// Título grande (32pt)
-    static func titleLarge(_ text: String) -> some View {
-        Text(text)
-            .font(.system(size: 32, weight: .bold, design: .rounded))
-            .lineSpacing(2)
-    }
-    
-    /// Título mediano (24pt)
-    static func titleMedium(_ text: String) -> some View {
-        Text(text)
-            .font(.system(size: 24, weight: .bold, design: .rounded))
-            .lineSpacing(1)
-    }
-    
-    /// Título pequeño (18pt)
-    static func titleSmall(_ text: String) -> some View {
-        Text(text)
-            .font(.system(size: 18, weight: .bold, design: .rounded))
-    }
-    
-    /// Texto para cuerpo de tamaño grande (16pt)
-    static func bodyLarge(_ text: String) -> some View {
-        Text(text)
-            .font(.system(size: 16, weight: .medium, design: .rounded))
-            .lineSpacing(4)
-    }
-    
-    /// Texto para cuerpo de tamaño medio (14pt)
-    static func bodyMedium(_ text: String) -> some View {
-        Text(text)
-            .font(.system(size: 14, weight: .medium, design: .rounded))
-            .lineSpacing(3)
-    }
-    
-    /// Texto para cuerpo de tamaño pequeño (12pt)
-    static func bodySmall(_ text: String) -> some View {
-        Text(text)
-            .font(.system(size: 12, weight: .medium, design: .rounded))
-            .lineSpacing(2)
-    }
-    
-    /// Etiqueta pequeña (10pt)
-    static func label(_ text: String) -> some View {
-        Text(text)
-            .font(.system(size: 10, weight: .semibold, design: .rounded))
-            .tracking(0.5)
-            .textCase(.uppercase)
-    }
-    
-    // MARK: - Iconos y Componentes
-    
-    /// Icono para estadísticas
-    static func statIcon(systemName: String, color: Color) -> some View {
-        Image(systemName: systemName)
-            .font(.system(size: 14))
-            .foregroundColor(color)
-            .frame(width: 28, height: 28)
-            .background(
-                Circle()
-                    .fill(color.opacity(0.1))
-            )
-    }
-    
-    /// Barra de progreso
-    static func progressBar(value: Double, color: Color = PureLifeColors.pureGreen) -> some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .leading) {
-                // Fondo
-                Capsule()
-                    .fill(PureLifeColors.elevatedSurface)
-                    .frame(height: 6)
-                
-                // Progreso
-                Capsule()
-                    .fill(color)
-                    .frame(width: min(CGFloat(value) * geometry.size.width, geometry.size.width), height: 6)
-            }
+    private struct CardStyle: ViewModifier {
+        let cornerRadius: CGFloat
+        
+        func body(content: Content) -> some View {
+            content
+                .padding(16)
+                .background(PureLifeColors.cardBackground)
+                .cornerRadius(cornerRadius)
+                .shadow(color: PureLifeColors.cardShadow, radius: 5, x: 0, y: 2)
         }
-        .frame(height: 6)
     }
 } 

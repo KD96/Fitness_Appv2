@@ -29,24 +29,29 @@ struct UserStatsView: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            // Tarjeta de información del usuario
-            userInfoCard
-            
-            // Selector de periodo
-            timeFrameSelector
-            
-            // Gráfico principal
-            activityChartCard
-            
-            // Selector de pestañas
-            tabSelector
-                .padding(.top, 5)
-            
-            // Grid de estadísticas
-            statsGrid
-                .padding(.top, 5)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                // Tarjeta de información del usuario
+                userInfoCard
+                
+                // Selector de periodo
+                timeFrameSelector
+                
+                // Gráfico principal
+                activityChartCard
+                
+                // Selector de pestañas
+                tabSelector
+                    .padding(.top, 5)
+                
+                // Grid de estadísticas
+                statsGrid
+                    .padding(.top, 5)
+                    .padding(.bottom, 20)
+            }
+            .padding(.horizontal, 16)
         }
+        .background(PureLifeColors.background)
     }
     
     // MARK: - Componentes de UI
@@ -71,12 +76,12 @@ struct UserStatsView: View {
                 // Avatar del usuario
                 ZStack {
                     Circle()
-                        .fill(PureLifeColors.pureGreenLight.opacity(0.2))
+                        .fill(PureLifeColors.logoGreen.opacity(0.2))
                         .frame(width: 50, height: 50)
                     
                     Text(userInitials)
                         .font(.system(size: 20, weight: .semibold, design: .rounded))
-                        .foregroundColor(PureLifeColors.pureGreenDark)
+                        .foregroundColor(PureLifeColors.logoGreen)
                 }
             }
             
@@ -132,7 +137,7 @@ struct UserStatsView: View {
                             ZStack {
                                 if selectedTimeFrame == timeFrame {
                                     RoundedRectangle(cornerRadius: 10)
-                                        .fill(PureLifeColors.pureGreenLight.opacity(0.3))
+                                        .fill(PureLifeColors.logoGreen.opacity(0.3))
                                 }
                             }
                         )
@@ -163,7 +168,7 @@ struct UserStatsView: View {
                         )
                         .foregroundStyle(
                             LinearGradient(
-                                gradient: Gradient(colors: [PureLifeColors.pureGreen, PureLifeColors.pureGreenDark]),
+                                gradient: Gradient(colors: [PureLifeColors.logoGreen, PureLifeColors.logoGreen.opacity(0.7)]),
                                 startPoint: .top,
                                 endPoint: .bottom
                             )
@@ -184,8 +189,8 @@ struct UserStatsView: View {
             
             // Leyenda para el gráfico
             HStack(spacing: 16) {
-                legendItem(color: PureLifeColors.pureGreen, label: "Workouts")
-                legendItem(color: PureLifeColors.pureGreenDark, label: "Target")
+                legendItem(color: PureLifeColors.logoGreen, label: "Workouts")
+                legendItem(color: PureLifeColors.logoGreen.opacity(0.7), label: "Target")
             }
         }
         .padding(18)
@@ -204,7 +209,7 @@ struct UserStatsView: View {
             }) {
                 Text("Workouts")
                     .font(.system(size: 15, weight: .medium, design: .rounded))
-                    .foregroundColor(selectedStatTab == 0 ? PureLifeColors.pureGreen : PureLifeColors.textSecondary)
+                    .foregroundColor(selectedStatTab == 0 ? PureLifeColors.logoGreen : PureLifeColors.textSecondary)
                     .padding(.vertical, 12)
                     .padding(.horizontal, 20)
                     .frame(maxWidth: .infinity)
@@ -214,7 +219,7 @@ struct UserStatsView: View {
                     .fill(Color.clear)
                     .overlay(
                         Rectangle()
-                            .fill(selectedStatTab == 0 ? PureLifeColors.pureGreen : Color.clear)
+                            .fill(selectedStatTab == 0 ? PureLifeColors.logoGreen : Color.clear)
                             .frame(height: 2),
                         alignment: .bottom
                     )
@@ -227,7 +232,7 @@ struct UserStatsView: View {
             }) {
                 Text("Activity")
                     .font(.system(size: 15, weight: .medium, design: .rounded))
-                    .foregroundColor(selectedStatTab == 1 ? PureLifeColors.pureGreen : PureLifeColors.textSecondary)
+                    .foregroundColor(selectedStatTab == 1 ? PureLifeColors.logoGreen : PureLifeColors.textSecondary)
                     .padding(.vertical, 12)
                     .padding(.horizontal, 20)
                     .frame(maxWidth: .infinity)
@@ -237,7 +242,7 @@ struct UserStatsView: View {
                     .fill(Color.clear)
                     .overlay(
                         Rectangle()
-                            .fill(selectedStatTab == 1 ? PureLifeColors.pureGreen : Color.clear)
+                            .fill(selectedStatTab == 1 ? PureLifeColors.logoGreen : Color.clear)
                             .frame(height: 2),
                         alignment: .bottom
                     )
@@ -250,7 +255,10 @@ struct UserStatsView: View {
     
     // Grid de estadísticas
     private var statsGrid: some View {
-        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+        LazyVGrid(columns: [
+            GridItem(.flexible(), spacing: 16),
+            GridItem(.flexible(), spacing: 16)
+        ], spacing: 16) {
             if selectedStatTab == 0 {
                 // Workouts stats
                 statCard(
@@ -259,7 +267,7 @@ struct UserStatsView: View {
                     value: "\(dataStore.totalWorkoutsCompleted)",
                     trend: "+\(dataStore.weeklyWorkoutCount)",
                     trendLabel: "this week",
-                    iconColor: PureLifeColors.pureGreen
+                    iconColor: PureLifeColors.logoGreen
                 )
                 
                 statCard(
@@ -296,7 +304,7 @@ struct UserStatsView: View {
                     value: "\(dataStore.healthKitData.stepsCount)",
                     target: "10,000 steps",
                     progress: CGFloat(dataStore.healthKitData.stepsCount) / 10000.0,
-                    iconColor: PureLifeColors.pureGreen
+                    iconColor: PureLifeColors.logoGreen
                 )
                 
                 healthMetricCard(
@@ -355,11 +363,11 @@ struct UserStatsView: View {
             HStack(spacing: 4) {
                 Image(systemName: "arrow.up")
                     .font(.system(size: 12))
-                    .foregroundColor(PureLifeColors.pureGreen)
+                    .foregroundColor(PureLifeColors.logoGreen)
                 
                 Text(trend)
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
-                    .foregroundColor(PureLifeColors.pureGreen)
+                    .foregroundColor(PureLifeColors.logoGreen)
                 
                 Text(trendLabel)
                     .font(.system(size: 12, design: .rounded))
@@ -407,15 +415,18 @@ struct UserStatsView: View {
                     .frame(height: 6)
                 
                 // Progreso
-                Capsule()
-                    .fill(
-                        LinearGradient(
-                            gradient: Gradient(colors: [iconColor, iconColor.opacity(0.7)]),
-                            startPoint: .leading,
-                            endPoint: .trailing
+                GeometryReader { geometry in
+                    Capsule()
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(colors: [iconColor, iconColor.opacity(0.7)]),
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
                         )
-                    )
-                    .frame(width: max(0, min(progress, 1.0)) * (UIScreen.main.bounds.width * 0.35), height: 6)
+                        .frame(width: max(0, min(progress, 1.0)) * geometry.size.width, height: 6)
+                }
+                .frame(height: 6)
             }
         }
         .padding(16)
@@ -442,6 +453,6 @@ struct UserStatsView_Previews: PreviewProvider {
     static var previews: some View {
         UserStatsView()
             .environmentObject(AppDataStore())
-            .preferredColorScheme(.dark)
+            .preferredColorScheme(.light)
     }
 } 

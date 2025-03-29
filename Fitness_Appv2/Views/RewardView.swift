@@ -12,12 +12,65 @@ struct RewardView: View {
         NavigationView {
             ZStack {
                 // Fondo principal
-                PureLifeColors.darkBackground.ignoresSafeArea()
+                PureLifeColors.background.ignoresSafeArea()
                 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 25) {
-                        // Header con logo y balance
-                        headerView
+                        // Logo
+                        PureLifeHeader()
+                        .padding(.bottom, 8)
+                        
+                        // User level
+                        UserLevelView(user: dataStore.currentUser)
+                            .padding(.horizontal, 16)
+                        
+                        // Balance card
+                        ZStack(alignment: .bottom) {
+                            // Card background
+                            Components.Card(title: "", cornerRadius: 25) {
+                                VStack(spacing: 10) {
+                                    Text("Token Balance")
+                                        .font(.system(size: 16, weight: .medium, design: .rounded))
+                                        .foregroundColor(PureLifeColors.textSecondary)
+                                        .padding(.top, 25)
+                                    
+                                    Text("\(String(format: "%.1f", dataStore.currentUser.tokenBalance))")
+                                        .font(.system(size: 32, weight: .bold, design: .rounded))
+                                        .foregroundColor(PureLifeColors.textPrimary)
+                                        .shadow(color: PureLifeColors.logoGreen.opacity(0.2), radius: 5, x: 0, y: 0)
+                                    
+                                    Text("TOKENS")
+                                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                                        .foregroundColor(PureLifeColors.logoGreen)
+                                        .tracking(2)
+                                    
+                                    Spacer()
+                                    
+                                    // Convert button
+                                    Button(action: {
+                                        showingCryptoWallet = true
+                                    }) {
+                                        HStack {
+                                            Image(systemName: "arrow.right.arrow.left")
+                                                .font(.system(size: 14, weight: .bold))
+                                            
+                                            Text("CONVERT TO CRYPTO")
+                                                .font(.system(size: 14, weight: .bold, design: .rounded))
+                                                .tracking(1)
+                                        }
+                                        .foregroundColor(PureLifeColors.surface)
+                                        .padding(.vertical, 12)
+                                        .frame(maxWidth: .infinity)
+                                        .background(PureLifeColors.logoGreen)
+                                        .cornerRadius(15)
+                                    }
+                                    .shadow(color: PureLifeColors.logoGreen.opacity(0.2), radius: 5, x: 0, y: 2)
+                                }
+                                .padding(20)
+                            }
+                        }
+                        .frame(height: 280)
+                        .padding(.horizontal, 16)
                         
                         // Sección de categorías
                         categoriesSection
@@ -37,117 +90,17 @@ struct RewardView: View {
                 purchaseConfirmationAlert
             }
         }
-        .accentColor(PureLifeColors.pureGreen)
+        .accentColor(PureLifeColors.logoGreen)
     }
     
     // MARK: - UI Components
     
-    private var headerView: some View {
-        VStack(spacing: 25) {
-            // Logo
-            HStack {
-                HStack(spacing: 0) {
-                    Text("pure")
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
-                        .foregroundColor(PureLifeColors.pureGreen)
-                    
-                    Text("life")
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
-                        .foregroundColor(PureLifeColors.textPrimary)
-                    
-                    Text(".")
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
-                        .foregroundColor(PureLifeColors.pureGreen)
-                }
-                
-                Spacer()
-            }
-            .padding(.horizontal, 20)
-            
-            // User level
-            UserLevelView(user: dataStore.currentUser)
-                .padding(.horizontal, 20)
-            
-            // Balance card
-            ZStack(alignment: .bottom) {
-                // Card background
-                RoundedRectangle(cornerRadius: 25)
-                    .fill(
-                        LinearGradient(
-                            gradient: Gradient(
-                                colors: [
-                                    PureLifeColors.darkSurface,
-                                    Color(red: 40/255, green: 40/255, blue: 40/255)
-                                ]
-                            ),
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 25)
-                            .strokeBorder(
-                                LinearGradient(
-                                    colors: [PureLifeColors.pureGreen.opacity(0.3), PureLifeColors.pureGreen.opacity(0)],
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                ),
-                                lineWidth: 1
-                            )
-                    )
-                    .shadow(color: Color.black.opacity(0.3), radius: 15, x: 0, y: 10)
-                
-                // Content
-                VStack(spacing: 10) {
-                    Text("Token Balance")
-                        .font(.system(size: 16, weight: .medium, design: .rounded))
-                        .foregroundColor(PureLifeColors.textSecondary)
-                        .padding(.top, 25)
-                    
-                    Text("\(String(format: "%.1f", dataStore.currentUser.tokenBalance))")
-                        .font(.system(size: 60, weight: .bold, design: .rounded))
-                        .foregroundColor(PureLifeColors.textPrimary)
-                        .shadow(color: PureLifeColors.pureGreen.opacity(0.3), radius: 10, x: 0, y: 0)
-                    
-                    Text("PURE")
-                        .font(.system(size: 14, weight: .heavy, design: .rounded))
-                        .foregroundColor(PureLifeColors.pureGreen)
-                        .tracking(2)
-                    
-                    Spacer()
-                    
-                    // Convert button
-                    Button(action: {
-                        showingCryptoWallet = true
-                    }) {
-                        HStack {
-                            Image(systemName: "arrow.right.arrow.left")
-                                .font(.system(size: 14, weight: .bold))
-                            
-                            Text("CONVERT TO CRYPTO")
-                                .font(.system(size: 14, weight: .bold, design: .rounded))
-                                .tracking(1)
-                        }
-                        .foregroundColor(PureLifeColors.darkBackground)
-                        .padding(.vertical, 15)
-                        .frame(maxWidth: .infinity)
-                        .background(PureLifeColors.accentGradient)
-                        .cornerRadius(15)
-                    }
-                    .shadow(color: PureLifeColors.pureGreen.opacity(0.3), radius: 10, x: 0, y: 5)
-                }
-                .padding(20)
-            }
-            .frame(height: 280)
-            .padding(.horizontal, 20)
-        }
-    }
-    
     private var categoriesSection: some View {
         VStack(alignment: .leading, spacing: 15) {
             HStack {
-                PureLifeUI.titleSmall("Marketplace")
-                    .padding(.leading, 20)
+                Text("Marketplace")
+                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                    .foregroundColor(PureLifeColors.textPrimary)
                 
                 Spacer()
                 
@@ -160,14 +113,14 @@ struct RewardView: View {
                         HStack(spacing: 4) {
                             Text("All Categories")
                                 .font(.system(size: 14, weight: .medium, design: .rounded))
-                                .foregroundColor(PureLifeColors.pureGreen)
+                                .foregroundColor(PureLifeColors.logoGreen)
                             
                             Image(systemName: "chevron.right")
                                 .font(.system(size: 12, weight: .semibold))
-                                .foregroundColor(PureLifeColors.pureGreen)
+                                .foregroundColor(PureLifeColors.logoGreen)
                         }
                     }
-                    .padding(.trailing, 20)
+                    .padding(.trailing, 16)
                 }
             }
             
@@ -211,14 +164,14 @@ struct RewardView: View {
                     featuredRewardsSection
                     
                     Divider()
-                        .background(PureLifeColors.divider)
+                        .background(PureLifeColors.divider.opacity(0.3))
                         .padding(.vertical, 15)
                         .padding(.horizontal, 40)
                     
                     newArrivalsSection
                     
                     Divider()
-                        .background(PureLifeColors.divider)
+                        .background(PureLifeColors.divider.opacity(0.3))
                         .padding(.vertical, 15)
                         .padding(.horizontal, 40)
                     
@@ -232,14 +185,14 @@ struct RewardView: View {
         VStack(alignment: .leading, spacing: 15) {
             HStack {
                 Image(systemName: "star.fill")
-                    .foregroundColor(PureLifeColors.pureGreen)
+                    .foregroundColor(PureLifeColors.logoGreen)
                     .font(.system(size: 16))
                 
                 Text("Featured Rewards")
                     .font(.system(size: 18, weight: .bold, design: .rounded))
                     .foregroundColor(PureLifeColors.textPrimary)
             }
-            .padding(.leading, 20)
+            .padding(.leading, 16)
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 15) {
@@ -261,14 +214,14 @@ struct RewardView: View {
         VStack(alignment: .leading, spacing: 15) {
             HStack {
                 Image(systemName: "sparkles")
-                    .foregroundColor(PureLifeColors.pureGreen)
+                    .foregroundColor(PureLifeColors.logoGreen)
                     .font(.system(size: 16))
                 
                 Text("New Arrivals")
                     .font(.system(size: 18, weight: .bold, design: .rounded))
                     .foregroundColor(PureLifeColors.textPrimary)
             }
-            .padding(.leading, 20)
+            .padding(.leading, 16)
             
             VStack(spacing: 15) {
                 ForEach(dataStore.availableRewards.filter { $0.isNew }) { reward in
@@ -288,14 +241,14 @@ struct RewardView: View {
                 VStack(alignment: .leading, spacing: 15) {
                     HStack {
                         Image(systemName: "bag.fill")
-                            .foregroundColor(PureLifeColors.pureGreen)
+                            .foregroundColor(PureLifeColors.logoGreen)
                             .font(.system(size: 16))
                         
                         Text("Your Purchases")
                             .font(.system(size: 18, weight: .bold, design: .rounded))
                             .foregroundColor(PureLifeColors.textPrimary)
                     }
-                    .padding(.leading, 20)
+                    .padding(.leading, 16)
                     
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 15) {
@@ -304,8 +257,8 @@ struct RewardView: View {
                                     .frame(width: 220, height: 150)
                             }
                         }
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 5)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
                     }
                 }
             }
@@ -345,14 +298,14 @@ struct UserLevelView: View {
     let user: User
     
     var body: some View {
-        PureLifeUI.card {
+        Components.Card(title: "", cornerRadius: 16) {
             VStack(alignment: .leading, spacing: 15) {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
                         HStack(spacing: 8) {
                             Text("LEVEL \(user.currentLevel.level)")
                                 .font(.system(size: 14, weight: .heavy, design: .rounded))
-                                .foregroundColor(PureLifeColors.pureGreen)
+                                .foregroundColor(PureLifeColors.logoGreen)
                                 .tracking(1)
                             
                             Text(user.currentLevel.title)
@@ -368,12 +321,12 @@ struct UserLevelView: View {
                         Circle()
                             .stroke(lineWidth: 8.0)
                             .opacity(0.2)
-                            .foregroundColor(PureLifeColors.pureGreen)
+                            .foregroundColor(PureLifeColors.logoGreen)
                         
                         Circle()
                             .trim(from: 0.0, to: CGFloat(min(user.progressToNextLevel, 1.0)))
                             .stroke(style: StrokeStyle(lineWidth: 8.0, lineCap: .round, lineJoin: .round))
-                            .foregroundColor(PureLifeColors.pureGreen)
+                            .foregroundColor(PureLifeColors.logoGreen)
                             .rotationEffect(Angle(degrees: 270.0))
                             .animation(.easeInOut, value: user.progressToNextLevel)
                         
@@ -406,20 +359,23 @@ struct UserLevelView: View {
                     ZStack(alignment: .leading) {
                         // Background
                         Capsule()
-                            .fill(PureLifeColors.darkBackground)
+                            .fill(PureLifeColors.background)
                             .frame(height: 8)
                         
                         // Fill
-                        Capsule()
-                            .fill(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [PureLifeColors.pureGreen, PureLifeColors.pureGreenDark]),
-                                    startPoint: .leading,
-                                    endPoint: .trailing
+                        GeometryReader { geometry in
+                            Capsule()
+                                .fill(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [PureLifeColors.logoGreen, PureLifeColors.logoGreen.opacity(0.7)]),
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
                                 )
-                            )
-                            .frame(width: UIScreen.main.bounds.width * 0.7 * CGFloat(user.progressToNextLevel), height: 8)
-                            .animation(.easeInOut, value: user.progressToNextLevel)
+                                .frame(width: CGFloat(user.progressToNextLevel) * geometry.size.width, height: 8)
+                                .animation(.easeInOut, value: user.progressToNextLevel)
+                        }
+                        .frame(height: 8)
                     }
                 }
             }
@@ -438,18 +394,18 @@ struct CategoryButton: View {
                 // Icon in a circle
                 ZStack {
                     Circle()
-                        .fill(isSelected ? PureLifeColors.pureGreen : PureLifeColors.darkSurface)
+                        .fill(isSelected ? PureLifeColors.logoGreen : PureLifeColors.background)
                         .frame(width: 50, height: 50)
-                        .shadow(color: isSelected ? PureLifeColors.pureGreen.opacity(0.3) : Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+                        .shadow(color: isSelected ? PureLifeColors.logoGreen.opacity(0.3) : Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                     
                     Image(systemName: category.icon)
                         .font(.system(size: 20))
-                        .foregroundColor(isSelected ? PureLifeColors.darkBackground : PureLifeColors.textSecondary)
+                        .foregroundColor(isSelected ? PureLifeColors.background : PureLifeColors.textSecondary)
                 }
                 
                 Text(category.rawValue)
                     .font(.system(size: 12, weight: isSelected ? .bold : .medium, design: .rounded))
-                    .foregroundColor(isSelected ? PureLifeColors.pureGreen : PureLifeColors.textSecondary)
+                    .foregroundColor(isSelected ? PureLifeColors.logoGreen : PureLifeColors.textSecondary)
                     .lineLimit(1)
             }
             .frame(width: 85)
@@ -464,12 +420,12 @@ struct RewardCard: View {
     
     var body: some View {
         Button(action: action) {
-            PureLifeUI.card {
+            Components.Card(title: "", cornerRadius: 16) {
                 HStack(spacing: 20) {
                     // Partner logo
                     ZStack {
                         Circle()
-                            .fill(reward.category.color.opacity(0.15))
+                            .fill(reward.category.color.opacity(0.1))
                             .frame(width: 60, height: 60)
                         
                         Image(systemName: reward.partnerLogo)
@@ -519,10 +475,10 @@ struct RewardCard: View {
                         
                         Text("BUY")
                             .font(.system(size: 12, weight: .heavy, design: .rounded))
-                            .foregroundColor(PureLifeColors.darkBackground)
+                            .foregroundColor(PureLifeColors.background)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
-                            .background(PureLifeColors.pureGreen)
+                            .background(PureLifeColors.logoGreen)
                             .cornerRadius(8)
                     }
                 }
@@ -552,84 +508,85 @@ struct FeaturedRewardCard: View {
     
     var body: some View {
         Button(action: action) {
-            ZStack {
-                // Background gradient
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(
-                        LinearGradient(
-                            gradient: Gradient(colors: [
-                                reward.category.color.opacity(0.2),
-                                PureLifeColors.darkSurface
-                            ]),
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 20)
-                            .strokeBorder(
-                                LinearGradient(
-                                    colors: [reward.category.color.opacity(0.4), Color.clear],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: 1.5
+            Components.Card(title: "", cornerRadius: 20) {
+                ZStack {
+                    // Background gradient
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    reward.category.color.opacity(0.1),
+                                    PureLifeColors.surface
+                                ]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
                             )
-                    )
-                
-                // Content
-                VStack(alignment: .leading, spacing: 16) {
-                    // Header
-                    HStack {
-                        Image(systemName: reward.partnerLogo)
-                            .font(.system(size: 22))
-                            .foregroundColor(reward.category.color)
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20)
+                                .strokeBorder(
+                                    LinearGradient(
+                                        colors: [reward.category.color.opacity(0.4), Color.clear],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    lineWidth: 1.5
+                                )
+                        )
+                    
+                    // Content
+                    VStack(alignment: .leading, spacing: 16) {
+                        // Header
+                        HStack {
+                            Image(systemName: reward.partnerLogo)
+                                .font(.system(size: 22))
+                                .foregroundColor(reward.category.color)
+                            
+                            Text(reward.partnerName)
+                                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                .foregroundColor(PureLifeColors.textPrimary)
+                            
+                            Spacer()
+                            
+                            if reward.isNew {
+                                TagView(text: "NEW", color: PureLifeColors.success)
+                            }
+                        }
                         
-                        Text(reward.partnerName)
-                            .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        // Title
+                        Text(reward.title)
+                            .font(.system(size: 22, weight: .bold, design: .rounded))
                             .foregroundColor(PureLifeColors.textPrimary)
+                            .lineLimit(2)
+                        
+                        // Description
+                        Text(reward.description)
+                            .font(.system(size: 15, weight: .regular, design: .rounded))
+                            .foregroundColor(PureLifeColors.textSecondary)
+                            .lineLimit(2)
                         
                         Spacer()
                         
-                        if reward.isNew {
-                            TagView(text: "NEW", color: PureLifeColors.success)
+                        // Footer
+                        HStack {
+                            // Discount if any
+                            if let percentage = reward.discountPercentage {
+                                TagView(text: "\(percentage)% OFF", color: PureLifeColors.warning)
+                            } else if let amount = reward.discountAmount {
+                                TagView(text: "$\(Int(amount)) OFF", color: PureLifeColors.warning)
+                            }
+                            
+                            Spacer()
+                            
+                            // Price
+                            Text(reward.formattedCost)
+                                .font(.system(size: 18, weight: .bold, design: .rounded))
+                                .foregroundColor(PureLifeColors.textPrimary)
                         }
                     }
-                    
-                    // Title
-                    Text(reward.title)
-                        .font(.system(size: 22, weight: .bold, design: .rounded))
-                        .foregroundColor(PureLifeColors.textPrimary)
-                        .lineLimit(2)
-                    
-                    // Description
-                    Text(reward.description)
-                        .font(.system(size: 15, weight: .regular, design: .rounded))
-                        .foregroundColor(PureLifeColors.textSecondary)
-                        .lineLimit(2)
-                    
-                    Spacer()
-                    
-                    // Footer
-                    HStack {
-                        // Discount if any
-                        if let percentage = reward.discountPercentage {
-                            TagView(text: "\(percentage)% OFF", color: PureLifeColors.warning)
-                        } else if let amount = reward.discountAmount {
-                            TagView(text: "$\(Int(amount)) OFF", color: PureLifeColors.warning)
-                        }
-                        
-                        Spacer()
-                        
-                        // Price
-                        Text(reward.formattedCost)
-                            .font(.system(size: 18, weight: .bold, design: .rounded))
-                            .foregroundColor(PureLifeColors.textPrimary)
-                    }
+                    .padding(20)
                 }
-                .padding(20)
             }
-            .shadow(color: Color.black.opacity(0.2), radius: 15, x: 0, y: 8)
         }
     }
 }
@@ -638,62 +595,64 @@ struct PurchasedRewardCard: View {
     let reward: Reward
     
     var body: some View {
-        ZStack {
-            // Background
-            RoundedRectangle(cornerRadius: 16)
-                .fill(PureLifeColors.darkSurface)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .strokeBorder(
-                            LinearGradient(
-                                colors: [PureLifeColors.pureGreen.opacity(0.3), Color.clear],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 1
-                        )
-                )
-                .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
-            
-            VStack(alignment: .leading, spacing: 12) {
-                // Header
-                HStack {
-                    Image(systemName: reward.partnerLogo)
-                        .font(.system(size: 18))
-                        .foregroundColor(reward.category.color)
+        Components.Card(title: "", cornerRadius: 16) {
+            ZStack {
+                // Background
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(PureLifeColors.background)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .strokeBorder(
+                                LinearGradient(
+                                    colors: [PureLifeColors.logoGreen.opacity(0.3), Color.clear],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1
+                            )
+                    )
+                    .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
+                
+                VStack(alignment: .leading, spacing: 12) {
+                    // Header
+                    HStack {
+                        Image(systemName: reward.partnerLogo)
+                            .font(.system(size: 18))
+                            .foregroundColor(reward.category.color)
+                        
+                        Text(reward.partnerName)
+                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                            .foregroundColor(PureLifeColors.textPrimary)
+                        
+                        Spacer()
+                        
+                        Image(systemName: "checkmark.seal.fill")
+                            .foregroundColor(PureLifeColors.success)
+                    }
                     
-                    Text(reward.partnerName)
-                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                    // Title
+                    Text(reward.title)
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
                         .foregroundColor(PureLifeColors.textPrimary)
+                        .lineLimit(1)
                     
                     Spacer()
                     
-                    Image(systemName: "checkmark.seal.fill")
-                        .foregroundColor(PureLifeColors.success)
-                }
-                
-                // Title
-                Text(reward.title)
-                    .font(.system(size: 16, weight: .bold, design: .rounded))
-                    .foregroundColor(PureLifeColors.textPrimary)
-                    .lineLimit(1)
-                
-                Spacer()
-                
-                // Expiry info if available
-                if let expiryDate = reward.expiryDate {
-                    HStack {
-                        Image(systemName: "clock")
-                            .font(.system(size: 12))
-                            .foregroundColor(PureLifeColors.textSecondary)
-                        
-                        Text("Expires: \(formattedDate(expiryDate))")
-                            .font(.system(size: 12, weight: .medium, design: .rounded))
-                            .foregroundColor(PureLifeColors.textSecondary)
+                    // Expiry info if available
+                    if let expiryDate = reward.expiryDate {
+                        HStack {
+                            Image(systemName: "clock")
+                                .font(.system(size: 12))
+                                .foregroundColor(PureLifeColors.textSecondary)
+                            
+                            Text("Expires: \(formattedDate(expiryDate))")
+                                .font(.system(size: 12, weight: .medium, design: .rounded))
+                                .foregroundColor(PureLifeColors.textSecondary)
+                        }
                     }
                 }
+                .padding(15)
             }
-            .padding(15)
         }
     }
     
@@ -709,6 +668,6 @@ struct RewardView_Previews: PreviewProvider {
     static var previews: some View {
         RewardView()
             .environmentObject(AppDataStore())
-            .preferredColorScheme(.dark)
+            .preferredColorScheme(.light)
     }
 } 

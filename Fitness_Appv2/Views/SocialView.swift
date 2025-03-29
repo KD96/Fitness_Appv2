@@ -14,23 +14,9 @@ struct SocialView: View {
                 pureLifeLightGreen.ignoresSafeArea()
                 
                 VStack(spacing: 0) {
-                    // Logo y título de la app
-                    HStack {
-                        Text("pure")
-                            .font(.system(size: 28, weight: .bold))
-                            .foregroundColor(pureLifeBlack) +
-                        Text("life")
-                            .font(.system(size: 28, weight: .bold))
-                            .foregroundColor(pureLifeBlack) +
-                        Text(".")
-                            .font(.system(size: 28, weight: .bold))
-                            .foregroundColor(pureLifeBlack)
-                        
-                        Spacer()
-                    }
-                    .padding(.horizontal)
-                    .padding(.bottom, 15)
-                    .padding(.top, 10)
+                    // Logo
+                    PureLifeHeader()
+                    .padding(.top, 8)
                     
                     ScrollView {
                         VStack(spacing: 20) {

@@ -17,7 +17,7 @@ struct WorkoutCard: View {
                 // Icono del tipo de ejercicio
                 Image(systemName: workout.type.icon)
                     .font(.system(size: 14))
-                    .foregroundColor(PureLifeColors.pureGreen)
+                    .foregroundColor(PureLifeColors.logoGreen)
                 
                 // Tipo de ejercicio
                 Text(workout.type.rawValue)
@@ -93,7 +93,7 @@ struct WorkoutStat: View {
             HStack(spacing: 4) {
                 Image(systemName: icon)
                     .font(.system(size: 12))
-                    .foregroundColor(PureLifeColors.pureGreen)
+                    .foregroundColor(PureLifeColors.logoGreen)
                 
                 Text(value)
                     .font(.system(size: 14, weight: .semibold, design: .rounded))

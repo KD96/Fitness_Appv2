@@ -66,7 +66,7 @@ struct MainTabView: View {
                 }
                 .tag(4)
         }
-        .accentColor(PureLifeColors.pureGreen)
+        .accentColor(PureLifeColors.logoGreen)
         .onAppear {
             // Aplicar el tema claro
             if #available(iOS 15.0, *) {

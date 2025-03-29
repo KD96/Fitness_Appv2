@@ -19,23 +19,24 @@ struct HealthKitAuthView: View {
                 pureLifeLightGreen.ignoresSafeArea()
                 
                 VStack(spacing: 30) {
-                    // Logo
-                    VStack(spacing: 10) {
-                        Text("pure")
-                            .font(.system(size: 38, weight: .bold))
-                            .foregroundColor(pureLifeBlack) +
-                        Text("life")
-                            .font(.system(size: 38, weight: .bold))
-                            .foregroundColor(pureLifeBlack) +
-                        Text(".")
-                            .font(.system(size: 38, weight: .bold))
-                            .foregroundColor(pureLifeBlack)
+                    // Logo and title section
+                    VStack(spacing: 20) {
+                        Image("Logo")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(height: 60)
                         
                         Text("Connect to your health data")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(pureLifeBlack)
+                        
+                        Text("Allow PureLife to read and write workout data from Apple Health")
                             .font(.body)
+                            .multilineTextAlignment(.center)
                             .foregroundColor(pureLifeBlack.opacity(0.7))
+                            .padding(.horizontal, 20)
                     }
-                    .padding(.top, 50)
                     
                     Spacer()
                     

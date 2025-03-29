@@ -4,59 +4,69 @@ import UIKit
 struct WorkoutDetailView: View {
     @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject var dataStore: AppDataStore
+    @State private var showingDeleteConfirmation = false
     
     let workout: Workout
     
     var body: some View {
-        NavigationView {
-            ZStack {
-                // Fondo principal
-                PureLifeColors.darkBackground.ignoresSafeArea()
+        ScrollView {
+            VStack(spacing: Spacing.xl) {
+                // Header section with workout image and basic info
+                headerSection
                 
-                ScrollView {
-                    VStack(spacing: 20) {
-                        // Header
-                        workoutHeader
-                        
-                        // Estadísticas
-                        statsSection
-                        
-                        // Notas (si existen)
-                        if let notes = workout.notes, !notes.isEmpty {
-                            notesSection(notes)
-                        }
-                        
-                        Spacer(minLength: 30)
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 20)
+                // Workout details and stats
+                Components.Card(title: "Workout Details", icon: "chart.bar.fill") {
+                    detailsSection
                 }
+                .padding(.horizontal, Spacing.screenHorizontalPadding)
+                
+                // Notes section if available
+                if let notes = workout.notes, !notes.isEmpty {
+                    Components.Card(title: "Notes", icon: "note.text") {
+                        Typography.paragraph(
+                            Text(notes)
+                        )
+                    }
+                    .padding(.horizontal, Spacing.screenHorizontalPadding)
+                }
+                
+                // Action buttons
+                actionsSection
+                    .padding(.horizontal, Spacing.screenHorizontalPadding)
+                    .padding(.bottom, Spacing.xl)
             }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        presentationMode.wrappedValue.dismiss()
-                    }) {
-                        Text("Done")
-                            .foregroundColor(PureLifeColors.pureGreen)
-                            .font(.system(size: 16, weight: .semibold, design: .rounded))
-                    }
-                }
-                
-                ToolbarItem(placement: .principal) {
-                    Text("Workout Details")
-                        .font(.system(size: 18, weight: .bold, design: .rounded))
-                        .foregroundColor(PureLifeColors.textPrimary)
-                }
+            .padding(.top, Spacing.lg)
+        }
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                backButton
+            }
+            
+            ToolbarItem(placement: .principal) {
+                Text(workout.name)
+                    .font(Typography.font(size: Typography.FontSize.lg, weight: Typography.FontWeight.bold))
+                    .foregroundColor(PureLifeColors.textPrimary)
             }
         }
+        .alert(isPresented: $showingDeleteConfirmation) {
+            Alert(
+                title: Text("Delete Workout"),
+                message: Text("Are you sure you want to delete this workout? This action cannot be undone."),
+                primaryButton: .destructive(Text("Delete")) {
+                    deleteWorkout()
+                },
+                secondaryButton: .cancel()
+            )
+        }
+        .background(PureLifeColors.background.ignoresSafeArea())
     }
     
     // MARK: - UI Components
     
-    private var workoutHeader: some View {
-        PureLifeUI.card {
+    private var headerSection: some View {
+        Components.Card(title: "", cornerRadius: 16) {
             HStack(spacing: 15) {
                 // Icono del tipo de workout
                 ZStack {
@@ -79,79 +89,55 @@ struct WorkoutDetailView: View {
                         .foregroundColor(PureLifeColors.textSecondary)
                     
                     Text(formattedDate)
-                        .font(.system(size: 14, weight: .regular, design: .rounded))
-                        .foregroundColor(PureLifeColors.textTertiary)
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .foregroundColor(PureLifeColors.textSecondary)
+                        .padding(.top, 5)
                 }
                 
                 Spacer()
             }
-            .padding(20)
         }
+        .padding(.horizontal, Spacing.screenHorizontalPadding)
     }
     
-    private var statsSection: some View {
-        PureLifeUI.card {
-            VStack(spacing: 20) {
-                Text("Workout Stats")
-                    .font(.system(size: 18, weight: .bold, design: .rounded))
-                    .foregroundColor(PureLifeColors.textPrimary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+    private var detailsSection: some View {
+        VStack(spacing: 20) {
+            // Grid de estadísticas
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 20) {
+                // Duración
+                statItem(
+                    iconName: "clock.fill",
+                    iconColor: .blue,
+                    value: formattedDuration,
+                    label: "Duration"
+                )
                 
-                // Grid de estadísticas
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 20) {
-                    // Duración
+                // Calorías
+                statItem(
+                    iconName: "flame.fill",
+                    iconColor: .orange,
+                    value: "\(Int(workout.caloriesBurned))",
+                    label: "Calories"
+                )
+                
+                // Distancia (si aplica)
+                if let distance = workout.distance, distance > 0 {
                     statItem(
-                        iconName: "clock.fill",
-                        iconColor: .blue,
-                        value: formattedDuration,
-                        label: "Duration"
-                    )
-                    
-                    // Calorías
-                    statItem(
-                        iconName: "flame.fill",
-                        iconColor: .orange,
-                        value: "\(Int(workout.caloriesBurned))",
-                        label: "Calories"
-                    )
-                    
-                    // Distancia (si aplica)
-                    if let distance = workout.distance, distance > 0 {
-                        statItem(
-                            iconName: "arrow.left.and.right",
-                            iconColor: .green,
-                            value: String(format: "%.1f km", distance),
-                            label: "Distance"
-                        )
-                    }
-                    
-                    // Tokens ganados
-                    statItem(
-                        iconName: "bitcoinsign.circle.fill",
-                        iconColor: .yellow,
-                        value: "\(Int(workout.tokensEarned))",
-                        label: "Tokens Earned"
+                        iconName: "arrow.left.and.right",
+                        iconColor: .green,
+                        value: String(format: "%.1f km", distance),
+                        label: "Distance"
                     )
                 }
-            }
-            .padding(20)
-        }
-    }
-    
-    private func notesSection(_ notes: String) -> some View {
-        PureLifeUI.card {
-            VStack(alignment: .leading, spacing: 15) {
-                Text("Notes")
-                    .font(.system(size: 18, weight: .bold, design: .rounded))
-                    .foregroundColor(PureLifeColors.textPrimary)
                 
-                Text(notes)
-                    .font(.system(size: 16, weight: .regular, design: .rounded))
-                    .foregroundColor(PureLifeColors.textSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
+                // Tokens ganados
+                statItem(
+                    iconName: "bitcoinsign.circle.fill",
+                    iconColor: .yellow,
+                    value: "\(Int(workout.tokensEarned))",
+                    label: "Tokens Earned"
+                )
             }
-            .padding(20)
-            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
     
@@ -180,6 +166,55 @@ struct WorkoutDetailView: View {
             
             Spacer()
         }
+    }
+    
+    private var actionsSection: some View {
+        VStack(spacing: Spacing.md) {
+            Components.PrimaryButton(
+                text: "Complete Workout",
+                action: {
+                    withAnimation(.spring()) {
+                        // Mark workout as completed logic would go here
+                        // dataStore.markWorkoutAsCompleted(workout)
+                    }
+                },
+                iconName: "checkmark.circle.fill"
+            )
+            
+            HStack(spacing: Spacing.md) {
+                Components.SecondaryButton(
+                    text: "Edit",
+                    action: {
+                        // Edit workout logic would go here
+                    },
+                    iconName: "pencil"
+                )
+                
+                Components.SecondaryButton(
+                    text: "Delete",
+                    action: {
+                        withAnimation {
+                            showingDeleteConfirmation = true
+                        }
+                    },
+                    iconName: "trash"
+                )
+            }
+        }
+    }
+    
+    private var backButton: some View {
+        Components.IconButton(
+            iconName: "chevron.left",
+            action: {
+                withAnimation {
+                    presentationMode.wrappedValue.dismiss()
+                }
+            },
+            iconColor: PureLifeColors.logoGreen,
+            backgroundColor: PureLifeColors.logoGreen.opacity(0.2),
+            size: 36
+        )
     }
     
     // MARK: - Helpers
@@ -219,6 +254,14 @@ struct WorkoutDetailView: View {
             return "\(hours)h \(remainingMinutes)m"
         } else {
             return "\(minutes)m"
+        }
+    }
+    
+    private func deleteWorkout() {
+        // Implementation of deleteWorkout function
+        withAnimation(.spring()) {
+            // dataStore.deleteWorkout(workout)
+            presentationMode.wrappedValue.dismiss()
         }
     }
 }
