@@ -2,18 +2,15 @@ import Foundation
 
 struct Workout: Identifiable, Codable {
     var id = UUID()
+    var name: String
     var type: WorkoutType
-    var duration: TimeInterval
+    var durationMinutes: Int
     var date: Date
-    var calories: Double
+    var caloriesBurned: Double
+    var tokensEarned: Double
     var notes: String?
+    var distance: Double?
     var completed: Bool = false
-    
-    // For rewards calculation
-    var tokenReward: Double {
-        // Simple algorithm: 1 token per 10 minutes of workout
-        return duration / 600
-    }
 }
 
 enum WorkoutType: String, Codable, CaseIterable {
@@ -21,7 +18,7 @@ enum WorkoutType: String, Codable, CaseIterable {
     case walking
     case cycling
     case swimming
-    case weightTraining
+    case strength
     case yoga
     case hiit
     case other
@@ -32,7 +29,7 @@ enum WorkoutType: String, Codable, CaseIterable {
         case .walking: return "figure.walk"
         case .cycling: return "figure.outdoor.cycle"
         case .swimming: return "figure.pool.swim"
-        case .weightTraining: return "dumbbell"
+        case .strength: return "dumbbell"
         case .yoga: return "figure.yoga"
         case .hiit: return "figure.highintensity.intervaltraining"
         case .other: return "figure.mixed.cardio"

@@ -66,11 +66,16 @@ struct NewWorkoutView: View {
     
     private func saveWorkout() {
         let newWorkout = Workout(
+            id: UUID(),
+            name: "Manual Workout",
             type: workoutType,
-            duration: duration * 60, // Convert to seconds
+            durationMinutes: Int(duration),
             date: date,
-            calories: calories,
-            notes: notes.isEmpty ? nil : notes
+            caloriesBurned: calories,
+            tokensEarned: calories / 20, // Convertir calorías a tokens
+            notes: notes.isEmpty ? nil : notes,
+            distance: nil,
+            completed: true
         )
         
         dataStore.saveWorkout(newWorkout)

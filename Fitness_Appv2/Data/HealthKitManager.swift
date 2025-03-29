@@ -95,19 +95,27 @@ class HealthKitManager: ObservableObject {
                     if calories.isNaN || calories.isInfinite {
                         // Si las calorías no son válidas, usar un valor predeterminado
                         return Workout(
+                            id: UUID(),
+                            name: "Workout from HealthKit",
                             type: workoutType,
-                            duration: duration,
+                            durationMinutes: Int(duration / 60),
                             date: date,
-                            calories: 0,
+                            caloriesBurned: 0,
+                            tokensEarned: 0,
+                            distance: nil,
                             completed: true
                         )
                     }
                     
                     return Workout(
+                        id: UUID(),
+                        name: "Workout from HealthKit",
                         type: workoutType,
-                        duration: duration,
+                        durationMinutes: Int(duration / 60),
                         date: date,
-                        calories: calories,
+                        caloriesBurned: calories,
+                        tokensEarned: calories / 50, // Una regla simple: 1 token por cada 50 calorías
+                        distance: hkWorkout.totalDistance?.doubleValue(for: .meter()) ?? nil,
                         completed: true
                     )
                 }
@@ -258,7 +266,7 @@ class HealthKitManager: ObservableObject {
         case .swimming:
             return .swimming
         case .traditionalStrengthTraining:
-            return .weightTraining
+            return .strength
         case .yoga:
             return .yoga
         case .highIntensityIntervalTraining:

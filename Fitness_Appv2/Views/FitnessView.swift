@@ -7,39 +7,34 @@ struct FitnessView: View {
     @State private var selectedWorkout: Workout?
     @State private var showingHealthKitAuth = false
     
-    // Colores de PureLife
-    private let pureLifeGreen = Color(red: 199/255, green: 227/255, blue: 214/255)
-    private let pureLifeLightGreen = Color(red: 220/255, green: 237/255, blue: 230/255)
-    private let pureLifeBlack = Color.black
-    
     var body: some View {
         NavigationView {
             ScrollView {
-                VStack(spacing: 20) {
+                VStack(spacing: 22) {
                     // Logo y título de la app
                     HStack {
                         Text("pure")
-                            .font(.system(size: 28, weight: .bold))
-                            .foregroundColor(pureLifeBlack) +
+                            .font(.system(size: 28, weight: .bold, design: .rounded))
+                            .foregroundColor(PureLifeColors.logoGreen) +
                         Text("life")
-                            .font(.system(size: 28, weight: .bold))
-                            .foregroundColor(pureLifeBlack) +
+                            .font(.system(size: 28, weight: .bold, design: .rounded))
+                            .foregroundColor(PureLifeColors.textPrimary) +
                         Text(".")
-                            .font(.system(size: 28, weight: .bold))
-                            .foregroundColor(pureLifeBlack)
+                            .font(.system(size: 28, weight: .bold, design: .rounded))
+                            .foregroundColor(PureLifeColors.logoGreen)
                         
                         Spacer()
                     }
-                    .padding(.horizontal)
-                    .padding(.bottom, 5)
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 4)
                     
                     // User stats summary
                     UserStatsView()
-                        .padding(.horizontal)
+                        .padding(.horizontal, 24)
                     
                     // Weekly activity summary
                     WeeklyActivityView()
-                        .padding(.horizontal)
+                        .padding(.horizontal, 24)
                     
                     // Banner para conectar con Apple Health si no está habilitado
                     if !dataStore.isHealthKitEnabled {
@@ -48,39 +43,39 @@ struct FitnessView: View {
                         }) {
                             HStack {
                                 Image(systemName: "heart.text.square.fill")
-                                    .font(.title2)
-                                    .foregroundColor(pureLifeBlack)
+                                    .font(.system(size: 20))
+                                    .foregroundColor(PureLifeColors.pureGreenDark)
                                 
                                 VStack(alignment: .leading, spacing: 3) {
                                     Text("Use your real health data")
-                                        .font(.headline)
-                                        .foregroundColor(pureLifeBlack)
+                                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                                        .foregroundColor(PureLifeColors.textPrimary)
                                     
                                     Text("Connect to Apple Health")
-                                        .font(.caption)
-                                        .foregroundColor(pureLifeBlack.opacity(0.7))
+                                        .font(.system(size: 13, design: .rounded))
+                                        .foregroundColor(PureLifeColors.textSecondary)
                                 }
                                 
                                 Spacer()
                                 
                                 Image(systemName: "chevron.right")
-                                    .foregroundColor(pureLifeBlack.opacity(0.7))
+                                    .foregroundColor(PureLifeColors.textSecondary)
                             }
-                            .padding()
+                            .padding(16)
                             .background(
-                                RoundedRectangle(cornerRadius: 15)
-                                    .fill(pureLifeGreen)
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(PureLifeColors.surface)
+                                    .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
                             )
-                            .padding(.horizontal)
+                            .padding(.horizontal, 24)
                         }
                     }
                     
                     // Recent workouts header
                     HStack {
                         Text("Recent Workouts")
-                            .font(.title3)
-                            .fontWeight(.bold)
-                            .foregroundColor(pureLifeBlack)
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                            .foregroundColor(PureLifeColors.textPrimary)
                         
                         Spacer()
                         
@@ -88,41 +83,43 @@ struct FitnessView: View {
                             showingNewWorkout = true
                         }) {
                             Label("Add Workout", systemImage: "plus.circle.fill")
-                                .font(.subheadline)
-                                .foregroundColor(pureLifeBlack)
+                                .font(.system(size: 15, weight: .medium, design: .rounded))
+                                .foregroundColor(PureLifeColors.pureGreen)
                         }
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 24)
                     
                     // Recent workouts list
-                    VStack(spacing: 12) {
+                    VStack(spacing: 16) {
                         if dataStore.currentUser.completedWorkouts.isEmpty {
-                            VStack(spacing: 10) {
+                            VStack(spacing: 12) {
                                 Image(systemName: "figure.run")
                                     .font(.system(size: 60))
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(PureLifeColors.pureGreenLight)
                                     .padding()
                                 
                                 Text("No workouts yet")
-                                    .font(.headline)
-                                    .foregroundColor(pureLifeBlack)
+                                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                                    .foregroundColor(PureLifeColors.textPrimary)
                                 
                                 Text("Start your fitness journey by adding your first workout")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
+                                    .font(.system(size: 14, design: .rounded))
+                                    .foregroundColor(PureLifeColors.textSecondary)
                                     .multilineTextAlignment(.center)
+                                    .padding(.horizontal, 24)
                                 
                                 Button(action: {
                                     showingNewWorkout = true
                                 }) {
                                     Text("Add Your First Workout")
-                                        .font(.headline)
-                                        .foregroundColor(pureLifeBlack)
-                                        .padding()
-                                        .background(pureLifeGreen)
-                                        .cornerRadius(10)
+                                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                                        .foregroundColor(PureLifeColors.textPrimary)
+                                        .padding(.vertical, 12)
+                                        .padding(.horizontal, 24)
+                                        .background(PureLifeColors.pureGreenLight)
+                                        .cornerRadius(16)
                                 }
-                                .padding(.top, 10)
+                                .padding(.top, 12)
                             }
                             .padding(.vertical, 30)
                         } else {
@@ -132,14 +129,14 @@ struct FitnessView: View {
                                     .onTapGesture {
                                         selectedWorkout = workout
                                     }
-                                    .padding(.horizontal)
+                                    .padding(.horizontal, 24)
                             }
                         }
                     }
                 }
-                .padding(.vertical)
+                .padding(.vertical, 20)
             }
-            .background(pureLifeLightGreen.ignoresSafeArea())
+            .background(PureLifeColors.background.ignoresSafeArea())
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -148,7 +145,7 @@ struct FitnessView: View {
                     }) {
                         Image(systemName: "plus")
                             .font(.headline)
-                            .foregroundColor(pureLifeBlack)
+                            .foregroundColor(PureLifeColors.pureGreen)
                     }
                 }
             }
@@ -169,64 +166,60 @@ struct WeeklyActivityView: View {
     @EnvironmentObject var dataStore: AppDataStore
     let days = ["M", "T", "W", "T", "F", "S", "S"]
     
-    // Colores de PureLife
-    private let pureLifeGreen = Color(red: 199/255, green: 227/255, blue: 214/255)
-    private let pureLifeBlack = Color.black
-    
     // Referencia al HealthKitManager para obtener datos
     private let healthKitManager = HealthKitManager.shared
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("Weekly Activity")
-                    .font(.headline)
-                    .foregroundColor(pureLifeBlack)
+                    .font(.system(size: 17, weight: .bold, design: .rounded))
+                    .foregroundColor(PureLifeColors.textPrimary)
                 
                 Spacer()
                 
                 if dataStore.isHealthKitEnabled {
                     Text("Apple Health")
-                        .font(.caption)
-                        .foregroundColor(pureLifeBlack.opacity(0.6))
+                        .font(.system(size: 13, design: .rounded))
+                        .foregroundColor(PureLifeColors.textSecondary)
                     
                     Image(systemName: "heart.fill")
                         .foregroundColor(.red)
                         .font(.caption)
                 }
             }
-            .padding(.bottom, 5)
+            .padding(.bottom, 4)
             
             HStack(spacing: 8) {
                 ForEach(0..<7) { index in
-                    VStack(spacing: 5) {
+                    VStack(spacing: 6) {
                         ZStack(alignment: .bottom) {
                             Rectangle()
-                                .foregroundColor(Color(UIColor.systemGray6))
+                                .foregroundColor(PureLifeColors.elevatedSurface)
                                 .frame(width: 30, height: 100)
-                                .cornerRadius(6)
+                                .cornerRadius(8)
                             
                             let activityLevel = getActivityLevel(for: index)
                             if activityLevel > 0 {
                                 Rectangle()
                                     .foregroundColor(activityColor(activityLevel))
                                     .frame(width: 30, height: max(0, min(activityLevel * 100, 100)))
-                                    .cornerRadius(6)
+                                    .cornerRadius(8)
                             }
                         }
                         
                         Text(days[index])
-                            .font(.caption2)
-                            .foregroundColor(pureLifeBlack.opacity(0.6))
+                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                            .foregroundColor(PureLifeColors.textSecondary)
                     }
                 }
             }
         }
-        .padding()
+        .padding(16)
         .background(
-            RoundedRectangle(cornerRadius: 15)
-                .fill(Color.white)
-                .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+            RoundedRectangle(cornerRadius: 16)
+                .fill(PureLifeColors.surface)
+                .shadow(color: Color.black.opacity(0.04), radius: 5, x: 0, y: 2)
         )
     }
     
@@ -251,11 +244,11 @@ struct WeeklyActivityView: View {
         let safeLevel = max(0, min(level, 1))
         
         if safeLevel < 0.3 {
-            return pureLifeGreen.opacity(0.5)
+            return PureLifeColors.pureGreenLight
         } else if safeLevel < 0.7 {
-            return pureLifeGreen.opacity(0.7)
+            return PureLifeColors.pureGreen.opacity(0.8)
         } else {
-            return pureLifeGreen
+            return PureLifeColors.pureGreen
         }
     }
 }
@@ -263,33 +256,29 @@ struct WeeklyActivityView: View {
 struct WorkoutRowView: View {
     let workout: Workout
     
-    // Colores de PureLife
-    private let pureLifeGreen = Color(red: 199/255, green: 227/255, blue: 214/255)
-    private let pureLifeBlack = Color.black
-    
     var body: some View {
-        HStack(spacing: 15) {
+        HStack(spacing: 16) {
             // Icono del tipo de ejercicio
             Image(systemName: workout.type.icon)
-                .font(.title2)
-                .foregroundColor(pureLifeBlack)
-                .frame(width: 50, height: 50)
-                .background(pureLifeGreen)
+                .font(.system(size: 18))
+                .foregroundColor(PureLifeColors.pureGreenDark)
+                .frame(width: 46, height: 46)
+                .background(PureLifeColors.pureGreenLight.opacity(0.3))
                 .cornerRadius(12)
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(workout.type.rawValue.capitalized)
-                    .font(.headline)
-                    .foregroundColor(pureLifeBlack)
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .foregroundColor(PureLifeColors.textPrimary)
                 
-                HStack(spacing: 10) {
-                    Label("\(Int(workout.duration / 60)) min", systemImage: "clock")
-                        .font(.caption)
-                        .foregroundColor(pureLifeBlack.opacity(0.6))
+                HStack(spacing: 12) {
+                    Label("\(workout.durationMinutes) min", systemImage: "clock")
+                        .font(.system(size: 13, design: .rounded))
+                        .foregroundColor(PureLifeColors.textSecondary)
                     
-                    Label("\(Int(workout.calories)) cal", systemImage: "flame.fill")
-                        .font(.caption)
-                        .foregroundColor(pureLifeBlack.opacity(0.6))
+                    Label("\(Int(workout.caloriesBurned)) cal", systemImage: "flame.fill")
+                        .font(.system(size: 13, design: .rounded))
+                        .foregroundColor(PureLifeColors.textSecondary)
                 }
             }
             
@@ -297,20 +286,19 @@ struct WorkoutRowView: View {
             
             VStack(alignment: .trailing, spacing: 4) {
                 Text(formattedDate(workout.date))
-                    .font(.caption)
-                    .foregroundColor(pureLifeBlack.opacity(0.6))
+                    .font(.system(size: 13, design: .rounded))
+                    .foregroundColor(PureLifeColors.textSecondary)
                 
-                Text("+\(String(format: "%.1f", workout.tokenReward))")
-                    .font(.callout)
-                    .fontWeight(.semibold)
-                    .foregroundColor(pureLifeBlack)
+                Text("+\(String(format: "%.1f", workout.tokensEarned))")
+                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                    .foregroundColor(PureLifeColors.pureGreen)
             }
         }
-        .padding()
+        .padding(14)
         .background(
-            RoundedRectangle(cornerRadius: 15)
-                .fill(Color.white)
-                .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 2)
+            RoundedRectangle(cornerRadius: 16)
+                .fill(PureLifeColors.surface)
+                .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
         )
     }
     
@@ -325,5 +313,6 @@ struct FitnessView_Previews: PreviewProvider {
     static var previews: some View {
         FitnessView()
             .environmentObject(AppDataStore())
+            .preferredColorScheme(.light)
     }
 } 

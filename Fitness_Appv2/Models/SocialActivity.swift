@@ -25,7 +25,7 @@ struct SocialActivity: Identifiable, Codable {
             workoutType: workout.type,
             timestamp: Date(),
             message: "Completed a \(workout.type.rawValue) workout",
-            tokenEarned: workout.tokenReward
+            tokenEarned: workout.tokensEarned
         )
     }
 } 

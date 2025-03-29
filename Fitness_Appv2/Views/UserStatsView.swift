@@ -1,201 +1,151 @@
 import SwiftUI
-import UIKit
+import Charts
 
 struct UserStatsView: View {
     @EnvironmentObject var dataStore: AppDataStore
-    @State private var showingHealthKitAuth = false
+    @State private var selectedTimeFrame: TimeFrame = .week
     
-    // Colores de PureLife
-    private let pureLifeGreen = Color(red: 199/255, green: 227/255, blue: 214/255)
-    private let pureLifeBlack = Color.black
+    enum TimeFrame: String, CaseIterable, Identifiable {
+        case week = "Week"
+        case month = "Month"
+        case year = "Year"
+        
+        var id: String { self.rawValue }
+    }
     
-    // Referencia al HealthKitManager
-    private let healthKitManager = HealthKitManager.shared
+    // Calcular las iniciales del nombre del usuario
+    private var userInitials: String {
+        let name = dataStore.currentUser.name
+        let components = name.components(separatedBy: " ")
+        if components.count > 1, 
+           let first = components.first?.prefix(1), 
+           let last = components.last?.prefix(1) {
+            return "\(first)\(last)"
+        } else if let first = name.first {
+            return String(first)
+        }
+        return "U"
+    }
     
     var body: some View {
-        VStack(spacing: 10) {
-            // Nombre del usuario y avatar
-            HStack {
-                Text("Hello, \(dataStore.currentUser.name)")
-                    .font(.title3)
-                    .fontWeight(.medium)
-                    .foregroundColor(pureLifeBlack)
-                
-                Spacer()
-                
-                // Avatar del usuario
-                Image(systemName: "person.crop.circle.fill")
-                    .resizable()
-                    .frame(width: 40, height: 40)
-                    .foregroundColor(pureLifeBlack)
-                    .background(Color.white)
-                    .clipShape(Circle())
-                    .overlay(
-                        Circle()
-                            .stroke(pureLifeGreen, lineWidth: 2)
-                    )
-                    .shadow(radius: 2)
-            }
-            .padding(.horizontal)
-            
-            // Estadísticas principales
-            HStack(spacing: 15) {
-                StatCard(
-                    title: "Workouts",
-                    value: "\(dataStore.currentUser.completedWorkouts.count)",
-                    icon: "figure.run",
-                    color: pureLifeBlack,
-                    backgroundColor: pureLifeGreen
-                )
-                
-                StatCard(
-                    title: "Tokens",
-                    value: "\(Int(dataStore.currentUser.tokenBalance))",
-                    icon: "dollarsign.circle",
-                    color: pureLifeBlack,
-                    backgroundColor: pureLifeGreen
-                )
-                
-                StatCard(
-                    title: "Streak",
-                    value: "\(dataStore.currentUser.workoutStreak)",
-                    icon: "flame.fill",
-                    color: pureLifeBlack,
-                    backgroundColor: pureLifeGreen
-                )
-            }
-            .padding(.horizontal, 10)
-            
-            // Datos de HealthKit si están disponibles
-            if dataStore.isHealthKitEnabled {
-                HStack(spacing: 15) {
-                    let steps = healthKitManager.totalSteps >= 0 ? healthKitManager.totalSteps : 0
-                    let calories = max(0, Int(healthKitManager.activeCalories))
-                    
-                    HealthStatCard(
-                        title: "Steps Today",
-                        value: "\(steps)",
-                        icon: "shoeprints.fill",
-                        color: pureLifeBlack,
-                        backgroundColor: Color.white
-                    )
-                    
-                    HealthStatCard(
-                        title: "Calories",
-                        value: "\(calories)",
-                        icon: "flame.fill",
-                        color: pureLifeBlack,
-                        backgroundColor: Color.white
-                    )
-                }
-                .padding(.horizontal, 10)
-                .padding(.top, 5)
-            } else {
-                // Botón para conectar con Apple Health
-                Button(action: {
-                    showingHealthKitAuth = true
-                }) {
-                    HStack {
-                        Image(systemName: "heart.text.square.fill")
-                            .font(.system(size: 24))
-                            .foregroundColor(pureLifeBlack)
-                            .padding(.trailing, 5)
+        VStack(alignment: .leading, spacing: 16) {
+            // Tarjeta de información del usuario
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    // Información del usuario
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Hello, \(dataStore.currentUser.firstName)")
+                            .font(.system(size: 22, weight: .bold, design: .rounded))
+                            .foregroundColor(PureLifeColors.textPrimary)
                         
-                        Text("Connect to Apple Health")
-                            .font(.headline)
-                            .foregroundColor(pureLifeBlack)
+                        Text("Your fitness journey awaits")
+                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                            .foregroundColor(PureLifeColors.textSecondary)
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(pureLifeGreen.opacity(0.5))
-                    )
-                    .padding(.horizontal, 10)
-                    .padding(.top, 5)
+                    
+                    Spacer()
+                    
+                    // Avatar del usuario
+                    ZStack {
+                        Circle()
+                            .fill(PureLifeColors.pureGreenLight.opacity(0.2))
+                            .frame(width: 50, height: 50)
+                        
+                        Text(userInitials)
+                            .font(.system(size: 20, weight: .semibold, design: .rounded))
+                            .foregroundColor(PureLifeColors.pureGreenDark)
+                    }
                 }
-            }
-        }
-        .padding(.vertical)
-        .background(
-            RoundedRectangle(cornerRadius: 15)
-                .fill(Color.white)
-                .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
-        )
-        .sheet(isPresented: $showingHealthKitAuth) {
-            HealthKitAuthView()
-        }
-    }
-}
-
-struct StatCard: View {
-    let title: String
-    let value: String
-    let icon: String
-    let color: Color
-    let backgroundColor: Color
-    
-    var body: some View {
-        VStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.system(size: 24))
-                .foregroundColor(color)
-            
-            Text(value)
-                .font(.system(size: 22, weight: .bold))
-                .foregroundColor(color)
-            
-            Text(title)
-                .font(.caption)
-                .foregroundColor(color.opacity(0.7))
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(backgroundColor)
-                .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 1)
-        )
-    }
-}
-
-struct HealthStatCard: View {
-    let title: String
-    let value: String
-    let icon: String
-    let color: Color
-    let backgroundColor: Color
-    
-    var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.system(size: 20))
-                .foregroundColor(color)
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title)
-                    .font(.caption)
-                    .foregroundColor(color.opacity(0.7))
                 
-                Text(value)
-                    .font(.headline)
-                    .foregroundColor(color)
+                // Tokens e información de progreso
+                HStack(spacing: 20) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("\(Int(dataStore.currentUser.tokenBalance))")
+                            .font(.system(size: 26, weight: .bold, design: .rounded))
+                            .foregroundColor(PureLifeColors.textPrimary)
+                        
+                        Text("Total tokens")
+                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                            .foregroundColor(PureLifeColors.textSecondary)
+                    }
+                    
+                    Divider()
+                        .frame(height: 36)
+                        .background(PureLifeColors.divider)
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("\(dataStore.totalWorkoutsCompleted)")
+                            .font(.system(size: 26, weight: .bold, design: .rounded))
+                            .foregroundColor(PureLifeColors.textPrimary)
+                        
+                        Text("Workouts")
+                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                            .foregroundColor(PureLifeColors.textSecondary)
+                    }
+                }
+                .padding(.top, 4)
+            }
+            .padding(18)
+            .background(PureLifeColors.surface)
+            .cornerRadius(16)
+            .shadow(color: Color.black.opacity(0.03), radius: 5, x: 0, y: 2)
+        }
+    }
+    
+    // MARK: - Componentes de UI
+    
+    private func statCard(icon: String, title: String, value: String, trend: String, trendLabel: String, iconColor: Color) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Icono y título
+            HStack(spacing: 12) {
+                Image(systemName: icon)
+                    .font(.system(size: 16))
+                    .foregroundColor(iconColor)
+                    .frame(width: 36, height: 36)
+                    .background(iconColor.opacity(0.1))
+                    .cornerRadius(10)
+                
+                Text(title)
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .foregroundColor(PureLifeColors.textSecondary)
             }
             
-            Spacer()
+            // Valor principal
+            Text(value)
+                .font(.system(size: 24, weight: .bold, design: .rounded))
+                .foregroundColor(PureLifeColors.textPrimary)
+            
+            // Tendencia
+            HStack(spacing: 4) {
+                Image(systemName: "arrow.up")
+                    .font(.system(size: 12))
+                    .foregroundColor(PureLifeColors.pureGreen)
+                
+                Text(trend)
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .foregroundColor(PureLifeColors.pureGreen)
+                
+                Text(trendLabel)
+                    .font(.system(size: 12, design: .rounded))
+                    .foregroundColor(PureLifeColors.textSecondary)
+            }
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
-        .padding(.horizontal, 10)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(backgroundColor)
-                .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 1)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color(red: 199/255, green: 227/255, blue: 214/255), lineWidth: 1)
-        )
+        .padding(16)
+        .background(PureLifeColors.surface)
+        .cornerRadius(16)
+        .shadow(color: Color.black.opacity(0.03), radius: 5, x: 0, y: 2)
+    }
+    
+    private func legendItem(color: Color, label: String) -> some View {
+        HStack(spacing: 8) {
+            Circle()
+                .fill(color)
+                .frame(width: 8, height: 8)
+            
+            Text(label)
+                .font(.system(size: 12, design: .rounded))
+                .foregroundColor(PureLifeColors.textSecondary)
+        }
     }
 }
 
@@ -203,7 +153,6 @@ struct UserStatsView_Previews: PreviewProvider {
     static var previews: some View {
         UserStatsView()
             .environmentObject(AppDataStore())
-            .padding()
-            .previewLayout(.sizeThatFits)
+            .preferredColorScheme(.dark)
     }
 } 

@@ -17,6 +17,11 @@ struct User: Identifiable, Codable {
     var userPreferences = UserPreferences()
     var joinDate = Date()
     
+    // Propiedad computada para obtener el primer nombre
+    var firstName: String {
+        return name.components(separatedBy: " ").first ?? name
+    }
+    
     // Add token reward to user balance
     mutating func addTokens(_ amount: Double) {
         tokenBalance += amount
@@ -32,7 +37,7 @@ struct User: Identifiable, Codable {
         
         // Calcular recompensa de tokens con multiplicador de nivel
         let currentLevel = UserLevel.getCurrentLevel(points: experiencePoints)
-        let baseTokens = workout.tokenReward
+        let baseTokens = workout.tokensEarned
         let bonusTokens = baseTokens * (currentLevel.tokenMultiplier - 1.0)
         let totalTokens = baseTokens + bonusTokens
         
@@ -48,7 +53,7 @@ struct User: Identifiable, Codable {
         
         // Añadir puntos de experiencia (XP)
         // 10 XP por minuto de ejercicio
-        let xpEarned = Int(workout.duration / 60) * 10
+        let xpEarned = workout.durationMinutes * 10
         experiencePoints += xpEarned
     }
     

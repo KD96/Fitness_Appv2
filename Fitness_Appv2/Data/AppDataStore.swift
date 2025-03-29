@@ -14,6 +14,9 @@ class AppDataStore: ObservableObject {
     @Published var dailyMissions: [Mission] = []
     @Published var selectedRewardCategory: Reward.Category?
     
+    // Datos de HealthKit
+    @Published var healthKitData: HealthKitData = HealthKitData()
+    
     // HealthKit manager
     private let healthKitManager = HealthKitManager.shared
     
@@ -31,10 +34,16 @@ class AppDataStore: ObservableObject {
         
         // Add some sample social activities
         let sampleWorkout = Workout(
+            id: UUID(),
+            name: "Evening Run",
             type: .running,
-            duration: 1800, // 30 minutes
+            durationMinutes: 30,
             date: Date().addingTimeInterval(-86400), // Yesterday
-            calories: 250
+            caloriesBurned: 250,
+            tokensEarned: 5.0,
+            notes: "Felt great!",
+            distance: 3.5,
+            completed: true
         )
         
         let sampleActivity = SocialActivity.createWorkoutActivity(
@@ -299,7 +308,7 @@ class AppDataStore: ObservableObject {
             switch mission.requirementType {
             case .duration:
                 if mission.workoutTypes.isEmpty || mission.workoutTypes.contains(workout.type) {
-                    shouldComplete = workout.duration / 60 >= mission.targetValue
+                    shouldComplete = Double(workout.durationMinutes) >= mission.targetValue
                 }
                 
             case .timeOfDay:
@@ -374,5 +383,116 @@ class AppDataStore: ObservableObject {
     private func isToday(_ date: Date) -> Bool {
         let calendar = Calendar.current
         return calendar.isDateInToday(date)
+    }
+}
+
+// MARK: - Estadísticas del Usuario
+
+extension AppDataStore {
+    // Propiedades computadas para estadísticas
+    var totalWorkoutsCompleted: Int {
+        return currentUser.completedWorkouts.count
+    }
+    
+    var weeklyWorkoutCount: Int {
+        return workoutsInLastDays(7).count
+    }
+    
+    var totalMinutesExercised: Int {
+        return currentUser.completedWorkouts.reduce(0) { $0 + $1.durationMinutes }
+    }
+    
+    var weeklyMinutesExercised: Int {
+        return workoutsInLastDays(7).reduce(0) { $0 + $1.durationMinutes }
+    }
+    
+    var totalCaloriesBurned: Double {
+        return currentUser.completedWorkouts.reduce(0) { $0 + $1.caloriesBurned }
+    }
+    
+    var weeklyCaloriesBurned: Double {
+        return workoutsInLastDays(7).reduce(0) { $0 + $1.caloriesBurned }
+    }
+    
+    var weeklyTokensEarned: Double {
+        return workoutsInLastDays(7).reduce(0) { $0 + $1.tokensEarned }
+    }
+    
+    // Para gráficos y HealthKit
+    var isHealthKitAuthorized: Bool {
+        return isHealthKitEnabled
+    }
+    
+    // Métodos para filtrar datos
+    private func workoutsInLastDays(_ days: Int) -> [Workout] {
+        let calendar = Calendar.current
+        let startDate = calendar.date(byAdding: .day, value: -days, to: Date()) ?? Date()
+        
+        return currentUser.completedWorkouts.filter { $0.date >= startDate }
+    }
+    
+    // Estructura para datos de gráficos
+    struct ChartData: Identifiable {
+        var id = UUID()
+        var label: String
+        var value: Double
+    }
+    
+    // Modelo para datos de HealthKit
+    struct HealthKitData {
+        var stepsCount: Int = 5324
+        var distance: Double = 3.7
+        var activeEnergy: Double = 420
+        var heartRate: Double = 72
+        var restingHeartRate: Double = 62
+    }
+    
+    // Obtener datos para el gráfico según el periodo seleccionado
+    func getWorkoutDataForChart(timeFrame: UserStatsView.TimeFrame) -> [ChartData] {
+        // Datos de ejemplo para diferentes periodos
+        switch timeFrame {
+        case .week:
+            return [
+                ChartData(label: "Mon", value: 2),
+                ChartData(label: "Tue", value: 1),
+                ChartData(label: "Wed", value: 3),
+                ChartData(label: "Thu", value: 0),
+                ChartData(label: "Fri", value: 2),
+                ChartData(label: "Sat", value: 1),
+                ChartData(label: "Sun", value: 0)
+            ]
+        case .month:
+            return [
+                ChartData(label: "W1", value: 5),
+                ChartData(label: "W2", value: 8),
+                ChartData(label: "W3", value: 6),
+                ChartData(label: "W4", value: 7)
+            ]
+        case .year:
+            return [
+                ChartData(label: "Jan", value: 20),
+                ChartData(label: "Feb", value: 18),
+                ChartData(label: "Mar", value: 25),
+                ChartData(label: "Apr", value: 22),
+                ChartData(label: "May", value: 28),
+                ChartData(label: "Jun", value: 30),
+                ChartData(label: "Jul", value: 32),
+                ChartData(label: "Aug", value: 35),
+                ChartData(label: "Sep", value: 28),
+                ChartData(label: "Oct", value: 25),
+                ChartData(label: "Nov", value: 22),
+                ChartData(label: "Dec", value: 20)
+            ]
+        }
+    }
+    
+    // Obtener el valor máximo para la escala del gráfico
+    func getMaxChartValue(timeFrame: UserStatsView.TimeFrame) -> Double {
+        let data = getWorkoutDataForChart(timeFrame: timeFrame)
+        if let maxValue = data.map({ $0.value }).max() {
+            // Añadir un 20% extra para espacio en la parte superior
+            return maxValue * 1.2
+        }
+        return 10.0 // Valor predeterminado si no hay datos
     }
 } 
