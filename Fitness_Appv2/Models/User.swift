@@ -92,7 +92,7 @@ struct User: Identifiable, Codable {
             tokenBalance -= amount
             
             // Realizar conversión a crypto
-            let cryptoAmount = cryptoWallet.convertTokens(tokenAmount: amount, to: cryptoType)
+            _ = cryptoWallet.convertTokens(tokenAmount: amount, to: cryptoType)
             
             return true
         }

@@ -85,7 +85,20 @@ class HealthKitManager: ObservableObject {
                     let workoutType = self.mapHKWorkoutTypeToWorkoutType(hkWorkout.workoutActivityType)
                     let duration = hkWorkout.duration
                     let date = hkWorkout.endDate
-                    let calories = hkWorkout.totalEnergyBurned?.doubleValue(for: .kilocalorie()) ?? 0
+                    
+                    // Get calories using the recommended approach for iOS 18+
+                    var calories: Double = 0
+                    if #available(iOS 18.0, *) {
+                        // iOS 18 y superior: usar el método recomendado
+                        if let activeEnergyType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned),
+                           let statistics = hkWorkout.statistics(for: activeEnergyType),
+                           let caloriesQuantity = statistics.sumQuantity() {
+                            calories = caloriesQuantity.doubleValue(for: .kilocalorie())
+                        }
+                    } else {
+                        // iOS anterior: usar el método obsoleto
+                        calories = hkWorkout.totalEnergyBurned?.doubleValue(for: .kilocalorie()) ?? 0
+                    }
                     
                     // Validar los valores para evitar NaN
                     if duration.isNaN || duration.isInfinite || duration <= 0 {
@@ -129,7 +142,7 @@ class HealthKitManager: ObservableObject {
     func fetchWeeklyActivity() {
         let calendar = Calendar.current
         let endDate = Date()
-        let startDate = calendar.date(byAdding: .day, value: -6, to: endDate)!
+        _ = calendar.date(byAdding: .day, value: -6, to: endDate)!
         
         var weekDays: [Date] = []
         for i in 0..<7 {
@@ -176,7 +189,7 @@ class HealthKitManager: ObservableObject {
             let sortedDays = weekDays.sorted(by: { $0 > $1 })
             
             // Encontrar el valor máximo para normalizar
-            let maxSteps = dailyStepCounts.values.max() ?? 10000
+            _ = dailyStepCounts.values.max() ?? 10000
             
             // Normalizar los valores entre 0 y 1
             self.weeklyActivityLevels = sortedDays.map { day in

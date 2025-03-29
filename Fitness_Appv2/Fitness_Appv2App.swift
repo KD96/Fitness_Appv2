@@ -27,7 +27,7 @@ struct Fitness_Appv2App: App {
                 .onAppear {
                     updateColorScheme()
                 }
-                .onChange(of: dataStore.currentUser.userPreferences.userAppearance) { _ in
+                .onChange(of: dataStore.currentUser.userPreferences.userAppearance) { _, _ in
                     updateColorScheme()
                 }
                 .preferredColorScheme(userColorScheme)
