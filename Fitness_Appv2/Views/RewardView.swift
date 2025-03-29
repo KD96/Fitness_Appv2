@@ -7,12 +7,13 @@ struct RewardView: View {
     @State private var showingPurchaseConfirmation = false
     @State private var selectedReward: Reward?
     @State private var selectedCategory: Reward.Category?
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         NavigationView {
             ZStack {
                 // Fondo principal
-                PureLifeColors.background.ignoresSafeArea()
+                PureLifeColors.adaptiveBackground(scheme: colorScheme).ignoresSafeArea()
                 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 25) {
@@ -27,16 +28,16 @@ struct RewardView: View {
                         // Balance card
                         ZStack(alignment: .bottom) {
                             // Card background
-                            Components.Card(title: "", cornerRadius: 25) {
+                            Components.Card(title: "", cornerRadius: 25, scheme: colorScheme) {
                                 VStack(spacing: 10) {
                                     Text("Token Balance")
                                         .font(.system(size: 16, weight: .medium, design: .rounded))
-                                        .foregroundColor(PureLifeColors.textSecondary)
+                                        .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                                         .padding(.top, 25)
                                     
                                     Text("\(String(format: "%.1f", dataStore.currentUser.tokenBalance))")
                                         .font(.system(size: 32, weight: .bold, design: .rounded))
-                                        .foregroundColor(PureLifeColors.textPrimary)
+                                        .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
                                         .shadow(color: PureLifeColors.logoGreen.opacity(0.2), radius: 5, x: 0, y: 0)
                                     
                                     Text("TOKENS")
@@ -58,7 +59,7 @@ struct RewardView: View {
                                                 .font(.system(size: 14, weight: .bold, design: .rounded))
                                                 .tracking(1)
                                         }
-                                        .foregroundColor(PureLifeColors.surface)
+                                        .foregroundColor(PureLifeColors.adaptiveSurface(scheme: colorScheme))
                                         .padding(.vertical, 12)
                                         .frame(maxWidth: .infinity)
                                         .background(PureLifeColors.logoGreen)
@@ -100,7 +101,7 @@ struct RewardView: View {
             HStack {
                 Text("Marketplace")
                     .font(.system(size: 18, weight: .bold, design: .rounded))
-                    .foregroundColor(PureLifeColors.textPrimary)
+                    .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
                 
                 Spacer()
                 
@@ -190,7 +191,7 @@ struct RewardView: View {
                 
                 Text("Featured Rewards")
                     .font(.system(size: 18, weight: .bold, design: .rounded))
-                    .foregroundColor(PureLifeColors.textPrimary)
+                    .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
             }
             .padding(.leading, 16)
             
@@ -219,7 +220,7 @@ struct RewardView: View {
                 
                 Text("New Arrivals")
                     .font(.system(size: 18, weight: .bold, design: .rounded))
-                    .foregroundColor(PureLifeColors.textPrimary)
+                    .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
             }
             .padding(.leading, 16)
             
@@ -246,7 +247,7 @@ struct RewardView: View {
                         
                         Text("Your Purchases")
                             .font(.system(size: 18, weight: .bold, design: .rounded))
-                            .foregroundColor(PureLifeColors.textPrimary)
+                            .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
                     }
                     .padding(.leading, 16)
                     

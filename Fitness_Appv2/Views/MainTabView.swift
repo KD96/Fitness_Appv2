@@ -3,79 +3,65 @@ import SwiftUI
 struct MainTabView: View {
     @EnvironmentObject var dataStore: AppDataStore
     @State private var selectedTab = 0
-    
-    init() {
-        // Configuración del aspecto de UITabBar para modo claro
-        UITabBar.appearance().backgroundColor = UIColor(PureLifeColors.surface)
-        UITabBar.appearance().unselectedItemTintColor = UIColor(PureLifeColors.textSecondary)
-        
-        // Elimina la línea superior del TabBar
-        UITabBar.appearance().shadowImage = UIImage()
-        UITabBar.appearance().backgroundImage = UIImage()
-        
-        // Configuración adicional si es iOS 15+
-        if #available(iOS 15.0, *) {
-            let appearance = UITabBarAppearance()
-            appearance.configureWithOpaqueBackground()
-            appearance.backgroundColor = UIColor(PureLifeColors.surface)
-            
-            UITabBar.appearance().standardAppearance = appearance
-            UITabBar.appearance().scrollEdgeAppearance = appearance
-        }
-    }
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         TabView(selection: $selectedTab) {
-            // Dashboard principal
-            UserStatsView()
+            FitnessView()
                 .tabItem {
-                    Image(systemName: selectedTab == 0 ? "chart.bar.fill" : "chart.bar")
-                    Text("Stats")
+                    Image(systemName: "figure.walk")
+                    Text("Fitness")
                 }
                 .tag(0)
             
-            // Vista de entrenamientos
             WorkoutListView()
                 .tabItem {
-                    Image(systemName: selectedTab == 1 ? "figure.run.circle.fill" : "figure.run.circle")
+                    Image(systemName: "list.bullet")
                     Text("Workouts")
                 }
                 .tag(1)
             
-            // Vista para iniciar un nuevo entrenamiento
-            NewWorkoutView()
+            RewardView()
                 .tabItem {
-                    Image(systemName: selectedTab == 2 ? "plus.circle.fill" : "plus.circle")
-                    Text("Add")
+                    Image(systemName: "gift")
+                    Text("Rewards")
                 }
                 .tag(2)
             
-            // Comunidad
             CommunityView()
                 .tabItem {
-                    Image(systemName: selectedTab == 3 ? "person.3.fill" : "person.3")
+                    Image(systemName: "person.3")
                     Text("Community")
                 }
                 .tag(3)
-            
-            // Recompensas
-            RewardView()
-                .tabItem {
-                    Image(systemName: selectedTab == 4 ? "gift.fill" : "gift")
-                    Text("Rewards")
-                }
-                .tag(4)
         }
         .accentColor(PureLifeColors.logoGreen)
         .onAppear {
-            // Aplicar el tema claro
-            if #available(iOS 15.0, *) {
-                // En iOS 15 y posteriores
-                let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene
-                windowScene?.windows.first?.overrideUserInterfaceStyle = .light
-            } else {
-                // Para iOS 14 y anteriores
+            configureTabBar()
+        }
+    }
+    
+    private func configureTabBar() {
+        // Configuración del aspecto de UITabBar para modo adaptativo
+        if #available(iOS 15.0, *) {
+            let appearance = UITabBarAppearance()
+            appearance.configureWithDefaultBackground()
+            appearance.backgroundColor = UIColor(PureLifeColors.adaptiveSurface(scheme: colorScheme))
+            
+            UITabBar.appearance().standardAppearance = appearance
+            UITabBar.appearance().scrollEdgeAppearance = appearance
+        } else {
+            // Fallback para iOS 14 y anteriores
+            UITabBar.appearance().backgroundColor = UIColor(PureLifeColors.adaptiveSurface(scheme: colorScheme))
+            
+            // Para iOS 14 y anteriores, configurar manualmente el modo
+            switch dataStore.currentUser.userPreferences.userAppearance {
+            case .light:
                 UIApplication.shared.windows.first?.overrideUserInterfaceStyle = .light
+            case .dark:
+                UIApplication.shared.windows.first?.overrideUserInterfaceStyle = .dark
+            case .system:
+                UIApplication.shared.windows.first?.overrideUserInterfaceStyle = .unspecified
             }
         }
     }
@@ -93,5 +79,9 @@ struct MainTabView_Previews: PreviewProvider {
         MainTabView()
             .environmentObject(AppDataStore())
             .preferredColorScheme(.light)
+        
+        MainTabView()
+            .environmentObject(AppDataStore())
+            .preferredColorScheme(.dark)
     }
 } 

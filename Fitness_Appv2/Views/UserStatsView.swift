@@ -5,6 +5,7 @@ struct UserStatsView: View {
     @EnvironmentObject var dataStore: AppDataStore
     @State private var selectedTimeFrame: TimeFrame = .week
     @State private var selectedStatTab = 0
+    @Environment(\.colorScheme) var colorScheme
     
     enum TimeFrame: String, CaseIterable, Identifiable {
         case week = "Week"
@@ -51,7 +52,7 @@ struct UserStatsView: View {
             }
             .padding(.horizontal, 16)
         }
-        .background(PureLifeColors.background)
+        .background(PureLifeColors.adaptiveBackground(scheme: colorScheme))
     }
     
     // MARK: - Componentes de UI
@@ -64,11 +65,11 @@ struct UserStatsView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Hello, \(dataStore.currentUser.firstName)")
                         .font(.system(size: 22, weight: .bold, design: .rounded))
-                        .foregroundColor(PureLifeColors.textPrimary)
+                        .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
                     
                     Text("Your fitness journey")
                         .font(.system(size: 14, weight: .medium, design: .rounded))
-                        .foregroundColor(PureLifeColors.textSecondary)
+                        .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                 }
                 
                 Spacer()
@@ -90,11 +91,11 @@ struct UserStatsView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("\(Int(dataStore.currentUser.tokenBalance))")
                         .font(.system(size: 26, weight: .bold, design: .rounded))
-                        .foregroundColor(PureLifeColors.textPrimary)
+                        .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
                     
                     Text("Total tokens")
                         .font(.system(size: 14, weight: .medium, design: .rounded))
-                        .foregroundColor(PureLifeColors.textSecondary)
+                        .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                 }
                 
                 Divider()
@@ -104,19 +105,19 @@ struct UserStatsView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("\(dataStore.totalWorkoutsCompleted)")
                         .font(.system(size: 26, weight: .bold, design: .rounded))
-                        .foregroundColor(PureLifeColors.textPrimary)
+                        .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
                     
                     Text("Workouts")
                         .font(.system(size: 14, weight: .medium, design: .rounded))
-                        .foregroundColor(PureLifeColors.textSecondary)
+                        .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                 }
             }
             .padding(.top, 4)
         }
         .padding(18)
-        .background(PureLifeColors.surface)
+        .background(PureLifeColors.adaptiveSurface(scheme: colorScheme))
         .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.03), radius: 5, x: 0, y: 2)
+        .shadow(color: PureLifeColors.adaptiveCardShadow(scheme: colorScheme), radius: 5, x: 0, y: 2)
     }
     
     // Selector de periodo
@@ -130,7 +131,7 @@ struct UserStatsView: View {
                 }) {
                     Text(timeFrame.rawValue)
                         .font(.system(size: 14, weight: selectedTimeFrame == timeFrame ? .bold : .medium, design: .rounded))
-                        .foregroundColor(selectedTimeFrame == timeFrame ? PureLifeColors.textPrimary : PureLifeColors.textSecondary)
+                        .foregroundColor(selectedTimeFrame == timeFrame ? PureLifeColors.adaptiveTextPrimary(scheme: colorScheme) : PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                         .padding(.vertical, 8)
                         .padding(.horizontal, 16)
                         .background(
@@ -156,7 +157,7 @@ struct UserStatsView: View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Activity Progress")
                 .font(.system(size: 17, weight: .bold, design: .rounded))
-                .foregroundColor(PureLifeColors.textPrimary)
+                .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
             
             // Gráfico
             if #available(iOS 16.0, *) {
@@ -181,7 +182,7 @@ struct UserStatsView: View {
             } else {
                 // Fallback para versiones anteriores de iOS
                 Text("Charts available on iOS 16 and newer")
-                    .foregroundColor(PureLifeColors.textSecondary)
+                    .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                     .font(.system(size: 14, weight: .medium, design: .rounded))
                     .frame(height: 180)
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -194,9 +195,9 @@ struct UserStatsView: View {
             }
         }
         .padding(18)
-        .background(PureLifeColors.surface)
+        .background(PureLifeColors.adaptiveSurface(scheme: colorScheme))
         .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.03), radius: 5, x: 0, y: 2)
+        .shadow(color: PureLifeColors.adaptiveCardShadow(scheme: colorScheme), radius: 5, x: 0, y: 2)
     }
     
     // Selector de pestañas de estadísticas
@@ -209,7 +210,7 @@ struct UserStatsView: View {
             }) {
                 Text("Workouts")
                     .font(.system(size: 15, weight: .medium, design: .rounded))
-                    .foregroundColor(selectedStatTab == 0 ? PureLifeColors.logoGreen : PureLifeColors.textSecondary)
+                    .foregroundColor(selectedStatTab == 0 ? PureLifeColors.logoGreen : PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                     .padding(.vertical, 12)
                     .padding(.horizontal, 20)
                     .frame(maxWidth: .infinity)
@@ -232,7 +233,7 @@ struct UserStatsView: View {
             }) {
                 Text("Activity")
                     .font(.system(size: 15, weight: .medium, design: .rounded))
-                    .foregroundColor(selectedStatTab == 1 ? PureLifeColors.logoGreen : PureLifeColors.textSecondary)
+                    .foregroundColor(selectedStatTab == 1 ? PureLifeColors.logoGreen : PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                     .padding(.vertical, 12)
                     .padding(.horizontal, 20)
                     .frame(maxWidth: .infinity)
@@ -248,9 +249,9 @@ struct UserStatsView: View {
                     )
             )
         }
-        .background(PureLifeColors.surface)
+        .background(PureLifeColors.adaptiveSurface(scheme: colorScheme))
         .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.03), radius: 3, x: 0, y: 1)
+        .shadow(color: PureLifeColors.adaptiveCardShadow(scheme: colorScheme), radius: 3, x: 0, y: 1)
     }
     
     // Grid de estadísticas
@@ -351,13 +352,13 @@ struct UserStatsView: View {
                 
                 Text(title)
                     .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundColor(PureLifeColors.textSecondary)
+                    .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
             }
             
             // Valor principal
             Text(value)
                 .font(.system(size: 24, weight: .bold, design: .rounded))
-                .foregroundColor(PureLifeColors.textPrimary)
+                .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
             
             // Tendencia
             HStack(spacing: 4) {
@@ -371,13 +372,13 @@ struct UserStatsView: View {
                 
                 Text(trendLabel)
                     .font(.system(size: 12, design: .rounded))
-                    .foregroundColor(PureLifeColors.textSecondary)
+                    .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
             }
         }
         .padding(16)
-        .background(PureLifeColors.surface)
+        .background(PureLifeColors.adaptiveSurface(scheme: colorScheme))
         .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.03), radius: 5, x: 0, y: 2)
+        .shadow(color: PureLifeColors.adaptiveCardShadow(scheme: colorScheme), radius: 5, x: 0, y: 2)
     }
     
     // Tarjeta de métrica de salud
@@ -394,18 +395,18 @@ struct UserStatsView: View {
                 
                 Text(title)
                     .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundColor(PureLifeColors.textSecondary)
+                    .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
             }
             
             // Valor principal
             Text(value)
                 .font(.system(size: 20, weight: .bold, design: .rounded))
-                .foregroundColor(PureLifeColors.textPrimary)
+                .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
             
             // Objetivo
             Text(target)
                 .font(.system(size: 12, weight: .medium, design: .rounded))
-                .foregroundColor(PureLifeColors.textSecondary)
+                .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
             
             // Barra de progreso
             ZStack(alignment: .leading) {
@@ -430,9 +431,9 @@ struct UserStatsView: View {
             }
         }
         .padding(16)
-        .background(PureLifeColors.surface)
+        .background(PureLifeColors.adaptiveSurface(scheme: colorScheme))
         .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.03), radius: 5, x: 0, y: 2)
+        .shadow(color: PureLifeColors.adaptiveCardShadow(scheme: colorScheme), radius: 5, x: 0, y: 2)
     }
     
     // Elemento de leyenda
@@ -444,15 +445,23 @@ struct UserStatsView: View {
             
             Text(label)
                 .font(.system(size: 12, design: .rounded))
-                .foregroundColor(PureLifeColors.textSecondary)
+                .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
         }
     }
 }
 
 struct UserStatsView_Previews: PreviewProvider {
     static var previews: some View {
-        UserStatsView()
-            .environmentObject(AppDataStore())
-            .preferredColorScheme(.light)
+        Group {
+            UserStatsView()
+                .environmentObject(AppDataStore())
+                .preferredColorScheme(.light)
+                .previewDisplayName("Light Mode")
+            
+            UserStatsView()
+                .environmentObject(AppDataStore())
+                .preferredColorScheme(.dark)
+                .previewDisplayName("Dark Mode")
+        }
     }
 } 

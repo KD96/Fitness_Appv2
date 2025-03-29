@@ -3,6 +3,8 @@ import SwiftUI
 struct PureLifeHeader: View {
     var showUserAvatar: Bool = false
     var userInitials: String = ""
+    @State private var showingSettings = false
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         HStack {
@@ -15,21 +17,28 @@ struct PureLifeHeader: View {
                 
                 Text("PureLife")
                     .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundColor(PureLifeColors.textPrimary)
+                    .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
             }
             
             Spacer()
             
             // Avatar del usuario (opcional)
             if showUserAvatar {
-                ZStack {
-                    Circle()
-                        .fill(PureLifeColors.logoGreen.opacity(0.2))
-                        .frame(width: 40, height: 40)
-                    
-                    Text(userInitials)
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundColor(PureLifeColors.logoGreen)
+                Button(action: {
+                    showingSettings = true
+                }) {
+                    ZStack {
+                        Circle()
+                            .fill(PureLifeColors.logoGreen.opacity(0.2))
+                            .frame(width: 40, height: 40)
+                        
+                        Text(userInitials)
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
+                            .foregroundColor(PureLifeColors.logoGreen)
+                    }
+                }
+                .sheet(isPresented: $showingSettings) {
+                    SettingsView()
                 }
             }
         }

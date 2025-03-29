@@ -6,13 +6,16 @@ struct FitnessView: View {
     @State private var showingNewWorkout = false
     @State private var selectedWorkout: Workout?
     @State private var showingHealthKitAuth = false
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 22) {
-                    // Header with logo
-                    PureLifeHeader()
+                    // Header con logo y botón de perfil
+                    HStack {
+                        PureLifeHeader(showUserAvatar: true, userInitials: String(dataStore.currentUser.firstName.prefix(1)))
+                    }
                     .padding(.bottom, 4)
                     
                     // User stats summary
@@ -36,23 +39,23 @@ struct FitnessView: View {
                                 VStack(alignment: .leading, spacing: 3) {
                                     Text("Use your real health data")
                                         .font(.system(size: 16, weight: .bold, design: .rounded))
-                                        .foregroundColor(PureLifeColors.textPrimary)
+                                        .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
                                     
                                     Text("Connect to Apple Health")
                                         .font(.system(size: 13, design: .rounded))
-                                        .foregroundColor(PureLifeColors.textSecondary)
+                                        .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                                 }
                                 
                                 Spacer()
                                 
                                 Image(systemName: "chevron.right")
-                                    .foregroundColor(PureLifeColors.textSecondary)
+                                    .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                             }
                             .padding(16)
                             .background(
                                 RoundedRectangle(cornerRadius: 16)
-                                    .fill(PureLifeColors.surface)
-                                    .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+                                    .fill(PureLifeColors.adaptiveSurface(scheme: colorScheme))
+                                    .shadow(color: PureLifeColors.adaptiveCardShadow(scheme: colorScheme), radius: 6, x: 0, y: 2)
                             )
                             .padding(.horizontal, 24)
                         }
@@ -62,7 +65,7 @@ struct FitnessView: View {
                     HStack {
                         Text("Recent Workouts")
                             .font(.system(size: 20, weight: .bold, design: .rounded))
-                            .foregroundColor(PureLifeColors.textPrimary)
+                            .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
                         
                         Spacer()
                         
@@ -87,11 +90,11 @@ struct FitnessView: View {
                                 
                                 Text("No workouts yet")
                                     .font(.system(size: 18, weight: .bold, design: .rounded))
-                                    .foregroundColor(PureLifeColors.textPrimary)
+                                    .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
                                 
                                 Text("Start your fitness journey by adding your first workout")
                                     .font(.system(size: 14, design: .rounded))
-                                    .foregroundColor(PureLifeColors.textSecondary)
+                                    .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal, 24)
                                 
@@ -100,7 +103,7 @@ struct FitnessView: View {
                                 }) {
                                     Text("Add Your First Workout")
                                         .font(.system(size: 16, weight: .bold, design: .rounded))
-                                        .foregroundColor(PureLifeColors.textPrimary)
+                                        .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
                                         .padding(.vertical, 12)
                                         .padding(.horizontal, 24)
                                         .background(PureLifeColors.logoGreen.opacity(0.3))
@@ -123,7 +126,7 @@ struct FitnessView: View {
                 }
                 .padding(.vertical, 20)
             }
-            .background(PureLifeColors.background.ignoresSafeArea())
+            .background(PureLifeColors.adaptiveBackground(scheme: colorScheme).ignoresSafeArea())
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -152,6 +155,7 @@ struct FitnessView: View {
 struct WeeklyActivityView: View {
     @EnvironmentObject var dataStore: AppDataStore
     let days = ["M", "T", "W", "T", "F", "S", "S"]
+    @Environment(\.colorScheme) var colorScheme
     
     // Referencia al HealthKitManager para obtener datos
     private let healthKitManager = HealthKitManager.shared
@@ -161,14 +165,14 @@ struct WeeklyActivityView: View {
             HStack {
                 Text("Weekly Activity")
                     .font(.system(size: 17, weight: .bold, design: .rounded))
-                    .foregroundColor(PureLifeColors.textPrimary)
+                    .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
                 
                 Spacer()
                 
                 if dataStore.isHealthKitEnabled {
                     Text("Apple Health")
                         .font(.system(size: 13, design: .rounded))
-                        .foregroundColor(PureLifeColors.textSecondary)
+                        .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                     
                     Image(systemName: "heart.fill")
                         .foregroundColor(.red)
@@ -182,7 +186,7 @@ struct WeeklyActivityView: View {
                     VStack(spacing: 6) {
                         ZStack(alignment: .bottom) {
                             Rectangle()
-                                .foregroundColor(PureLifeColors.elevatedSurface)
+                                .foregroundColor(PureLifeColors.adaptiveElevatedSurface(scheme: colorScheme))
                                 .frame(width: 30, height: 100)
                                 .cornerRadius(8)
                             
@@ -197,7 +201,7 @@ struct WeeklyActivityView: View {
                         
                         Text(days[index])
                             .font(.system(size: 12, weight: .medium, design: .rounded))
-                            .foregroundColor(PureLifeColors.textSecondary)
+                            .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                     }
                 }
             }
@@ -205,8 +209,8 @@ struct WeeklyActivityView: View {
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(PureLifeColors.surface)
-                .shadow(color: Color.black.opacity(0.04), radius: 5, x: 0, y: 2)
+                .fill(PureLifeColors.adaptiveSurface(scheme: colorScheme))
+                .shadow(color: PureLifeColors.adaptiveCardShadow(scheme: colorScheme), radius: 5, x: 0, y: 2)
         )
     }
     
@@ -242,6 +246,7 @@ struct WeeklyActivityView: View {
 
 struct WorkoutRowView: View {
     let workout: Workout
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         HStack(spacing: 16) {
@@ -256,16 +261,16 @@ struct WorkoutRowView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(workout.type.rawValue.capitalized)
                     .font(.system(size: 16, weight: .semibold, design: .rounded))
-                    .foregroundColor(PureLifeColors.textPrimary)
+                    .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
                 
                 HStack(spacing: 12) {
                     Label("\(workout.durationMinutes) min", systemImage: "clock")
                         .font(.system(size: 13, design: .rounded))
-                        .foregroundColor(PureLifeColors.textSecondary)
+                        .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                     
                     Label("\(Int(workout.caloriesBurned)) cal", systemImage: "flame.fill")
                         .font(.system(size: 13, design: .rounded))
-                        .foregroundColor(PureLifeColors.textSecondary)
+                        .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                 }
             }
             
@@ -274,7 +279,7 @@ struct WorkoutRowView: View {
             VStack(alignment: .trailing, spacing: 4) {
                 Text(formattedDate(workout.date))
                     .font(.system(size: 13, design: .rounded))
-                    .foregroundColor(PureLifeColors.textSecondary)
+                    .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                 
                 Text("+\(String(format: "%.1f", workout.tokensEarned))")
                     .font(.system(size: 15, weight: .bold, design: .rounded))
@@ -284,8 +289,8 @@ struct WorkoutRowView: View {
         .padding(14)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(PureLifeColors.surface)
-                .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+                .fill(PureLifeColors.adaptiveSurface(scheme: colorScheme))
+                .shadow(color: PureLifeColors.adaptiveCardShadow(scheme: colorScheme), radius: 6, x: 0, y: 2)
         )
     }
     
@@ -298,8 +303,16 @@ struct WorkoutRowView: View {
 
 struct FitnessView_Previews: PreviewProvider {
     static var previews: some View {
-        FitnessView()
-            .environmentObject(AppDataStore())
-            .preferredColorScheme(.light)
+        Group {
+            FitnessView()
+                .environmentObject(AppDataStore())
+                .preferredColorScheme(.light)
+                .previewDisplayName("Light Mode")
+            
+            FitnessView()
+                .environmentObject(AppDataStore())
+                .preferredColorScheme(.dark)
+                .previewDisplayName("Dark Mode")
+        }
     }
 } 

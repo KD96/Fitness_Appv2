@@ -106,6 +106,7 @@ struct UserPreferences: Codable {
     var favoriteActivities: [WorkoutType] = []
     var receiveNotifications: Bool = true
     var preferredRewardCategories: [Reward.Category] = []
+    var userAppearance: AppearanceMode = .system
     
     enum FitnessGoal: String, Codable, CaseIterable {
         case loseWeight = "Lose Weight"
@@ -121,6 +122,20 @@ struct UserPreferences: Codable {
             case .improveEndurance: return "figure.run"
             case .general: return "heart"
             case .stressReduction: return "brain.head.profile"
+            }
+        }
+    }
+    
+    enum AppearanceMode: String, Codable, CaseIterable {
+        case light = "Light"
+        case dark = "Dark" 
+        case system = "System"
+        
+        var icon: String {
+            switch self {
+            case .light: return "sun.max.fill"
+            case .dark: return "moon.fill"
+            case .system: return "gear"
             }
         }
     }

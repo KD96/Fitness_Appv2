@@ -7,12 +7,13 @@ struct WorkoutListView: View {
     @State private var searchText = ""
     @State private var showingFilter = false
     @State private var selectedWorkoutType: WorkoutType?
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         NavigationView {
             ZStack {
                 // Fondo principal
-                PureLifeColors.background.ignoresSafeArea()
+                PureLifeColors.adaptiveBackground(scheme: colorScheme).ignoresSafeArea()
                 
                 VStack(spacing: 0) {
                     // Header personalizado
@@ -88,7 +89,7 @@ struct WorkoutListView: View {
             HStack {
                 Text("Workout History")
                     .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .foregroundColor(PureLifeColors.textPrimary)
+                    .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
                 
                 Spacer()
             }
@@ -103,10 +104,10 @@ struct WorkoutListView: View {
             // Barra de búsqueda
             HStack {
                 Image(systemName: "magnifyingglass")
-                    .foregroundColor(PureLifeColors.textSecondary)
+                    .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                 
                 TextField("Search workouts", text: $searchText)
-                    .foregroundColor(PureLifeColors.textPrimary)
+                    .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
                     .accentColor(PureLifeColors.logoGreen)
                 
                 if !searchText.isEmpty {
@@ -114,15 +115,15 @@ struct WorkoutListView: View {
                         searchText = ""
                     }) {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(PureLifeColors.textSecondary)
+                            .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                     }
                 }
             }
             .padding(.vertical, 12)
             .padding(.horizontal, 16)
-            .background(PureLifeColors.surface)
+            .background(PureLifeColors.adaptiveSurface(scheme: colorScheme))
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.03), radius: 5, x: 0, y: 2)
+            .shadow(color: PureLifeColors.adaptiveCardShadow(scheme: colorScheme), radius: 5, x: 0, y: 2)
             .padding(.horizontal, 24)
             
             // Filtros por tipo de entrenamiento
@@ -136,13 +137,13 @@ struct WorkoutListView: View {
                     }) {
                         Text("All")
                             .font(.system(size: 14, weight: .medium, design: .rounded))
-                            .foregroundColor(selectedWorkoutType == nil ? PureLifeColors.logoGreen : PureLifeColors.textSecondary)
+                            .foregroundColor(selectedWorkoutType == nil ? PureLifeColors.logoGreen : PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                             .padding(.vertical, 8)
                             .padding(.horizontal, 16)
                             .background(
                                 selectedWorkoutType == nil ?
                                 PureLifeColors.logoGreen.opacity(0.3) :
-                                PureLifeColors.elevatedSurface
+                                PureLifeColors.adaptiveElevatedSurface(scheme: colorScheme)
                             )
                             .cornerRadius(20)
                     }
@@ -165,13 +166,13 @@ struct WorkoutListView: View {
                                 Text(type.rawValue)
                                     .font(.system(size: 14, weight: .medium, design: .rounded))
                             }
-                            .foregroundColor(selectedWorkoutType == type ? PureLifeColors.logoGreen : PureLifeColors.textSecondary)
+                            .foregroundColor(selectedWorkoutType == type ? PureLifeColors.logoGreen : PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                             .padding(.vertical, 8)
                             .padding(.horizontal, 16)
                             .background(
                                 selectedWorkoutType == type ?
                                 PureLifeColors.logoGreen.opacity(0.3) :
-                                PureLifeColors.elevatedSurface
+                                PureLifeColors.adaptiveElevatedSurface(scheme: colorScheme)
                             )
                             .cornerRadius(20)
                         }
@@ -191,7 +192,7 @@ struct WorkoutListView: View {
                     HStack {
                         Text(filterInfoText)
                             .font(.system(size: 14, weight: .medium, design: .rounded))
-                            .foregroundColor(PureLifeColors.textSecondary)
+                            .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                         
                         Spacer()
                         
@@ -199,8 +200,8 @@ struct WorkoutListView: View {
                             searchText = ""
                             selectedWorkoutType = nil
                         }) {
-                            Text("Clear filters")
-                                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            Text("Clear All")
+                                .font(.system(size: 14, weight: .medium, design: .rounded))
                                 .foregroundColor(PureLifeColors.logoGreen)
                         }
                     }
@@ -208,18 +209,17 @@ struct WorkoutListView: View {
                     .padding(.top, 8)
                 }
                 
+                // Listar entrenamientos
                 ForEach(filteredWorkouts) { workout in
-                    WorkoutCard(workout: workout)
-                        .onTapGesture {
-                            selectedWorkout = workout
-                            showingDetail = true
-                        }
-                        .padding(.horizontal, 24)
+                    WorkoutCard(workout: workout, onSelect: {
+                        selectedWorkout = workout
+                        showingDetail = true
+                    })
+                    .padding(.horizontal, 24)
                 }
-                // Espaciado extra al final para mostrar todo el contenido
-                Color.clear.frame(height: 20)
+                .padding(.bottom, 20)
             }
-            .padding(.top, 8)
+            .padding(.top, 12)
         }
     }
     
@@ -241,63 +241,136 @@ struct WorkoutListView: View {
     
     private var emptyStateView: some View {
         VStack(spacing: 20) {
-            Spacer()
-            
-            Image(systemName: "figure.run")
-                .font(.system(size: 60))
-                .foregroundColor(PureLifeColors.logoGreen.opacity(0.3))
+            Image(systemName: "figure.run.circle")
+                .font(.system(size: 70))
+                .foregroundColor(PureLifeColors.logoGreen.opacity(0.5))
+                .padding(.bottom, 10)
             
             Text("No workouts found")
                 .font(.system(size: 20, weight: .bold, design: .rounded))
-                .foregroundColor(PureLifeColors.textPrimary)
+                .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
             
             if !searchText.isEmpty || selectedWorkoutType != nil {
                 Text("Try changing your filters")
                     .font(.system(size: 16, weight: .medium, design: .rounded))
-                    .foregroundColor(PureLifeColors.textSecondary)
+                    .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                     .multilineTextAlignment(.center)
                 
                 Button(action: {
                     searchText = ""
                     selectedWorkoutType = nil
                 }) {
-                    Text("Clear filters")
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
-                        .foregroundColor(PureLifeColors.logoGreen)
+                    Text("Clear Filters")
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundColor(.white)
                         .padding(.vertical, 12)
-                        .padding(.horizontal, 30)
-                        .background(PureLifeColors.logoGreen.opacity(0.3))
-                        .cornerRadius(16)
+                        .padding(.horizontal, 24)
+                        .background(PureLifeColors.logoGreen)
+                        .cornerRadius(12)
                 }
-                .padding(.top, 10)
+                .padding(.top, 8)
             } else {
                 Text("Track your first workout to get started")
                     .font(.system(size: 16, weight: .medium, design: .rounded))
-                    .foregroundColor(PureLifeColors.textSecondary)
+                    .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
                 
                 NavigationLink(destination: NewWorkoutView()) {
                     Text("Add Workout")
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
-                        .foregroundColor(PureLifeColors.logoGreen)
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundColor(.white)
                         .padding(.vertical, 12)
-                        .padding(.horizontal, 30)
-                        .background(PureLifeColors.logoGreen.opacity(0.3))
-                        .cornerRadius(16)
+                        .padding(.horizontal, 24)
+                        .background(PureLifeColors.logoGreen)
+                        .cornerRadius(12)
                 }
-                .padding(.top, 10)
+                .padding(.top, 8)
             }
-            
-            Spacer()
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(20)
+    }
+}
+
+// MARK: - WorkoutCard Component
+
+struct WorkoutCard: View {
+    let workout: Workout
+    var onSelect: () -> Void
+    @Environment(\.colorScheme) var colorScheme
+    
+    var body: some View {
+        Button(action: onSelect) {
+            HStack(spacing: 16) {
+                // Icono del tipo de ejercicio
+                Image(systemName: workout.type.icon)
+                    .font(.system(size: 18))
+                    .foregroundColor(.white)
+                    .frame(width: 42, height: 42)
+                    .background(PureLifeColors.logoGreen)
+                    .cornerRadius(12)
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(workout.name)
+                        .font(.system(size: 17, weight: .semibold, design: .rounded))
+                        .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
+                        .lineLimit(1)
+                    
+                    Text(workout.type.rawValue.capitalized)
+                        .font(.system(size: 14, design: .rounded))
+                        .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
+                }
+                
+                Spacer()
+                
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text(formattedDate(workout.date))
+                        .font(.system(size: 14, design: .rounded))
+                        .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
+                    
+                    // Stats mini-row
+                    HStack(spacing: 16) {
+                        Label("\(workout.durationMinutes) min", systemImage: "clock")
+                            .font(.system(size: 12, design: .rounded))
+                            .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
+                        
+                        Label("\(Int(workout.caloriesBurned)) cal", systemImage: "flame.fill")
+                            .font(.system(size: 12, design: .rounded))
+                            .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
+                    }
+                }
+            }
+            .padding(16)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(PureLifeColors.adaptiveSurface(scheme: colorScheme))
+                    .shadow(color: PureLifeColors.adaptiveCardShadow(scheme: colorScheme), radius: 4, x: 0, y: 2)
+            )
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+    
+    private func formattedDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
     }
 }
 
 struct WorkoutListView_Previews: PreviewProvider {
     static var previews: some View {
-        WorkoutListView()
-            .environmentObject(AppDataStore())
-            .preferredColorScheme(.light)
+        Group {
+            WorkoutListView()
+                .environmentObject(AppDataStore())
+                .preferredColorScheme(.light)
+                .previewDisplayName("Light Mode")
+            
+            WorkoutListView()
+                .environmentObject(AppDataStore())
+                .preferredColorScheme(.dark)
+                .previewDisplayName("Dark Mode")
+        }
     }
 } 

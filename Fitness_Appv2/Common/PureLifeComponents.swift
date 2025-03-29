@@ -112,36 +112,47 @@ struct Components {
         let content: Content
         var icon: String? = nil
         var cornerRadius: CGFloat = Spacing.cornerRadius
+        var scheme: ColorScheme? = nil
         
-        init(title: String, icon: String? = nil, cornerRadius: CGFloat = Spacing.cornerRadius, @ViewBuilder content: () -> Content) {
+        init(title: String, icon: String? = nil, cornerRadius: CGFloat = Spacing.cornerRadius, scheme: ColorScheme? = nil, @ViewBuilder content: () -> Content) {
             self.title = title
             self.icon = icon
             self.cornerRadius = cornerRadius
+            self.scheme = scheme
             self.content = content()
         }
         
         var body: some View {
             VStack(alignment: .leading, spacing: Spacing.sm) {
                 // Header
-                HStack(spacing: Spacing.xs) {
-                    if let iconName = icon {
-                        Image(systemName: iconName)
-                            .font(.system(size: Typography.FontSize.md))
-                            .foregroundColor(PureLifeColors.logoGreen)
+                if !title.isEmpty {
+                    HStack(spacing: Spacing.xs) {
+                        if let iconName = icon {
+                            Image(systemName: iconName)
+                                .font(.system(size: Typography.FontSize.md))
+                                .foregroundColor(PureLifeColors.logoGreen)
+                        }
+                        
+                        Text(title)
+                            .font(.system(size: Typography.FontSize.lg, weight: .bold, design: .rounded))
+                            .foregroundColor(scheme != nil ? 
+                                             PureLifeColors.adaptiveTextPrimary(scheme: scheme!) : 
+                                             PureLifeColors.textPrimary)
                     }
-                    
-                    Text(title)
-                        .font(.system(size: Typography.FontSize.lg, weight: .bold, design: .rounded))
-                        .foregroundColor(PureLifeColors.textPrimary)
                 }
                 
                 // Contenido
                 content
             }
             .padding(Spacing.cardPadding)
-            .background(PureLifeColors.cardBackground)
+            .background(scheme != nil ? 
+                        PureLifeColors.adaptiveSurface(scheme: scheme!) : 
+                        PureLifeColors.cardBackground)
             .cornerRadius(cornerRadius)
-            .shadow(color: PureLifeColors.cardShadow, radius: 5, x: 0, y: 2)
+            .shadow(color: scheme != nil ? 
+                    PureLifeColors.adaptiveCardShadow(scheme: scheme!) : 
+                    PureLifeColors.cardShadow, 
+                    radius: 5, x: 0, y: 2)
         }
     }
     

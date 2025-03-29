@@ -11,6 +11,8 @@ import SwiftUI
 struct Fitness_Appv2App: App {
     // Crear una instancia del AppDataStore que será compartida en toda la app
     @StateObject var dataStore = AppDataStore()
+    @Environment(\.colorScheme) var systemColorScheme
+    @State private var userColorScheme: ColorScheme? = nil
     
     init() {
         // Cambiar el nombre que aparece en la barra de navegación
@@ -22,6 +24,24 @@ struct Fitness_Appv2App: App {
         WindowGroup {
             MainTabView()
                 .environmentObject(dataStore)
+                .onAppear {
+                    updateColorScheme()
+                }
+                .onChange(of: dataStore.currentUser.userPreferences.userAppearance) { _ in
+                    updateColorScheme()
+                }
+                .preferredColorScheme(userColorScheme)
+        }
+    }
+    
+    private func updateColorScheme() {
+        switch dataStore.currentUser.userPreferences.userAppearance {
+        case .light:
+            userColorScheme = .light
+        case .dark:
+            userColorScheme = .dark
+        case .system:
+            userColorScheme = nil // Use system setting
         }
     }
 }

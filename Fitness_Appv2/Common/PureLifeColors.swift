@@ -99,11 +99,60 @@ struct PureLifeColors {
     static let tabBarInactive = textSecondary
     static let navigationBarBackground = surface
     
+    // MARK: - Color Adaptations for Dark Mode
+    
+    /// Helper to adapt colors based on color scheme
+    static func adaptiveColor(light: Color, dark: Color, scheme: ColorScheme) -> Color {
+        switch scheme {
+        case .light:
+            return light
+        case .dark:
+            return dark
+        @unknown default:
+            return light
+        }
+    }
+    
+    /// Adaptive background color
+    static func adaptiveBackground(scheme: ColorScheme) -> Color {
+        adaptiveColor(light: background, dark: darkBackground, scheme: scheme)
+    }
+    
+    /// Adaptive surface color
+    static func adaptiveSurface(scheme: ColorScheme) -> Color {
+        adaptiveColor(light: surface, dark: darkSurface, scheme: scheme)
+    }
+    
+    /// Adaptive elevated surface color
+    static func adaptiveElevatedSurface(scheme: ColorScheme) -> Color {
+        adaptiveColor(light: elevatedSurface, dark: darkSurfaceSecondary, scheme: scheme)
+    }
+    
+    /// Adaptive text primary color
+    static func adaptiveTextPrimary(scheme: ColorScheme) -> Color {
+        adaptiveColor(light: textPrimary, dark: darkTextPrimary, scheme: scheme)
+    }
+    
+    /// Adaptive text secondary color
+    static func adaptiveTextSecondary(scheme: ColorScheme) -> Color {
+        adaptiveColor(light: textSecondary, dark: darkTextSecondary, scheme: scheme)
+    }
+    
+    /// Adaptive card shadow color
+    static func adaptiveCardShadow(scheme: ColorScheme) -> Color {
+        adaptiveColor(light: Color.black.opacity(0.04), dark: Color.black.opacity(0.1), scheme: scheme)
+    }
+    
     // MARK: - Card Styles
     
     /// Card style - aplicar a un contenedor con .modifier(PureLifeColors.cardStyle())
     static func cardStyle(cornerRadius: CGFloat = 16) -> some ViewModifier {
         CardStyle(cornerRadius: cornerRadius)
+    }
+    
+    /// Adaptive card style that respects color scheme
+    static func adaptiveCardStyle(cornerRadius: CGFloat = 16, scheme: ColorScheme) -> some ViewModifier {
+        AdaptiveCardStyle(cornerRadius: cornerRadius, scheme: scheme)
     }
     
     private struct CardStyle: ViewModifier {
@@ -115,6 +164,19 @@ struct PureLifeColors {
                 .background(PureLifeColors.cardBackground)
                 .cornerRadius(cornerRadius)
                 .shadow(color: PureLifeColors.cardShadow, radius: 5, x: 0, y: 2)
+        }
+    }
+    
+    private struct AdaptiveCardStyle: ViewModifier {
+        let cornerRadius: CGFloat
+        let scheme: ColorScheme
+        
+        func body(content: Content) -> some View {
+            content
+                .padding(16)
+                .background(PureLifeColors.adaptiveSurface(scheme: scheme))
+                .cornerRadius(cornerRadius)
+                .shadow(color: PureLifeColors.adaptiveCardShadow(scheme: scheme), radius: 5, x: 0, y: 2)
         }
     }
 } 
