@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct WorkoutDetailView: View {
     @Environment(\.presentationMode) var presentationMode
@@ -15,7 +16,7 @@ struct WorkoutDetailView: View {
                             .font(.largeTitle)
                             .foregroundColor(.blue)
                             .frame(width: 60, height: 60)
-                            .background(Color(.systemGray6))
+                            .background(Color(UIColor.systemGray6))
                             .cornerRadius(12)
                         
                         VStack(alignment: .leading) {

@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct RewardView: View {
     @EnvironmentObject var dataStore: AppDataStore
@@ -23,7 +24,7 @@ struct RewardView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color(.secondarySystemBackground))
+                    .background(Color(UIColor.secondarySystemBackground))
                     .cornerRadius(16)
                     
                     // Earning opportunities
@@ -54,7 +55,7 @@ struct RewardView: View {
                                     .foregroundColor(.green)
                             }
                             .padding()
-                            .background(Color(.secondarySystemBackground))
+                            .background(Color(UIColor.secondarySystemBackground))
                             .cornerRadius(12)
                         }
                     }
@@ -89,7 +90,7 @@ struct RewardView: View {
                                         .foregroundColor(.green)
                                 }
                                 .padding()
-                                .background(Color(.secondarySystemBackground))
+                                .background(Color(UIColor.secondarySystemBackground))
                                 .cornerRadius(12)
                             }
                         }
