@@ -6,10 +6,32 @@ struct FitnessView: View {
     @State private var showingNewWorkout = false
     @State private var selectedWorkout: Workout?
     
+    // Colores de PureLife
+    private let pureLifeGreen = Color(red: 199/255, green: 227/255, blue: 214/255)
+    private let pureLifeLightGreen = Color(red: 220/255, green: 237/255, blue: 230/255)
+    private let pureLifeBlack = Color.black
+    
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 20) {
+                    // Logo y título de la app
+                    HStack {
+                        Text("pure")
+                            .font(.system(size: 28, weight: .bold))
+                            .foregroundColor(pureLifeBlack) +
+                        Text("life")
+                            .font(.system(size: 28, weight: .bold))
+                            .foregroundColor(pureLifeBlack) +
+                        Text(".")
+                            .font(.system(size: 28, weight: .bold))
+                            .foregroundColor(pureLifeBlack)
+                        
+                        Spacer()
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 5)
+                    
                     // User stats summary
                     UserStatsView()
                         .padding(.horizontal)
@@ -23,6 +45,7 @@ struct FitnessView: View {
                         Text("Recent Workouts")
                             .font(.title3)
                             .fontWeight(.bold)
+                            .foregroundColor(pureLifeBlack)
                         
                         Spacer()
                         
@@ -31,7 +54,7 @@ struct FitnessView: View {
                         }) {
                             Label("Add Workout", systemImage: "plus.circle.fill")
                                 .font(.subheadline)
-                                .foregroundColor(Color(red: 0.0, green: 0.7, blue: 0.9))
+                                .foregroundColor(pureLifeBlack)
                         }
                     }
                     .padding(.horizontal)
@@ -47,6 +70,7 @@ struct FitnessView: View {
                                 
                                 Text("No workouts yet")
                                     .font(.headline)
+                                    .foregroundColor(pureLifeBlack)
                                 
                                 Text("Start your fitness journey by adding your first workout")
                                     .font(.caption)
@@ -58,9 +82,9 @@ struct FitnessView: View {
                                 }) {
                                     Text("Add Your First Workout")
                                         .font(.headline)
-                                        .foregroundColor(.white)
+                                        .foregroundColor(pureLifeBlack)
                                         .padding()
-                                        .background(Color(red: 0.0, green: 0.7, blue: 0.9))
+                                        .background(pureLifeGreen)
                                         .cornerRadius(10)
                                 }
                                 .padding(.top, 10)
@@ -80,7 +104,8 @@ struct FitnessView: View {
                 }
                 .padding(.vertical)
             }
-            .navigationTitle("Fitness")
+            .background(pureLifeLightGreen.ignoresSafeArea())
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
@@ -88,6 +113,7 @@ struct FitnessView: View {
                     }) {
                         Image(systemName: "plus")
                             .font(.headline)
+                            .foregroundColor(pureLifeBlack)
                     }
                 }
             }
@@ -106,10 +132,15 @@ struct WeeklyActivityView: View {
     // Valores simulados de actividad para cada día (0-1)
     let activityLevels: [Double] = [0.3, 0.7, 0.5, 0.8, 0.2, 0.9, 0.6]
     
+    // Colores de PureLife
+    private let pureLifeGreen = Color(red: 199/255, green: 227/255, blue: 214/255)
+    private let pureLifeBlack = Color.black
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Weekly Activity")
                 .font(.headline)
+                .foregroundColor(pureLifeBlack)
                 .padding(.bottom, 5)
             
             HStack(spacing: 8) {
@@ -129,7 +160,7 @@ struct WeeklyActivityView: View {
                         
                         Text(days[index])
                             .font(.caption2)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(pureLifeBlack.opacity(0.6))
                     }
                 }
             }
@@ -137,18 +168,18 @@ struct WeeklyActivityView: View {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 15)
-                .fill(Color(UIColor.systemBackground))
-                .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+                .fill(Color.white)
+                .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
         )
     }
     
     func activityColor(_ level: Double) -> Color {
         if level < 0.3 {
-            return Color.red.opacity(0.7)
+            return pureLifeGreen.opacity(0.5)
         } else if level < 0.7 {
-            return Color.orange.opacity(0.8)
+            return pureLifeGreen.opacity(0.7)
         } else {
-            return Color.green.opacity(0.8)
+            return pureLifeGreen
         }
     }
 }
@@ -156,28 +187,33 @@ struct WeeklyActivityView: View {
 struct WorkoutRowView: View {
     let workout: Workout
     
+    // Colores de PureLife
+    private let pureLifeGreen = Color(red: 199/255, green: 227/255, blue: 214/255)
+    private let pureLifeBlack = Color.black
+    
     var body: some View {
         HStack(spacing: 15) {
             // Icono del tipo de ejercicio
             Image(systemName: workout.type.icon)
                 .font(.title2)
-                .foregroundColor(.white)
+                .foregroundColor(pureLifeBlack)
                 .frame(width: 50, height: 50)
-                .background(workoutColor(workout.type))
+                .background(pureLifeGreen)
                 .cornerRadius(12)
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(workout.type.rawValue.capitalized)
                     .font(.headline)
+                    .foregroundColor(pureLifeBlack)
                 
                 HStack(spacing: 10) {
                     Label("\(Int(workout.duration / 60)) min", systemImage: "clock")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(pureLifeBlack.opacity(0.6))
                     
                     Label("\(Int(workout.calories)) cal", systemImage: "flame.fill")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(pureLifeBlack.opacity(0.6))
                 }
             }
             
@@ -186,19 +222,19 @@ struct WorkoutRowView: View {
             VStack(alignment: .trailing, spacing: 4) {
                 Text(formattedDate(workout.date))
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(pureLifeBlack.opacity(0.6))
                 
                 Text("+\(String(format: "%.1f", workout.tokenReward))")
                     .font(.callout)
                     .fontWeight(.semibold)
-                    .foregroundColor(.green)
+                    .foregroundColor(pureLifeBlack)
             }
         }
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 15)
-                .fill(Color(UIColor.systemBackground))
-                .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 2)
+                .fill(Color.white)
+                .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 2)
         )
     }
     
@@ -206,21 +242,6 @@ struct WorkoutRowView: View {
         let formatter = DateFormatter()
         formatter.dateStyle = .short
         return formatter.string(from: date)
-    }
-    
-    private func workoutColor(_ type: WorkoutType) -> Color {
-        switch type {
-        case .running:
-            return Color.blue
-        case .cycling:
-            return Color.green
-        case .swimming:
-            return Color(red: 0.0, green: 0.7, blue: 0.9)
-        case .walking:
-            return Color.orange
-        case .weightTraining, .yoga, .hiit, .other:
-            return Color.purple
-        }
     }
 }
 

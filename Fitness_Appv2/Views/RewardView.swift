@@ -4,59 +4,84 @@ import UIKit
 struct RewardView: View {
     @EnvironmentObject var dataStore: AppDataStore
     
+    // Colores de PureLife
+    private let pureLifeGreen = Color(red: 199/255, green: 227/255, blue: 214/255)
+    private let pureLifeLightGreen = Color(red: 220/255, green: 237/255, blue: 230/255)
+    private let pureLifeBlack = Color.black
+    
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 20) {
+                    // Logo y título de la app
+                    HStack {
+                        Text("pure")
+                            .font(.system(size: 28, weight: .bold))
+                            .foregroundColor(pureLifeBlack) +
+                        Text("life")
+                            .font(.system(size: 28, weight: .bold))
+                            .foregroundColor(pureLifeBlack) +
+                        Text(".")
+                            .font(.system(size: 28, weight: .bold))
+                            .foregroundColor(pureLifeBlack)
+                        
+                        Spacer()
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 5)
+                    
                     // Token balance card
                     VStack {
                         Text("Token Balance")
                             .font(.headline)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(pureLifeBlack.opacity(0.7))
                         
                         Text("\(String(format: "%.1f", dataStore.currentUser.tokenBalance))")
                             .font(.system(size: 48, weight: .bold))
-                            .foregroundColor(.blue)
+                            .foregroundColor(pureLifeBlack)
                         
-                        Text("FTNS")
+                        Text("PURE")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(pureLifeBlack.opacity(0.7))
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color(UIColor.secondarySystemBackground))
+                    .background(pureLifeGreen)
                     .cornerRadius(16)
                     
                     // Earning opportunities
                     VStack(alignment: .leading, spacing: 20) {
                         Text("Earning Opportunities")
                             .font(.headline)
+                            .foregroundColor(pureLifeBlack)
                         
                         ForEach(earningOpportunities, id: \.title) { opportunity in
                             HStack {
                                 Image(systemName: opportunity.icon)
                                     .font(.title2)
-                                    .foregroundColor(.blue)
+                                    .foregroundColor(pureLifeBlack)
                                     .frame(width: 40, height: 40)
                                 
                                 VStack(alignment: .leading) {
                                     Text(opportunity.title)
                                         .font(.headline)
+                                        .foregroundColor(pureLifeBlack)
                                     
                                     Text(opportunity.description)
                                         .font(.subheadline)
-                                        .foregroundColor(.secondary)
+                                        .foregroundColor(pureLifeBlack.opacity(0.7))
                                 }
                                 
                                 Spacer()
                                 
                                 Text("+\(opportunity.reward)")
                                     .font(.headline)
-                                    .foregroundColor(.green)
+                                    .foregroundColor(pureLifeBlack)
                             }
                             .padding()
-                            .background(Color(UIColor.secondarySystemBackground))
+                            .background(Color.white)
                             .cornerRadius(12)
+                            .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 2)
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -65,10 +90,11 @@ struct RewardView: View {
                     VStack(alignment: .leading, spacing: 16) {
                         Text("Recent Earnings")
                             .font(.headline)
+                            .foregroundColor(pureLifeBlack)
                         
                         if dataStore.currentUser.completedWorkouts.isEmpty {
                             Text("No recent workouts")
-                                .foregroundColor(.secondary)
+                                .foregroundColor(pureLifeBlack.opacity(0.7))
                                 .frame(maxWidth: .infinity, alignment: .center)
                                 .padding()
                         } else {
@@ -77,21 +103,23 @@ struct RewardView: View {
                                     VStack(alignment: .leading) {
                                         Text(workout.type.rawValue.capitalized)
                                             .font(.headline)
+                                            .foregroundColor(pureLifeBlack)
                                         
                                         Text(formattedDate(workout.date))
                                             .font(.caption)
-                                            .foregroundColor(.secondary)
+                                            .foregroundColor(pureLifeBlack.opacity(0.7))
                                     }
                                     
                                     Spacer()
                                     
                                     Text("+\(String(format: "%.1f", workout.tokenReward))")
                                         .font(.headline)
-                                        .foregroundColor(.green)
+                                        .foregroundColor(pureLifeBlack)
                                 }
                                 .padding()
-                                .background(Color(UIColor.secondarySystemBackground))
+                                .background(Color.white)
                                 .cornerRadius(12)
+                                .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 2)
                             }
                         }
                     }
@@ -99,7 +127,8 @@ struct RewardView: View {
                 }
                 .padding()
             }
-            .navigationTitle("Rewards")
+            .background(pureLifeLightGreen.ignoresSafeArea())
+            .navigationBarTitleDisplayMode(.inline)
         }
     }
     

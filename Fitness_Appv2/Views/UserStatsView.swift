@@ -4,25 +4,30 @@ import UIKit
 struct UserStatsView: View {
     @EnvironmentObject var dataStore: AppDataStore
     
+    // Colores de PureLife
+    private let pureLifeGreen = Color(red: 199/255, green: 227/255, blue: 214/255)
+    private let pureLifeBlack = Color.black
+    
     var body: some View {
         VStack(spacing: 10) {
             // Nombre del usuario y avatar
             HStack {
-                Text("¡Hola, \(dataStore.currentUser.name)!")
-                    .font(.title2)
-                    .fontWeight(.bold)
+                Text("Hello, \(dataStore.currentUser.name)")
+                    .font(.title3)
+                    .fontWeight(.medium)
+                    .foregroundColor(pureLifeBlack)
                 
                 Spacer()
                 
                 Image(systemName: "person.crop.circle.fill")
                     .resizable()
                     .frame(width: 40, height: 40)
-                    .foregroundColor(Color(red: 0.0, green: 0.7, blue: 0.9))
+                    .foregroundColor(pureLifeBlack)
                     .background(Color.white)
                     .clipShape(Circle())
                     .overlay(
                         Circle()
-                            .stroke(Color.white, lineWidth: 2)
+                            .stroke(pureLifeGreen, lineWidth: 2)
                     )
                     .shadow(radius: 2)
             }
@@ -34,21 +39,24 @@ struct UserStatsView: View {
                     title: "Workouts",
                     value: "\(dataStore.currentUser.completedWorkouts.count)",
                     icon: "figure.run",
-                    color: Color.blue
+                    color: pureLifeBlack,
+                    backgroundColor: pureLifeGreen
                 )
                 
                 StatCard(
                     title: "Tokens",
                     value: "\(Int(dataStore.currentUser.tokenBalance))",
                     icon: "dollarsign.circle",
-                    color: Color.green
+                    color: pureLifeBlack,
+                    backgroundColor: pureLifeGreen
                 )
                 
                 StatCard(
                     title: "Streak",
                     value: "\(dataStore.currentUser.workoutStreak)",
                     icon: "flame.fill",
-                    color: Color.orange
+                    color: pureLifeBlack,
+                    backgroundColor: pureLifeGreen
                 )
             }
             .padding(.horizontal, 10)
@@ -56,8 +64,8 @@ struct UserStatsView: View {
         .padding(.vertical)
         .background(
             RoundedRectangle(cornerRadius: 15)
-                .fill(Color(UIColor.secondarySystemBackground))
-                .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+                .fill(Color.white)
+                .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
         )
     }
 }
@@ -67,6 +75,7 @@ struct StatCard: View {
     let value: String
     let icon: String
     let color: Color
+    let backgroundColor: Color
     
     var body: some View {
         VStack(spacing: 8) {
@@ -76,17 +85,18 @@ struct StatCard: View {
             
             Text(value)
                 .font(.system(size: 22, weight: .bold))
+                .foregroundColor(color)
             
             Text(title)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(color.opacity(0.7))
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color(UIColor.systemBackground))
-                .shadow(color: color.opacity(0.1), radius: 3, x: 0, y: 1)
+                .fill(backgroundColor)
+                .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 1)
         )
     }
 }
