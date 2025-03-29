@@ -73,7 +73,7 @@ struct NewWorkoutView: View {
             notes: notes.isEmpty ? nil : notes
         )
         
-        dataStore.completeWorkout(newWorkout)
+        dataStore.saveWorkout(newWorkout)
     }
 }
 

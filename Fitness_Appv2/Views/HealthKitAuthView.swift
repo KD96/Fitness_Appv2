@@ -133,20 +133,18 @@ struct HealthKitAuthView: View {
         isRequesting = true
         
         if HKHealthStore.isHealthDataAvailable() {
-            let healthKitManager = HealthKitManager.shared
-            
-            healthKitManager.requestAuthorization { success in
-                isRequesting = false
-                
-                if success {
-                    alertMessage = "Successfully connected to Apple Health! Your personal health data will now appear in the app."
-                    dataStore.isHealthKitEnabled = true
-                    dataStore.refreshHealthData()
-                } else {
-                    alertMessage = "Could not access health data. Please make sure that you've granted PureLife permission to access your health data in Settings."
+            dataStore.requestHealthKitAuthorization { success in
+                DispatchQueue.main.async {
+                    isRequesting = false
+                    
+                    if success {
+                        alertMessage = "Successfully connected to Apple Health! Your personal health data will now appear in the app."
+                    } else {
+                        alertMessage = "Could not access health data. Please make sure that you've granted PureLife permission to access your health data in Settings."
+                    }
+                    
+                    showAlert = true
                 }
-                
-                showAlert = true
             }
         } else {
             isRequesting = false

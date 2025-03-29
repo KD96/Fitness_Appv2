@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 struct User: Identifiable, Codable {
     var id = UUID()
@@ -9,6 +10,13 @@ struct User: Identifiable, Codable {
     var workoutStreak: Int = 0
     var completedWorkouts: [Workout] = []
     
+    // Nuevos campos para funcionalidad mejorada
+    var experiencePoints: Int = 0
+    var cryptoWallet = CryptoWallet()
+    var purchasedRewards: [Reward] = []
+    var userPreferences = UserPreferences()
+    var joinDate = Date()
+    
     // Add token reward to user balance
     mutating func addTokens(_ amount: Double) {
         tokenBalance += amount
@@ -16,24 +24,98 @@ struct User: Identifiable, Codable {
     
     // Add a completed workout and update tokens
     mutating func completeWorkout(_ workout: Workout) {
-        var completedWorkout = workout
-        completedWorkout.completed = true
-        completedWorkouts.append(completedWorkout)
-        addTokens(workout.tokenReward)
+        // Añadir el entrenamiento a la lista de completados
+        completedWorkouts.append(workout)
         
-        // Update streak logic
-        updateStreak()
+        // Actualizar racha de entrenamientos (lógica simplificada)
+        workoutStreak += 1
+        
+        // Calcular recompensa de tokens con multiplicador de nivel
+        let currentLevel = UserLevel.getCurrentLevel(points: experiencePoints)
+        let baseTokens = workout.tokenReward
+        let bonusTokens = baseTokens * (currentLevel.tokenMultiplier - 1.0)
+        let totalTokens = baseTokens + bonusTokens
+        
+        // Añadir tokens a balance
+        tokenBalance += totalTokens
+        
+        // Añadir tokens a la wallet
+        cryptoWallet.addTransaction(
+            amount: totalTokens,
+            type: .received,
+            description: "Completed \(workout.type.rawValue) workout"
+        )
+        
+        // Añadir puntos de experiencia (XP)
+        // 10 XP por minuto de ejercicio
+        let xpEarned = Int(workout.duration / 60) * 10
+        experiencePoints += xpEarned
     }
     
-    private mutating func updateStreak() {
-        // Simple streak logic - if worked out today, increment streak
-        // More sophisticated logic would be added for a production app
-        if let lastWorkout = completedWorkouts.last {
-            if Calendar.current.isDateInToday(lastWorkout.date) {
-                workoutStreak += 1
-            } else if !Calendar.current.isDateInYesterday(lastWorkout.date) {
-                // Reset streak if missed a day
-                workoutStreak = 1
+    // Obtener el nivel actual
+    var currentLevel: UserLevel {
+        return UserLevel.getCurrentLevel(points: experiencePoints)
+    }
+    
+    // Calcular progreso hacia el siguiente nivel
+    var progressToNextLevel: Double {
+        return UserLevel.getProgressToNextLevel(points: experiencePoints)
+    }
+    
+    // Comprar una recompensa
+    mutating func purchaseReward(_ reward: Reward) -> Bool {
+        // Verificar si hay suficientes tokens
+        if tokenBalance >= reward.tokenCost {
+            tokenBalance -= reward.tokenCost
+            purchasedRewards.append(reward)
+            
+            // Registrar la transacción
+            cryptoWallet.addTransaction(
+                amount: reward.tokenCost,
+                type: .sent,
+                description: "Purchased \(reward.title) from \(reward.partnerName)"
+            )
+            
+            return true
+        }
+        return false
+    }
+    
+    // Convertir tokens a crypto
+    mutating func convertTokensToCrypto(amount: Double, to cryptoType: CryptoWallet.CryptoType) -> Bool {
+        if tokenBalance >= amount {
+            tokenBalance -= amount
+            
+            // Realizar conversión a crypto
+            let cryptoAmount = cryptoWallet.convertTokens(tokenAmount: amount, to: cryptoType)
+            
+            return true
+        }
+        return false
+    }
+}
+
+// Estructura para preferencias de usuario
+struct UserPreferences: Codable {
+    var fitnessGoal: FitnessGoal = .general
+    var favoriteActivities: [WorkoutType] = []
+    var receiveNotifications: Bool = true
+    var preferredRewardCategories: [Reward.Category] = []
+    
+    enum FitnessGoal: String, Codable, CaseIterable {
+        case loseWeight = "Lose Weight"
+        case gainMuscle = "Gain Muscle"
+        case improveEndurance = "Improve Endurance"
+        case general = "General Fitness"
+        case stressReduction = "Stress Reduction"
+        
+        var icon: String {
+            switch self {
+            case .loseWeight: return "arrow.down.circle"
+            case .gainMuscle: return "figure.arms.open"
+            case .improveEndurance: return "figure.run"
+            case .general: return "heart"
+            case .stressReduction: return "brain.head.profile"
             }
         }
     }

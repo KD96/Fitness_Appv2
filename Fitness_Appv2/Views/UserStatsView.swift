@@ -23,18 +23,7 @@ struct UserStatsView: View {
                 
                 Spacer()
                 
-                // Botón para refrescar datos de HealthKit
-                if dataStore.isHealthKitEnabled {
-                    Button(action: {
-                        dataStore.refreshHealthData()
-                    }) {
-                        Image(systemName: "arrow.clockwise")
-                            .foregroundColor(pureLifeBlack)
-                            .font(.headline)
-                    }
-                    .padding(.trailing, 8)
-                }
-                
+                // Avatar del usuario
                 Image(systemName: "person.crop.circle.fill")
                     .resizable()
                     .frame(width: 40, height: 40)
