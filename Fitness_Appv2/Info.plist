@@ -6,5 +6,9 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
+	<key>NSHealthShareUsageDescription</key>
+	<string>PureLife necesita acceder a tus datos de salud para mostrar tus entrenamientos y actividad física</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>PureLife guardará tus nuevos entrenamientos en la app Salud</string>
 </dict>
 </plist>

@@ -5,6 +5,7 @@ struct FitnessView: View {
     @EnvironmentObject var dataStore: AppDataStore
     @State private var showingNewWorkout = false
     @State private var selectedWorkout: Workout?
+    @State private var showingHealthKitAuth = false
     
     // Colores de PureLife
     private let pureLifeGreen = Color(red: 199/255, green: 227/255, blue: 214/255)
@@ -39,6 +40,40 @@ struct FitnessView: View {
                     // Weekly activity summary
                     WeeklyActivityView()
                         .padding(.horizontal)
+                    
+                    // Banner para conectar con Apple Health si no está habilitado
+                    if !dataStore.isHealthKitEnabled {
+                        Button(action: {
+                            showingHealthKitAuth = true
+                        }) {
+                            HStack {
+                                Image(systemName: "heart.text.square.fill")
+                                    .font(.title2)
+                                    .foregroundColor(pureLifeBlack)
+                                
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text("Use your real health data")
+                                        .font(.headline)
+                                        .foregroundColor(pureLifeBlack)
+                                    
+                                    Text("Connect to Apple Health")
+                                        .font(.caption)
+                                        .foregroundColor(pureLifeBlack.opacity(0.7))
+                                }
+                                
+                                Spacer()
+                                
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(pureLifeBlack.opacity(0.7))
+                            }
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 15)
+                                    .fill(pureLifeGreen)
+                            )
+                            .padding(.horizontal)
+                        }
+                    }
                     
                     // Recent workouts header
                     HStack {
@@ -123,25 +158,44 @@ struct FitnessView: View {
             .sheet(item: $selectedWorkout) { workout in
                 WorkoutDetailView(workout: workout)
             }
+            .sheet(isPresented: $showingHealthKitAuth) {
+                HealthKitAuthView()
+            }
         }
     }
 }
 
 struct WeeklyActivityView: View {
+    @EnvironmentObject var dataStore: AppDataStore
     let days = ["M", "T", "W", "T", "F", "S", "S"]
-    // Valores simulados de actividad para cada día (0-1)
-    let activityLevels: [Double] = [0.3, 0.7, 0.5, 0.8, 0.2, 0.9, 0.6]
     
     // Colores de PureLife
     private let pureLifeGreen = Color(red: 199/255, green: 227/255, blue: 214/255)
     private let pureLifeBlack = Color.black
     
+    // Referencia al HealthKitManager para obtener datos
+    private let healthKitManager = HealthKitManager.shared
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Weekly Activity")
-                .font(.headline)
-                .foregroundColor(pureLifeBlack)
-                .padding(.bottom, 5)
+            HStack {
+                Text("Weekly Activity")
+                    .font(.headline)
+                    .foregroundColor(pureLifeBlack)
+                
+                Spacer()
+                
+                if dataStore.isHealthKitEnabled {
+                    Text("Apple Health")
+                        .font(.caption)
+                        .foregroundColor(pureLifeBlack.opacity(0.6))
+                    
+                    Image(systemName: "heart.fill")
+                        .foregroundColor(.red)
+                        .font(.caption)
+                }
+            }
+            .padding(.bottom, 5)
             
             HStack(spacing: 8) {
                 ForEach(0..<7) { index in
@@ -152,10 +206,13 @@ struct WeeklyActivityView: View {
                                 .frame(width: 30, height: 100)
                                 .cornerRadius(6)
                             
-                            Rectangle()
-                                .foregroundColor(activityColor(activityLevels[index]))
-                                .frame(width: 30, height: activityLevels[index] * 100)
-                                .cornerRadius(6)
+                            let activityLevel = getActivityLevel(for: index)
+                            if activityLevel > 0 {
+                                Rectangle()
+                                    .foregroundColor(activityColor(activityLevel))
+                                    .frame(width: 30, height: max(0, min(activityLevel * 100, 100)))
+                                    .cornerRadius(6)
+                            }
                         }
                         
                         Text(days[index])
@@ -173,10 +230,29 @@ struct WeeklyActivityView: View {
         )
     }
     
+    // Obtener el nivel de actividad del HealthKitManager si está disponible
+    private func getActivityLevel(for index: Int) -> Double {
+        if dataStore.isHealthKitEnabled {
+            let value = healthKitManager.weeklyActivityLevels[index]
+            // Proteger contra NaN y valores negativos
+            if value.isNaN || value < 0 {
+                return 0
+            }
+            return value
+        } else {
+            // Valores simulados si HealthKit no está disponible
+            let simulatedLevels: [Double] = [0.3, 0.7, 0.5, 0.8, 0.2, 0.9, 0.6]
+            return simulatedLevels[index]
+        }
+    }
+    
     func activityColor(_ level: Double) -> Color {
-        if level < 0.3 {
+        // Validación adicional para evitar problemas con valores extremos
+        let safeLevel = max(0, min(level, 1))
+        
+        if safeLevel < 0.3 {
             return pureLifeGreen.opacity(0.5)
-        } else if level < 0.7 {
+        } else if safeLevel < 0.7 {
             return pureLifeGreen.opacity(0.7)
         } else {
             return pureLifeGreen

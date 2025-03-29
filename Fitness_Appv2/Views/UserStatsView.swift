@@ -3,10 +3,14 @@ import UIKit
 
 struct UserStatsView: View {
     @EnvironmentObject var dataStore: AppDataStore
+    @State private var showingHealthKitAuth = false
     
     // Colores de PureLife
     private let pureLifeGreen = Color(red: 199/255, green: 227/255, blue: 214/255)
     private let pureLifeBlack = Color.black
+    
+    // Referencia al HealthKitManager
+    private let healthKitManager = HealthKitManager.shared
     
     var body: some View {
         VStack(spacing: 10) {
@@ -18,6 +22,18 @@ struct UserStatsView: View {
                     .foregroundColor(pureLifeBlack)
                 
                 Spacer()
+                
+                // Botón para refrescar datos de HealthKit
+                if dataStore.isHealthKitEnabled {
+                    Button(action: {
+                        dataStore.refreshHealthData()
+                    }) {
+                        Image(systemName: "arrow.clockwise")
+                            .foregroundColor(pureLifeBlack)
+                            .font(.headline)
+                    }
+                    .padding(.trailing, 8)
+                }
                 
                 Image(systemName: "person.crop.circle.fill")
                     .resizable()
@@ -60,6 +76,56 @@ struct UserStatsView: View {
                 )
             }
             .padding(.horizontal, 10)
+            
+            // Datos de HealthKit si están disponibles
+            if dataStore.isHealthKitEnabled {
+                HStack(spacing: 15) {
+                    let steps = healthKitManager.totalSteps >= 0 ? healthKitManager.totalSteps : 0
+                    let calories = max(0, Int(healthKitManager.activeCalories))
+                    
+                    HealthStatCard(
+                        title: "Steps Today",
+                        value: "\(steps)",
+                        icon: "shoeprints.fill",
+                        color: pureLifeBlack,
+                        backgroundColor: Color.white
+                    )
+                    
+                    HealthStatCard(
+                        title: "Calories",
+                        value: "\(calories)",
+                        icon: "flame.fill",
+                        color: pureLifeBlack,
+                        backgroundColor: Color.white
+                    )
+                }
+                .padding(.horizontal, 10)
+                .padding(.top, 5)
+            } else {
+                // Botón para conectar con Apple Health
+                Button(action: {
+                    showingHealthKitAuth = true
+                }) {
+                    HStack {
+                        Image(systemName: "heart.text.square.fill")
+                            .font(.system(size: 24))
+                            .foregroundColor(pureLifeBlack)
+                            .padding(.trailing, 5)
+                        
+                        Text("Connect to Apple Health")
+                            .font(.headline)
+                            .foregroundColor(pureLifeBlack)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(pureLifeGreen.opacity(0.5))
+                    )
+                    .padding(.horizontal, 10)
+                    .padding(.top, 5)
+                }
+            }
         }
         .padding(.vertical)
         .background(
@@ -67,6 +133,9 @@ struct UserStatsView: View {
                 .fill(Color.white)
                 .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
         )
+        .sheet(isPresented: $showingHealthKitAuth) {
+            HealthKitAuthView()
+        }
     }
 }
 
@@ -97,6 +166,46 @@ struct StatCard: View {
             RoundedRectangle(cornerRadius: 12)
                 .fill(backgroundColor)
                 .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 1)
+        )
+    }
+}
+
+struct HealthStatCard: View {
+    let title: String
+    let value: String
+    let icon: String
+    let color: Color
+    let backgroundColor: Color
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 20))
+                .foregroundColor(color)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.caption)
+                    .foregroundColor(color.opacity(0.7))
+                
+                Text(value)
+                    .font(.headline)
+                    .foregroundColor(color)
+            }
+            
+            Spacer()
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 12)
+        .padding(.horizontal, 10)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(backgroundColor)
+                .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 1)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color(red: 199/255, green: 227/255, blue: 214/255), lineWidth: 1)
         )
     }
 }
