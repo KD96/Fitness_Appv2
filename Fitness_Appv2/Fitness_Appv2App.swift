@@ -9,8 +9,6 @@ import SwiftUI
 
 @main
 struct Fitness_Appv2App: App {
-    let persistenceController = PersistenceController.shared
-
     var body: some Scene {
         WindowGroup {
             MainTabView()
