@@ -126,6 +126,25 @@ struct OnboardingView: View {
                     .aspectRatio(contentMode: .fit)
                     .frame(height: 80)
                 
+                // Icono atlético en lugar de imagen
+                ZStack {
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(LinearGradient(
+                            gradient: Gradient(colors: [Color.blue.opacity(0.2), Color.green.opacity(0.2)]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ))
+                        .frame(height: 200)
+                    
+                    Image(systemName: "figure.mixed.cardio")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(height: 120)
+                        .foregroundColor(.blue)
+                }
+                .padding(.horizontal, 30)
+                .shadow(radius: 5)
+                
                 Text("Track your fitness journey, earn rewards, and connect with friends.")
                     .font(.system(size: 18, weight: .medium, design: .rounded))
                     .multilineTextAlignment(.center)
@@ -174,6 +193,25 @@ struct OnboardingView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
             
+            // Icono motivador en lugar de imagen
+            ZStack {
+                RoundedRectangle(cornerRadius: 15)
+                    .fill(LinearGradient(
+                        gradient: Gradient(colors: [Color.orange.opacity(0.2), Color.yellow.opacity(0.2)]),
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ))
+                    .frame(height: 150)
+                
+                Image(systemName: "figure.strengthtraining.traditional")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(height: 100)
+                    .foregroundColor(.orange)
+            }
+            .padding(.horizontal, 30)
+            .shadow(radius: 3)
+            
             ScrollView {
                 VStack(spacing: 12) {
                     ForEach(UserPreferences.FitnessGoal.allCases, id: \.self) { goal in
@@ -188,7 +226,7 @@ struct OnboardingView: View {
                 }
                 .padding(.horizontal, 30)
             }
-            .frame(height: 300)
+            .frame(height: 250)
         }
         .padding()
     }
@@ -204,6 +242,25 @@ struct OnboardingView: View {
             Text("Select all that apply")
                 .font(.subheadline)
                 .foregroundColor(pureLifeBlack.opacity(0.7))
+            
+            // Icono deportivo en lugar de imagen
+            ZStack {
+                RoundedRectangle(cornerRadius: 15)
+                    .fill(LinearGradient(
+                        gradient: Gradient(colors: [Color.blue.opacity(0.2), Color.cyan.opacity(0.2)]),
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ))
+                    .frame(height: 120)
+                
+                Image(systemName: "figure.run")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(height: 80)
+                    .foregroundColor(.blue)
+            }
+            .padding(.horizontal, 30)
+            .shadow(radius: 3)
             
             ScrollView {
                 VStack(alignment: .leading, spacing: 15) {
@@ -225,7 +282,7 @@ struct OnboardingView: View {
                 }
                 .padding(.horizontal, 20)
             }
-            .frame(height: 300)
+            .frame(height: 220)
         }
         .padding()
     }
@@ -238,6 +295,25 @@ struct OnboardingView: View {
                 .foregroundColor(pureLifeBlack)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
+            
+            // Icono de motivación fitness en lugar de imagen
+            ZStack {
+                RoundedRectangle(cornerRadius: 15)
+                    .fill(LinearGradient(
+                        gradient: Gradient(colors: [Color.green.opacity(0.2), Color.mint.opacity(0.2)]),
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ))
+                    .frame(height: 140)
+                
+                Image(systemName: "trophy.fill")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(height: 80)
+                    .foregroundColor(.green)
+            }
+            .padding(.horizontal, 30)
+            .shadow(radius: 3)
             
             // Token icon
             ZStack {
@@ -418,6 +494,9 @@ struct OnboardingView: View {
         
         // Save data
         dataStore.saveData()
+        
+        // Mark onboarding as completed
+        UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
         
         // Close onboarding
         isShowingOnboarding = false

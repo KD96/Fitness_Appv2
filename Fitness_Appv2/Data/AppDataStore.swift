@@ -384,44 +384,6 @@ class AppDataStore: ObservableObject {
         let calendar = Calendar.current
         return calendar.isDateInToday(date)
     }
-}
-
-// MARK: - Estadísticas del Usuario
-
-extension AppDataStore {
-    // Propiedades computadas para estadísticas
-    var totalWorkoutsCompleted: Int {
-        return currentUser.completedWorkouts.count
-    }
-    
-    var weeklyWorkoutCount: Int {
-        return workoutsInLastDays(7).count
-    }
-    
-    var totalMinutesExercised: Int {
-        return currentUser.completedWorkouts.reduce(0) { $0 + $1.durationMinutes }
-    }
-    
-    var weeklyMinutesExercised: Int {
-        return workoutsInLastDays(7).reduce(0) { $0 + $1.durationMinutes }
-    }
-    
-    var totalCaloriesBurned: Double {
-        return currentUser.completedWorkouts.reduce(0) { $0 + $1.caloriesBurned }
-    }
-    
-    var weeklyCaloriesBurned: Double {
-        return workoutsInLastDays(7).reduce(0) { $0 + $1.caloriesBurned }
-    }
-    
-    var weeklyTokensEarned: Double {
-        return workoutsInLastDays(7).reduce(0) { $0 + $1.tokensEarned }
-    }
-    
-    // Para gráficos y HealthKit
-    var isHealthKitAuthorized: Bool {
-        return isHealthKitEnabled
-    }
     
     // Métodos para filtrar datos
     private func workoutsInLastDays(_ days: Int) -> [Workout] {
@@ -429,6 +391,26 @@ extension AppDataStore {
         let startDate = calendar.date(byAdding: .day, value: -days, to: Date()) ?? Date()
         
         return currentUser.completedWorkouts.filter { $0.date >= startDate }
+    }
+    
+    // MARK: - Reset User Data
+    
+    /// Resets user data to a clean state for logout
+    func resetUserData() {
+        // Create a new default user
+        currentUser = User(name: "User")
+        
+        // Reset any necessary app state
+        isHealthKitEnabled = false
+        
+        // Re-generate rewards and missions for the new user
+        setupRewardsAndMissions()
+        
+        // Clear any persisted user data
+        UserDefaults.standard.removeObject(forKey: "userData")
+        
+        // Notify observers about the reset
+        objectWillChange.send()
     }
     
     // Estructura para datos de gráficos
@@ -494,5 +476,43 @@ extension AppDataStore {
             return maxValue * 1.2
         }
         return 10.0 // Valor predeterminado si no hay datos
+    }
+}
+
+// MARK: - Estadísticas del Usuario
+
+extension AppDataStore {
+    // Propiedades computadas para estadísticas
+    var totalWorkoutsCompleted: Int {
+        return currentUser.completedWorkouts.count
+    }
+    
+    var weeklyWorkoutCount: Int {
+        return workoutsInLastDays(7).count
+    }
+    
+    var totalMinutesExercised: Int {
+        return currentUser.completedWorkouts.reduce(0) { $0 + $1.durationMinutes }
+    }
+    
+    var weeklyMinutesExercised: Int {
+        return workoutsInLastDays(7).reduce(0) { $0 + $1.durationMinutes }
+    }
+    
+    var totalCaloriesBurned: Double {
+        return currentUser.completedWorkouts.reduce(0) { $0 + $1.caloriesBurned }
+    }
+    
+    var weeklyCaloriesBurned: Double {
+        return workoutsInLastDays(7).reduce(0) { $0 + $1.caloriesBurned }
+    }
+    
+    var weeklyTokensEarned: Double {
+        return workoutsInLastDays(7).reduce(0) { $0 + $1.tokensEarned }
+    }
+    
+    // Para gráficos y HealthKit
+    var isHealthKitAuthorized: Bool {
+        return isHealthKitEnabled
     }
 } 

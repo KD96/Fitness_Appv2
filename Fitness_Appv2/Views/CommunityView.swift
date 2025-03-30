@@ -104,6 +104,9 @@ struct CommunityView: View {
     private var leaderboardContent: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 24) {
+                // Banner de motivación con imagen atlética
+                communityBanner
+                
                 // Top performers cards with medals
                 topPerformersSection
                 
@@ -113,6 +116,51 @@ struct CommunityView: View {
             .padding(.horizontal, 20)
             .padding(.bottom, 30)
         }
+    }
+    
+    // Banner de motivación comunitaria
+    private var communityBanner: some View {
+        ZStack(alignment: .bottomLeading) {
+            // Rectángulo con gradiente en lugar de imagen
+            RoundedRectangle(cornerRadius: 16)
+                .fill(LinearGradient(
+                    gradient: Gradient(colors: [Color.green.opacity(0.3), Color.blue.opacity(0.3)]),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                ))
+                .frame(height: 160)
+            
+            // Overlay gradient
+            RoundedRectangle(cornerRadius: 16)
+                .fill(LinearGradient(
+                    gradient: Gradient(colors: [.black.opacity(0.7), .clear]),
+                    startPoint: .bottom,
+                    endPoint: .center
+                ))
+                .frame(height: 160)
+            
+            // Icono grande de grupo
+            Image(systemName: "person.3.fill")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(height: 60)
+                .foregroundColor(.white.opacity(0.3))
+                .padding(.trailing, 20)
+                .padding(.top, 20)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+            
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Community Challenge")
+                    .font(.system(size: 22, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                
+                Text("Join others in reaching fitness goals")
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .foregroundColor(.white.opacity(0.9))
+            }
+            .padding(20)
+        }
+        .shadow(radius: 5)
     }
     
     private var topPerformersSection: some View {
@@ -180,15 +228,24 @@ struct CommunityView: View {
                     .foregroundColor(.white)
             }
             
-            // User avatar with initials
+            // User avatar with icon instead of image
             ZStack {
                 Circle()
                     .fill(PureLifeColors.logoGreen.opacity(0.15))
                     .frame(width: 60 * scale, height: 60 * scale)
                 
-                Text(String(user.firstName.prefix(1)))
-                    .font(.system(size: 24 * scale, weight: .semibold, design: .rounded))
-                    .foregroundColor(PureLifeColors.logoGreen)
+                // Si es top 3, muestra un icono atlético en lugar de iniciales
+                if position <= 3 {
+                    Image(systemName: getAthleteIconForPosition(position))
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 30 * scale, height: 30 * scale)
+                        .foregroundColor(getColorForPosition(position))
+                } else {
+                    Text(String(user.firstName.prefix(1)))
+                        .font(.system(size: 24 * scale, weight: .semibold, design: .rounded))
+                        .foregroundColor(PureLifeColors.logoGreen)
+                }
             }
             
             // User name and points
@@ -204,6 +261,34 @@ struct CommunityView: View {
             }
         }
         .frame(maxWidth: .infinity)
+    }
+    
+    // Función para obtener iconos atléticos según la posición
+    private func getAthleteIconForPosition(_ position: Int) -> String {
+        switch position {
+        case 1:
+            return "figure.run"
+        case 2:
+            return "dumbbell"
+        case 3:
+            return "figure.yoga"
+        default:
+            return "figure.mixed.cardio"
+        }
+    }
+    
+    // Función para obtener colores según la posición
+    private func getColorForPosition(_ position: Int) -> Color {
+        switch position {
+        case 1:
+            return .blue
+        case 2:
+            return .orange
+        case 3:
+            return .purple
+        default:
+            return PureLifeColors.logoGreen
+        }
     }
     
     private func medalGradient(for position: Int) -> Gradient {

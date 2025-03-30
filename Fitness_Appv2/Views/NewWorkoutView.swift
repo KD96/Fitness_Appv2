@@ -26,21 +26,59 @@ struct NewWorkoutView: View {
     var body: some View {
         NavigationView {
             Form {
+                // Header image section
+                Section {
+                    VStack(alignment: .center, spacing: 0) {
+                        // Icono del tipo de entrenamiento en lugar de imagen
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        AthleteImages.getColorForWorkoutType(workoutType).opacity(0.3),
+                                        AthleteImages.getColorForWorkoutType(workoutType).opacity(0.1)
+                                    ]),
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ))
+                                .frame(height: 200)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                                )
+                            
+                            Image(systemName: AthleteImages.getIconForWorkoutType(workoutType))
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(height: 100)
+                                .foregroundColor(AthleteImages.getColorForWorkoutType(workoutType))
+                                .opacity(0.8)
+                        }
+                        .shadow(radius: 3)
+                        .padding(.vertical, 8)
+                    }
+                }
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                
                 Section(header: Text("Workout Information")) {
                     TextField("Name", text: $workoutName)
                         .padding(.vertical, 8)
                     
-                    Picker("Type", selection: $workoutType) {
-                        ForEach(WorkoutType.allCases, id: \.self) { type in
-                            Label(type.rawValue.capitalized, systemImage: type.icon)
-                                .tag(type)
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Type")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 15) {
+                                ForEach(WorkoutType.allCases, id: \.self) { type in
+                                    workoutTypeButton(type)
+                                }
+                            }
+                            .padding(.vertical, 5)
                         }
                     }
-                    .pickerStyle(MenuPickerStyle())
-                    .onChange(of: workoutType) { _, _ in
-                        // Reset or adjust values when workout type changes
-                        updateMetricsDefaults()
-                    }
+                    .padding(.vertical, 8)
                     
                     DatePicker("Date", selection: $date, displayedComponents: [.date, .hourAndMinute])
                         .padding(.vertical, 8)
@@ -82,6 +120,41 @@ struct NewWorkoutView: View {
                     presentationMode.wrappedValue.dismiss()
                 }
             )
+        }
+    }
+    
+    // Workout type selection button with athletic icons
+    @ViewBuilder
+    private func workoutTypeButton(_ type: WorkoutType) -> some View {
+        Button(action: {
+            withAnimation {
+                workoutType = type
+                updateMetricsDefaults()
+            }
+        }) {
+            VStack(spacing: 8) {
+                ZStack {
+                    Circle()
+                        .fill(workoutType == type ? 
+                              Color.blue.opacity(0.2) : 
+                              Color.gray.opacity(0.1))
+                        .frame(width: 70, height: 70)
+                    
+                    Image(systemName: AthleteImages.getIconForWorkoutType(type))
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 30, height: 30)
+                        .foregroundColor(workoutType == type ? .blue : .gray)
+                }
+                .overlay(
+                    Circle()
+                        .stroke(workoutType == type ? Color.blue : Color.clear, lineWidth: 2)
+                )
+                
+                Text(type.rawValue.capitalized)
+                    .font(.caption)
+                    .foregroundColor(workoutType == type ? .blue : .primary)
+            }
         }
     }
     

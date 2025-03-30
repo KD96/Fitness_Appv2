@@ -66,38 +66,69 @@ struct WorkoutDetailView: View {
     // MARK: - UI Components
     
     private var headerSection: some View {
-        UIComponents.Card(title: "", cornerRadius: 16) {
-            HStack(spacing: 15) {
-                // Icono del tipo de workout
-                ZStack {
-                    Circle()
-                        .fill(typeColor.opacity(0.15))
-                        .frame(width: 60, height: 60)
-                    
-                    Image(systemName: workout.type.icon)
-                        .font(.system(size: 24))
-                        .foregroundColor(typeColor)
-                }
+        VStack(spacing: 0) {
+            // Icono del tipo de entrenamiento en lugar de imagen
+            ZStack(alignment: .center) {
+                // Fondo con gradiente
+                Rectangle()
+                    .fill(LinearGradient(
+                        gradient: Gradient(colors: [typeColor.opacity(0.3), typeColor.opacity(0.1)]),
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ))
+                    .frame(height: 180)
                 
-                VStack(alignment: .leading, spacing: 5) {
-                    Text(workout.name)
-                        .font(.system(size: 20, weight: .bold, design: .rounded))
-                        .foregroundColor(PureLifeColors.textPrimary)
-                    
-                    Text(workout.type.rawValue)
-                        .font(.system(size: 16, weight: .medium, design: .rounded))
-                        .foregroundColor(PureLifeColors.textSecondary)
-                    
-                    Text(formattedDate)
-                        .font(.system(size: 14, weight: .medium, design: .rounded))
-                        .foregroundColor(PureLifeColors.textSecondary)
-                        .padding(.top, 5)
-                }
+                // Overlay gradient
+                LinearGradient(
+                    gradient: Gradient(colors: [.black.opacity(0.4), .clear, .black.opacity(0.5)]),
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: 180)
                 
-                Spacer()
+                // Icono grande del tipo de entrenamiento
+                Image(systemName: AthleteImages.getIconForWorkoutType(workout.type))
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(height: 100)
+                    .foregroundColor(.white.opacity(0.8))
+            }
+            .cornerRadius(16, corners: [.topLeft, .topRight])
+            
+            UIComponents.Card(title: "", cornerRadius: 0) {
+                HStack(spacing: 15) {
+                    // Icono del tipo de workout
+                    ZStack {
+                        Circle()
+                            .fill(typeColor.opacity(0.15))
+                            .frame(width: 60, height: 60)
+                        
+                        Image(systemName: workout.type.icon)
+                            .font(.system(size: 24))
+                            .foregroundColor(typeColor)
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text(workout.name)
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                            .foregroundColor(PureLifeColors.textPrimary)
+                        
+                        Text(workout.type.rawValue)
+                            .font(.system(size: 16, weight: .medium, design: .rounded))
+                            .foregroundColor(PureLifeColors.textSecondary)
+                        
+                        Text(formattedDate)
+                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                            .foregroundColor(PureLifeColors.textSecondary)
+                            .padding(.top, 5)
+                    }
+                    
+                    Spacer()
+                }
             }
         }
         .padding(.horizontal, Spacing.screenHorizontalPadding)
+        .shadow(radius: 5)
     }
     
     private var detailsSection: some View {

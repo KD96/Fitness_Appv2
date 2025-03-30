@@ -77,8 +77,42 @@ struct FitnessView: View {
             }
             .padding(.horizontal, 20)
             
-            // Athlete carousel
-            AthleteCarouselView(images: ["athlete1", "athlete2"], height: 180)
+            // Icono hero en lugar de imagen
+            ZStack(alignment: .bottomLeading) {
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(LinearGradient(
+                        gradient: Gradient(colors: [PureLifeColors.logoGreen.opacity(0.3), Color.blue.opacity(0.2)]),
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ))
+                    .frame(height: 200)
+                
+                // Overlay gradient
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(LinearGradient(
+                        gradient: Gradient(colors: [.black.opacity(0.6), .clear]),
+                        startPoint: .bottom,
+                        endPoint: .center
+                    ))
+                    .frame(height: 200)
+                
+                // Workout icon
+                Image(systemName: "figure.run")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(height: 100)
+                    .foregroundColor(.white.opacity(0.8))
+                    .padding(.trailing, 20)
+                    .padding(.top, 20)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+                
+                Text("Start Your Fitness Journey")
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .padding(20)
+            }
+            .padding(.horizontal, 20)
+            .shadow(radius: 5)
         }
     }
     
@@ -173,53 +207,46 @@ struct FitnessView: View {
             showingNewWorkout = true
         }) {
             VStack(alignment: .center, spacing: 10) {
-                // Athletic image or icon based on type
-                if let image = UIImage(named: AthleteCarouselView.getWorkoutTypeImages(type).first ?? "") {
-                    Image(uiImage: image)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 70, height: 70)
-                        .clipShape(Circle())
-                        .overlay(
-                            Circle()
-                                .stroke(
-                                    LinearGradient(
-                                        gradient: Gradient(colors: [
-                                            PureLifeColors.logoGreen,
-                                            PureLifeColors.logoGreen.opacity(0.5)
-                                        ]),
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    ),
-                                    lineWidth: 2
-                                )
-                        )
-                } else {
-                    ZStack {
-                        Circle()
-                            .fill(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [
-                                        PureLifeColors.logoGreen.opacity(0.2),
-                                        PureLifeColors.logoGreen.opacity(0.1)
-                                    ]),
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
+                // Icon with gradient background
+                ZStack {
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    AthleteImages.getColorForWorkoutType(type).opacity(0.3),
+                                    AthleteImages.getColorForWorkoutType(type).opacity(0.1)
+                                ]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
                             )
-                            .frame(width: 70, height: 70)
-                        
-                        Image(systemName: type.icon)
-                            .font(.system(size: 30))
-                            .foregroundColor(PureLifeColors.logoGreen)
-                    }
+                        )
+                        .frame(width: 90, height: 90)
+                    
+                    Image(systemName: AthleteImages.getIconForWorkoutType(type))
+                        .font(.system(size: 36))
+                        .foregroundColor(AthleteImages.getColorForWorkoutType(type))
                 }
+                .overlay(
+                    Circle()
+                        .stroke(
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    AthleteImages.getColorForWorkoutType(type).opacity(0.8),
+                                    AthleteImages.getColorForWorkoutType(type).opacity(0.3)
+                                ]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 2
+                        )
+                )
+                .shadow(radius: 3)
                 
                 Text(type.rawValue.capitalized)
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
             }
-            .frame(width: 100)
+            .frame(width: 110)
             .padding(.vertical, 10)
         }
     }

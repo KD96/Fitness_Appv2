@@ -4,6 +4,7 @@ struct SettingsView: View {
     @Environment(\.presentationMode) var presentationMode
     @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var dataStore: AppDataStore
+    @State private var showLogoutConfirmation = false
     
     var body: some View {
         NavigationView {
@@ -67,6 +68,21 @@ struct SettingsView: View {
                         Text("Terms of Service")
                     }
                 }
+                
+                // MARK: - Logout Section
+                Section {
+                    Button(action: {
+                        showLogoutConfirmation = true
+                    }) {
+                        HStack {
+                            Text("Logout")
+                                .foregroundColor(.red)
+                            Spacer()
+                            Image(systemName: "rectangle.portrait.and.arrow.right")
+                                .foregroundColor(.red)
+                        }
+                    }
+                }
             }
             .navigationBarTitle("Settings", displayMode: .large)
             .navigationBarItems(trailing: Button("Done") {
@@ -76,6 +92,16 @@ struct SettingsView: View {
                 dataStore.saveData()
             })
             .background(PureLifeColors.adaptiveBackground(scheme: colorScheme).edgesIgnoringSafeArea(.all))
+            .alert(isPresented: $showLogoutConfirmation) {
+                Alert(
+                    title: Text("Logout"),
+                    message: Text("Are you sure you want to logout? This will reset your session."),
+                    primaryButton: .destructive(Text("Logout")) {
+                        logout()
+                    },
+                    secondaryButton: .cancel()
+                )
+            }
         }
         .accentColor(PureLifeColors.logoGreen)
     }
@@ -85,6 +111,23 @@ struct SettingsView: View {
         formatter.dateStyle = .medium
         formatter.timeStyle = .none
         return formatter
+    }
+    
+    // MARK: - Logout Function
+    private func logout() {
+        // Reset onboarding flag in UserDefaults to trigger onboarding flow
+        UserDefaults.standard.set(false, forKey: "hasCompletedOnboarding")
+        
+        // Reset user data or create a new user
+        dataStore.resetUserData()
+        
+        // If there's a central authentication system, log the user out
+        
+        // Notify the system to show onboarding
+        NotificationCenter.default.post(name: Notification.Name("LogoutAndShowOnboarding"), object: nil)
+        
+        // Dismiss the settings view
+        presentationMode.wrappedValue.dismiss()
     }
 }
 
