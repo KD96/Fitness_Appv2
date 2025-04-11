@@ -70,8 +70,9 @@ struct WorkoutListView: View {
         UIComponents.TabContentView(
             backgroundColor: PureLifeColors.adaptiveBackground(scheme: colorScheme)
         ) {
+            // Fixed layout with proper scrolling
             VStack(spacing: 0) {
-                // Custom header with search bar
+                // Fixed Header - Stays at the top
                 VStack(spacing: 16) {
                     // Logo and profile
                     PureLifeHeader(showUserAvatar: true, userInitials: String(dataStore.currentUser.firstName.prefix(1)))
@@ -129,7 +130,7 @@ struct WorkoutListView: View {
                 .padding(.top, 16)
                 .padding(.bottom, 8)
                 
-                // Filter options row (collapsible)
+                // Filter options row (collapsible) - Still fixed at top
                 if showingFilterOptions {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 10) {
@@ -165,105 +166,112 @@ struct WorkoutListView: View {
                     .transition(.move(edge: .top).combined(with: .opacity))
                 }
                 
-                // AI Workout Recommendation (collapsible)
-                if showingAIRecommendation {
-                    VStack(spacing: 12) {
-                        // Recommendation content
-                        WorkoutRecommendationView()
-                            .padding(.horizontal, 20)
-                        
-                        // Toggle button to hide/show
-                        Button(action: {
-                            withAnimation {
-                                showingAIRecommendation = false
-                                dataStore.trackEvent(eventName: "hide_ai_recommendation")
-                            }
-                        }) {
-                            HStack {
-                                Text("Hide Recommendation")
-                                    .font(.system(size: 14, weight: .medium, design: .rounded))
-                                Image(systemName: "chevron.up")
-                                    .font(.system(size: 12))
-                            }
-                            .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
-                            .padding(.vertical, 8)
-                        }
-                    }
-                    .padding(.bottom, 8)
-                    .transition(.move(edge: .top).combined(with: .opacity))
-                } else {
-                    // Button to show recommendation if hidden
-                    Button(action: {
-                        withAnimation {
-                            showingAIRecommendation = true
-                            dataStore.trackEvent(eventName: "show_ai_recommendation")
-                        }
-                    }) {
-                        HStack {
-                            Image(systemName: "sparkles")
-                                .font(.system(size: 12))
-                            Text("Show AI Recommendation")
-                                .font(.system(size: 14, weight: .medium, design: .rounded))
-                            Image(systemName: "chevron.down")
-                                .font(.system(size: 12))
-                        }
-                        .foregroundColor(PureLifeColors.logoGreen)
-                        .padding(.vertical, 8)
-                    }
-                    .padding(.bottom, 8)
-                    .transition(.move(edge: .top).combined(with: .opacity))
-                }
-                
-                // Workout counter and add button
-                HStack {
-                    Text("\(filteredWorkouts.count) \(filteredWorkouts.count == 1 ? "Workout" : "Workouts")")
-                        .font(.system(size: 15, weight: .medium, design: .rounded))
-                        .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
-                    
-                    Spacer()
-                    
-                    Button(action: {
-                        showingNewWorkout = true
-                        dataStore.trackEvent(eventName: "add_workout_button_tapped")
-                        dataStore.trackFeatureUsed(featureName: "workout_creation")
-                    }) {
-                        HStack(spacing: 6) {
-                            Text("Add")
-                                .font(.system(size: 15, weight: .medium, design: .rounded))
-                            
-                            Image(systemName: "plus.circle.fill")
-                                .font(.system(size: 16))
-                        }
-                        .foregroundColor(PureLifeColors.logoGreen)
-                        .padding(.vertical, 8)
-                        .padding(.horizontal, 14)
-                        .background(
-                            Capsule()
-                                .fill(PureLifeColors.logoGreen.opacity(0.12))
-                        )
-                    }
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 16)
-                .padding(.bottom, 8)
-                
-                // Workouts list or empty state
-                if filteredWorkouts.isEmpty {
-                    emptyWorkoutsView
-                } else {
-                    ScrollView {
-                        LazyVStack(spacing: 16) {
-                            ForEach(filteredWorkouts) { workout in
-                                WorkoutCardView(workout: workout)
-                                    .onTapGesture {
-                                        selectedWorkout = workout
-                                        dataStore.trackEvent(eventName: "view_workout_details")
+                // Scrollable content area - includes AI recommendation and workout list
+                ScrollView(showsIndicators: true) {
+                    VStack(spacing: 16) {
+                        // AI Workout Recommendation (collapsible)
+                        if showingAIRecommendation {
+                            VStack(spacing: 12) {
+                                // Recommendation content
+                                WorkoutRecommendationView()
+                                    .padding(.horizontal, 20)
+                                
+                                // Toggle button to hide/show
+                                Button(action: {
+                                    withAnimation {
+                                        showingAIRecommendation = false
+                                        dataStore.trackEvent(eventName: "hide_ai_recommendation")
                                     }
+                                }) {
+                                    HStack {
+                                        Text("Hide Recommendation")
+                                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                                        Image(systemName: "chevron.up")
+                                            .font(.system(size: 12))
+                                    }
+                                    .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
+                                    .padding(.vertical, 8)
+                                }
+                            }
+                            .padding(.bottom, 8)
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                        } else {
+                            // Button to show recommendation if hidden
+                            Button(action: {
+                                withAnimation {
+                                    showingAIRecommendation = true
+                                    dataStore.trackEvent(eventName: "show_ai_recommendation")
+                                }
+                            }) {
+                                HStack {
+                                    Image(systemName: "sparkles")
+                                        .font(.system(size: 12))
+                                    Text("Show AI Recommendation")
+                                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                                    Image(systemName: "chevron.down")
+                                        .font(.system(size: 12))
+                                }
+                                .foregroundColor(PureLifeColors.logoGreen)
+                                .padding(.vertical, 8)
+                            }
+                            .padding(.bottom, 8)
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                            .padding(.horizontal, 20)
+                        }
+                        
+                        // Workout counter and add button
+                        HStack {
+                            Text("\(filteredWorkouts.count) \(filteredWorkouts.count == 1 ? "Workout" : "Workouts")")
+                                .font(.system(size: 15, weight: .medium, design: .rounded))
+                                .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
+                            
+                            Spacer()
+                            
+                            Button(action: {
+                                showingNewWorkout = true
+                                dataStore.trackEvent(eventName: "add_workout_button_tapped")
+                                dataStore.trackFeatureUsed(featureName: "workout_creation")
+                            }) {
+                                HStack(spacing: 6) {
+                                    Text("Add")
+                                        .font(.system(size: 15, weight: .medium, design: .rounded))
+                                    
+                                    Image(systemName: "plus.circle.fill")
+                                        .font(.system(size: 16))
+                                }
+                                .foregroundColor(PureLifeColors.logoGreen)
+                                .padding(.vertical, 8)
+                                .padding(.horizontal, 14)
+                                .background(
+                                    Capsule()
+                                        .fill(PureLifeColors.logoGreen.opacity(0.12))
+                                )
                             }
                         }
                         .padding(.horizontal, 20)
-                        .padding(.bottom, 30)
+                        .padding(.top, 8)
+                        
+                        // Workouts list or empty state
+                        if filteredWorkouts.isEmpty {
+                            emptyWorkoutsView
+                                .padding(.top, 20)
+                                .padding(.horizontal, 20)
+                        } else {
+                            LazyVStack(spacing: 16) {
+                                ForEach(filteredWorkouts) { workout in
+                                    WorkoutCardView(workout: workout)
+                                        .onTapGesture {
+                                            selectedWorkout = workout
+                                            dataStore.trackEvent(eventName: "view_workout_details")
+                                        }
+                                        .padding(.horizontal, 20)
+                                }
+                            }
+                            .padding(.top, 12)
+                            .padding(.bottom, 40)
+                        }
                     }
+                    .padding(.bottom, 30) // Extra padding at bottom for comfortable scrolling
                 }
             }
         }
