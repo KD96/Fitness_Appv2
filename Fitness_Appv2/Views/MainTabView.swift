@@ -5,8 +5,24 @@ struct MainTabView: View {
     @State private var selectedTab = 0
     @Environment(\.colorScheme) var colorScheme
     
+    // Determinar si se debe usar modo oscuro basado en preferencias
+    private var shouldUseDarkMode: Bool {
+        switch dataStore.currentUser.userPreferences.userAppearance {
+        case .dark:
+            return true
+        case .light:
+            return false
+        case .system:
+            return colorScheme == .dark
+        }
+    }
+    
     var body: some View {
-        ZStack(alignment: .bottom) {
+        ZStack {
+            // Fondo adaptable según el modo
+            (shouldUseDarkMode ? PureLifeColors.darkBackground : Color.white)
+                .edgesIgnoringSafeArea(.all)
+            
             TabView(selection: $selectedTab) {
                 FitnessView()
                     .tabItem {
@@ -22,98 +38,72 @@ struct MainTabView: View {
                     }
                     .tag(1)
                 
+                NutritionView()
+                    .tabItem {
+                        Image(systemName: "fork.knife")
+                        Text("Nutrition")
+                    }
+                    .tag(2)
+                
                 RewardView()
                     .tabItem {
                         Image(systemName: "gift")
                         Text("Rewards")
                     }
-                    .tag(2)
+                    .tag(3)
                 
                 SettingsView()
                     .tabItem {
                         Image(systemName: "gear")
                         Text("Settings")
                     }
-                    .tag(3)
+                    .tag(4)
             }
             .accentColor(PureLifeColors.logoGreen)
-            .edgesIgnoringSafeArea(.all)
             .onAppear {
                 configureTabBar()
             }
-            .onChange(of: colorScheme) { _, _ in
+            .onChange(of: shouldUseDarkMode) { _ in
                 configureTabBar()
             }
-            .onChange(of: dataStore.currentUser.userPreferences.userAppearance) { _, _ in
-                configureTabBar()
+            
+            // Overlay para el tabBar que se adapta al color del tema
+            VStack {
+                Spacer()
+                Rectangle()
+                    .fill(shouldUseDarkMode ? PureLifeColors.darkBackground : Color.white)
+                    .frame(height: 49) // Altura estándar del tab bar
+                    .edgesIgnoringSafeArea(.bottom)
             }
+            .edgesIgnoringSafeArea(.bottom)
         }
-        .edgesIgnoringSafeArea(.bottom)
-        .background(PureLifeColors.adaptiveBackground(scheme: colorScheme).edgesIgnoringSafeArea(.all))
     }
     
     private func configureTabBar() {
-        // Solución para el modo oscuro/claro
-        if #available(iOS 15.0, *) {
-            let tabBarAppearance = UITabBarAppearance()
-            
-            // Configuración basada en modo oscuro/claro
-            if colorScheme == .dark {
-                // Modo oscuro - colores específicos
-                tabBarAppearance.configureWithDefaultBackground()
-                tabBarAppearance.backgroundColor = UIColor(PureLifeColors.adaptiveSurface(scheme: .dark))
-                
-                // Colores personalizados para elementos
-                let itemAppearance = UITabBarItemAppearance()
-                itemAppearance.normal.iconColor = UIColor.gray
-                itemAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.gray]
-                itemAppearance.selected.iconColor = UIColor(PureLifeColors.logoGreen)
-                itemAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor(PureLifeColors.logoGreen)]
-                
-                tabBarAppearance.stackedLayoutAppearance = itemAppearance
-                tabBarAppearance.inlineLayoutAppearance = itemAppearance
-                tabBarAppearance.compactInlineLayoutAppearance = itemAppearance
-            } else {
-                // Modo claro
-                tabBarAppearance.configureWithDefaultBackground()
-                tabBarAppearance.backgroundColor = UIColor(PureLifeColors.adaptiveSurface(scheme: .light))
-                
-                // Colores personalizados para elementos
-                let itemAppearance = UITabBarItemAppearance()
-                itemAppearance.normal.iconColor = UIColor.gray
-                itemAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.gray]
-                itemAppearance.selected.iconColor = UIColor(PureLifeColors.logoGreen)
-                itemAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor(PureLifeColors.logoGreen)]
-                
-                tabBarAppearance.stackedLayoutAppearance = itemAppearance
-                tabBarAppearance.inlineLayoutAppearance = itemAppearance
-                tabBarAppearance.compactInlineLayoutAppearance = itemAppearance
-            }
-            
-            // Aplicar apariencia y hacer que sea translúcido
-            UITabBar.appearance().standardAppearance = tabBarAppearance
-            UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
-            UITabBar.appearance().isTranslucent = true
+        let appearance = UITabBarAppearance()
+        appearance.configureWithDefaultBackground()
+        
+        if shouldUseDarkMode {
+            appearance.backgroundColor = UIColor(PureLifeColors.darkBackground)
         } else {
-            // Configuración para iOS 14 y anteriores
-            UITabBar.appearance().isTranslucent = true
-            
-            if colorScheme == .dark {
-                UITabBar.appearance().barTintColor = UIColor(PureLifeColors.adaptiveSurface(scheme: .dark))
-            } else {
-                UITabBar.appearance().barTintColor = UIColor(PureLifeColors.adaptiveSurface(scheme: .light))
-            }
-            
-            // Actualizar el estilo de interfaz para iOS 14
-            switch dataStore.currentUser.userPreferences.userAppearance {
-            case .light:
-                UIApplication.shared.windows.first?.overrideUserInterfaceStyle = .light
-            case .dark:
-                UIApplication.shared.windows.first?.overrideUserInterfaceStyle = .dark
-            case .system:
-                UIApplication.shared.windows.first?.overrideUserInterfaceStyle = .unspecified
-            }
+            appearance.backgroundColor = UIColor.white
         }
+        
+        let itemAppearance = UITabBarItemAppearance()
+        itemAppearance.normal.iconColor = shouldUseDarkMode ? UIColor.lightGray : UIColor.gray
+        itemAppearance.normal.titleTextAttributes = [.foregroundColor: shouldUseDarkMode ? UIColor.lightGray : UIColor.gray]
+        itemAppearance.selected.iconColor = UIColor(PureLifeColors.logoGreen)
+        itemAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor(PureLifeColors.logoGreen)]
+        
+        appearance.stackedLayoutAppearance = itemAppearance
+        appearance.inlineLayoutAppearance = itemAppearance
+        appearance.compactInlineLayoutAppearance = itemAppearance
+        
+        UITabBar.appearance().standardAppearance = appearance
+        if #available(iOS 15.0, *) {
+            UITabBar.appearance().scrollEdgeAppearance = appearance
+        }
+        UITabBar.appearance().isTranslucent = false
     }
 }
 
