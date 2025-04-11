@@ -1,6 +1,86 @@
 import Foundation
 import SwiftUI
 
+// User level structure to represent user's experience level
+enum FitnessUserLevel: Int, Codable {
+    case beginner = 1
+    case intermediate = 2
+    case advanced = 3
+    case expert = 4
+    case master = 5
+    
+    var name: String {
+        switch self {
+        case .beginner: return "Beginner"
+        case .intermediate: return "Intermediate"
+        case .advanced: return "Advanced"
+        case .expert: return "Expert"
+        case .master: return "Master"
+        }
+    }
+    
+    // Add level property that returns the raw value
+    var level: Int {
+        return self.rawValue
+    }
+    
+    // Add title property for display in UI
+    var title: String {
+        return "Level \(self.rawValue): \(self.name)"
+    }
+    
+    // Calculate current level based on XP points
+    static func getCurrentLevel(points: Int) -> FitnessUserLevel {
+        switch points {
+        case 0..<1000:
+            return .beginner
+        case 1000..<3000:
+            return .intermediate
+        case 3000..<6000:
+            return .advanced
+        case 6000..<10000:
+            return .expert
+        default:
+            return .master
+        }
+    }
+    
+    // Calculate progress percentage to next level
+    static func getProgressToNextLevel(points: Int) -> Double {
+        let level = getCurrentLevel(points: points)
+        
+        // If already at max level, return 100%
+        if level == .master {
+            return 1.0
+        }
+        
+        let nextLevelPoints: Int
+        let currentLevelMinPoints: Int
+        
+        switch level {
+        case .beginner:
+            currentLevelMinPoints = 0
+            nextLevelPoints = 1000
+        case .intermediate:
+            currentLevelMinPoints = 1000
+            nextLevelPoints = 3000
+        case .advanced:
+            currentLevelMinPoints = 3000
+            nextLevelPoints = 6000
+        case .expert:
+            currentLevelMinPoints = 6000
+            nextLevelPoints = 10000
+        case .master:
+            return 1.0 // Should not reach here
+        }
+        
+        let pointsInCurrentLevel = points - currentLevelMinPoints
+        let pointsRequiredForNextLevel = nextLevelPoints - currentLevelMinPoints
+        
+        return Double(pointsInCurrentLevel) / Double(pointsRequiredForNextLevel)
+    }
+}
+
 struct User: Identifiable, Codable {
     var id = UUID()
     var name: String
@@ -47,13 +127,13 @@ struct User: Identifiable, Codable {
     }
     
     // Obtener el nivel actual
-    var currentLevel: UserLevel {
-        return UserLevel.getCurrentLevel(points: experiencePoints)
+    var currentLevel: FitnessUserLevel {
+        return FitnessUserLevel.getCurrentLevel(points: experiencePoints)
     }
     
     // Calcular progreso hacia el siguiente nivel
     var progressToNextLevel: Double {
-        return UserLevel.getProgressToNextLevel(points: experiencePoints)
+        return FitnessUserLevel.getProgressToNextLevel(points: experiencePoints)
     }
     
     // Comprar una recompensa

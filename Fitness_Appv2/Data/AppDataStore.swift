@@ -446,8 +446,14 @@ class AppDataStore: ObservableObject {
         analyticsManager.trackScreenView(screenName: screenName)
     }
     
-    func trackEvent(eventName: String) {
+    func trackEvent(eventName: String, parameters: [String: Any] = [:]) {
+        // Call the simpler method that doesn't take parameters
         analyticsManager.trackEvent(eventName: eventName)
+        
+        // Log parameters for debugging (since the existing AnalyticsManager doesn't support parameters)
+        if !parameters.isEmpty {
+            print("Event parameters (not tracked by AnalyticsManager): \(parameters)")
+        }
     }
     
     func trackFeatureUsed(featureName: String) {

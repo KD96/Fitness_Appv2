@@ -4,6 +4,9 @@ struct NutritionView: View {
     @EnvironmentObject var dataStore: AppDataStore
     @Environment(\.colorScheme) var colorScheme
     
+    // State for showing/hiding the AI recommendation
+    @State private var showingAIRecommendation = true
+    
     var body: some View {
         NavigationView {
             ZStack {
@@ -26,7 +29,63 @@ struct NutritionView: View {
                         }
                         .padding(.horizontal, 20)
                         
-                        // Meal Plan Cards
+                        // AI Nutrition Recommendation (collapsible)
+                        if showingAIRecommendation {
+                            VStack(spacing: 12) {
+                                // Recommendation content
+                                NutritionRecommendationView()
+                                    .padding(.horizontal, 20)
+                                
+                                // Toggle button to hide
+                                Button(action: {
+                                    withAnimation {
+                                        showingAIRecommendation = false
+                                        dataStore.trackEvent(eventName: "hide_ai_nutrition_plan")
+                                    }
+                                }) {
+                                    HStack {
+                                        Text("Hide AI Recommendation")
+                                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                                        Image(systemName: "chevron.up")
+                                            .font(.system(size: 12))
+                                    }
+                                    .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
+                                    .padding(.vertical, 8)
+                                }
+                            }
+                            .padding(.bottom, 8)
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                        } else {
+                            // Button to show recommendation if hidden
+                            Button(action: {
+                                withAnimation {
+                                    showingAIRecommendation = true
+                                    dataStore.trackEvent(eventName: "show_ai_nutrition_plan")
+                                }
+                            }) {
+                                HStack {
+                                    Image(systemName: "sparkles")
+                                        .font(.system(size: 12))
+                                    Text("Show AI Nutrition Plan")
+                                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                                    Image(systemName: "chevron.down")
+                                        .font(.system(size: 12))
+                                }
+                                .foregroundColor(PureLifeColors.logoGreen)
+                                .padding(.vertical, 8)
+                            }
+                            .padding(.bottom, 8)
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                        }
+                        
+                        // Standard Meal Plan Cards
+                        Text("Standard Plans")
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                            .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, 20)
+                            .padding(.top, 8)
+                        
                         mealPlanCard(title: "Weight Loss Plan", 
                                      description: "Low calorie, high protein diet to support weight loss while maintaining muscle mass.",
                                      calories: "1,800",
@@ -55,6 +114,13 @@ struct NutritionView: View {
                                      color: .green)
                         
                         // Nutrition Tips
+                        Text("Nutrition Tips")
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                            .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, 20)
+                            .padding(.top, 16)
+                            
                         tipCard(title: "Stay Hydrated", 
                                 description: "Drink at least 8 glasses of water daily to maintain energy levels and support metabolism.",
                                 icon: "drop.fill")

@@ -9,6 +9,9 @@ struct WorkoutListView: View {
     @State private var showingFilterOptions = false
     @Environment(\.colorScheme) var colorScheme
     
+    // New state for showing the AI recommendation
+    @State private var showingAIRecommendation = true
+    
     enum FilterOption: String, CaseIterable, Identifiable {
         case all = "All Workouts"
         case running = "Running"
@@ -159,6 +162,55 @@ struct WorkoutListView: View {
                         .padding(.horizontal, 20)
                         .padding(.vertical, 8)
                     }
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                }
+                
+                // AI Workout Recommendation (collapsible)
+                if showingAIRecommendation {
+                    VStack(spacing: 12) {
+                        // Recommendation content
+                        WorkoutRecommendationView()
+                            .padding(.horizontal, 20)
+                        
+                        // Toggle button to hide/show
+                        Button(action: {
+                            withAnimation {
+                                showingAIRecommendation = false
+                                dataStore.trackEvent(eventName: "hide_ai_recommendation")
+                            }
+                        }) {
+                            HStack {
+                                Text("Hide Recommendation")
+                                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                                Image(systemName: "chevron.up")
+                                    .font(.system(size: 12))
+                            }
+                            .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
+                            .padding(.vertical, 8)
+                        }
+                    }
+                    .padding(.bottom, 8)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                } else {
+                    // Button to show recommendation if hidden
+                    Button(action: {
+                        withAnimation {
+                            showingAIRecommendation = true
+                            dataStore.trackEvent(eventName: "show_ai_recommendation")
+                        }
+                    }) {
+                        HStack {
+                            Image(systemName: "sparkles")
+                                .font(.system(size: 12))
+                            Text("Show AI Recommendation")
+                                .font(.system(size: 14, weight: .medium, design: .rounded))
+                            Image(systemName: "chevron.down")
+                                .font(.system(size: 12))
+                        }
+                        .foregroundColor(PureLifeColors.logoGreen)
+                        .padding(.vertical, 8)
+                    }
+                    .padding(.bottom, 8)
                     .transition(.move(edge: .top).combined(with: .opacity))
                 }
                 
