@@ -62,20 +62,6 @@ struct Fitness_Appv2App: App {
         UINavigationBar.appearance().largeTitleTextAttributes = [.foregroundColor: UIColor(PureLifeColors.textPrimary)]
         UINavigationBar.appearance().titleTextAttributes = [.foregroundColor: UIColor(PureLifeColors.textPrimary)]
         
-        // Configurar la apariencia del TabBar para el modo oscuro
-        let tabAppearance = UITabBarAppearance()
-        tabAppearance.configureWithDefaultBackground()
-        
-        // Esta configuración se aplicará inicialmente y luego se actualizará
-        // según las preferencias del usuario
-        UITabBar.appearance().standardAppearance = tabAppearance
-        if #available(iOS 15.0, *) {
-            UITabBar.appearance().scrollEdgeAppearance = tabAppearance
-        }
-        
-        // Asegurar que no sea translúcido
-        UITabBar.appearance().isTranslucent = false
-        
         // Check if onboarding has been completed
         let hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
         self._isShowingOnboarding = State(initialValue: !hasCompletedOnboarding)

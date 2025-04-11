@@ -5,93 +5,72 @@ struct MainTabView: View {
     @State private var selectedTab = 0
     @Environment(\.colorScheme) var colorScheme
     
-    // Determinar si se debe usar modo oscuro basado en preferencias
-    private var shouldUseDarkMode: Bool {
-        switch dataStore.currentUser.userPreferences.userAppearance {
-        case .dark:
-            return true
-        case .light:
-            return false
-        case .system:
-            return colorScheme == .dark
-        }
-    }
-    
     var body: some View {
-        ZStack {
-            // Fondo adaptable según el modo
-            (shouldUseDarkMode ? PureLifeColors.darkBackground : Color.white)
-                .edgesIgnoringSafeArea(.all)
+        TabView(selection: $selectedTab) {
+            FitnessView()
+                .tabItem {
+                    Image(systemName: "figure.walk")
+                    Text("Dashboard")
+                }
+                .tag(0)
             
-            TabView(selection: $selectedTab) {
-                FitnessView()
-                    .tabItem {
-                        Image(systemName: "figure.walk")
-                        Text("Dashboard")
-                    }
-                    .tag(0)
-                
-                WorkoutListView()
-                    .tabItem {
-                        Image(systemName: "list.bullet")
-                        Text("Workouts")
-                    }
-                    .tag(1)
-                
-                NutritionView()
-                    .tabItem {
-                        Image(systemName: "fork.knife")
-                        Text("Nutrition")
-                    }
-                    .tag(2)
-                
-                RewardView()
-                    .tabItem {
-                        Image(systemName: "gift")
-                        Text("Rewards")
-                    }
-                    .tag(3)
-                
-                SettingsView()
-                    .tabItem {
-                        Image(systemName: "gear")
-                        Text("Settings")
-                    }
-                    .tag(4)
-            }
-            .accentColor(PureLifeColors.logoGreen)
-            .onAppear {
-                configureTabBar()
-            }
-            .onChange(of: shouldUseDarkMode) { _ in
-                configureTabBar()
-            }
+            WorkoutListView()
+                .tabItem {
+                    Image(systemName: "list.bullet")
+                    Text("Workouts")
+                }
+                .tag(1)
             
-            // Overlay para el tabBar que se adapta al color del tema
-            VStack {
-                Spacer()
-                Rectangle()
-                    .fill(shouldUseDarkMode ? PureLifeColors.darkBackground : Color.white)
-                    .frame(height: 49) // Altura estándar del tab bar
-                    .edgesIgnoringSafeArea(.bottom)
-            }
-            .edgesIgnoringSafeArea(.bottom)
+            NutritionView()
+                .tabItem {
+                    Image(systemName: "fork.knife")
+                    Text("Nutrition")
+                }
+                .tag(2)
+            
+            RewardView()
+                .tabItem {
+                    Image(systemName: "gift")
+                    Text("Rewards")
+                }
+                .tag(3)
+            
+            SettingsView()
+                .tabItem {
+                    Image(systemName: "gear")
+                    Text("Settings")
+                }
+                .tag(4)
+        }
+        .accentColor(PureLifeColors.logoGreen)
+        .onAppear {
+            setupTabBar()
+        }
+        .onChange(of: colorScheme) { _ in
+            setupTabBar()
         }
     }
     
-    private func configureTabBar() {
+    private func setupTabBar() {
         let appearance = UITabBarAppearance()
-        appearance.configureWithDefaultBackground()
+        appearance.configureWithOpaqueBackground()
         
-        if shouldUseDarkMode {
+        if colorScheme == .dark {
+            // Configurar apariencia para modo oscuro
             appearance.backgroundColor = UIColor(PureLifeColors.darkBackground)
         } else {
+            // Configurar apariencia para modo claro
             appearance.backgroundColor = UIColor.white
         }
         
+        // Configurar colores de los items
         let itemAppearance = UITabBarItemAppearance()
-        itemAppearance.normal.iconColor = shouldUseDarkMode ? UIColor.lightGray : UIColor.gray
-        itemAppearance.normal.titleTextAttributes = [.foregroundColor: shouldUseDarkMode ? UIColor.lightGray : UIColor.gray]
+        
+        // Texto y iconos normales
+        itemAppearance.normal.iconColor = UIColor.gray
+        itemAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.gray]
+        
+        // Texto y iconos seleccionados
         itemAppearance.selected.iconColor = UIColor(PureLifeColors.logoGreen)
         itemAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor(PureLifeColors.logoGreen)]
         
@@ -99,11 +78,13 @@ struct MainTabView: View {
         appearance.inlineLayoutAppearance = itemAppearance
         appearance.compactInlineLayoutAppearance = itemAppearance
         
+        // Aplicar la apariencia
         UITabBar.appearance().standardAppearance = appearance
+        
+        // Para iOS 15+, configurar también scrollEdgeAppearance
         if #available(iOS 15.0, *) {
             UITabBar.appearance().scrollEdgeAppearance = appearance
         }
-        UITabBar.appearance().isTranslucent = false
     }
 }
 
