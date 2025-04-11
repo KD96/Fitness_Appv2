@@ -15,8 +15,6 @@ struct WorkoutListView: View {
         case cycling = "Cycling"
         case walking = "Walking"
         case weightTraining = "Weight Training"
-        case highIntensity = "HIIT"
-        case yoga = "Yoga"
         
         var id: String { self.rawValue }
         
@@ -27,8 +25,6 @@ struct WorkoutListView: View {
             case .cycling: return "figure.outdoor.cycle"
             case .walking: return "figure.walk"
             case .weightTraining: return "dumbbell.fill"
-            case .highIntensity: return "heart.circle.fill"
-            case .yoga: return "figure.mind.and.body"
             }
         }
         
@@ -40,8 +36,6 @@ struct WorkoutListView: View {
             case .cycling: return .cycling
             case .walking: return .walking
             case .weightTraining: return .strength
-            case .highIntensity: return .hiit
-            case .yoga: return .yoga
             }
         }
     }
@@ -90,6 +84,11 @@ struct WorkoutListView: View {
                             TextField("Search workouts", text: $searchText)
                                 .font(.system(size: 16, design: .rounded))
                                 .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
+                                .onChange(of: searchText) { _, newValue in
+                                    if !newValue.isEmpty {
+                                        dataStore.trackEvent(eventName: "workout_search")
+                                    }
+                                }
                             
                             if !searchText.isEmpty {
                                 Button(action: {
@@ -109,6 +108,9 @@ struct WorkoutListView: View {
                         Button(action: {
                             withAnimation {
                                 showingFilterOptions.toggle()
+                                if showingFilterOptions {
+                                    dataStore.trackEvent(eventName: "show_workout_filters")
+                                }
                             }
                         }) {
                             Image(systemName: "line.3.horizontal.decrease.circle.fill")
@@ -131,6 +133,7 @@ struct WorkoutListView: View {
                             ForEach(FilterOption.allCases) { option in
                                 Button(action: {
                                     selectedFilterOption = option
+                                    dataStore.trackEvent(eventName: "filter_workouts_by_\(option.rawValue.lowercased().replacingOccurrences(of: " ", with: "_"))")
                                 }) {
                                     HStack(spacing: 6) {
                                         Image(systemName: option.icon)
@@ -169,6 +172,8 @@ struct WorkoutListView: View {
                     
                     Button(action: {
                         showingNewWorkout = true
+                        dataStore.trackEvent(eventName: "add_workout_button_tapped")
+                        dataStore.trackFeatureUsed(featureName: "workout_creation")
                     }) {
                         HStack(spacing: 6) {
                             Text("Add")
@@ -198,14 +203,13 @@ struct WorkoutListView: View {
                         LazyVStack(spacing: 16) {
                             ForEach(filteredWorkouts) { workout in
                                 WorkoutCardView(workout: workout)
-                                    .contentShape(Rectangle())
                                     .onTapGesture {
                                         selectedWorkout = workout
+                                        dataStore.trackEvent(eventName: "view_workout_details")
                                     }
                             }
                         }
                         .padding(.horizontal, 20)
-                        .padding(.top, 8)
                         .padding(.bottom, 30)
                     }
                 }
@@ -217,6 +221,9 @@ struct WorkoutListView: View {
         }
         .sheet(item: $selectedWorkout) { workout in
             WorkoutDetailView(workout: workout)
+        }
+        .onAppear {
+            dataStore.trackScreenView(screenName: "WorkoutListView")
         }
     }
     
@@ -404,8 +411,6 @@ struct WorkoutCardView: View {
         case "cycling": return "figure.outdoor.cycle"
         case "walking": return "figure.walk"
         case "weight training": return "dumbbell.fill"
-        case "hiit": return "heart.circle.fill"
-        case "yoga": return "figure.mind.and.body"
         default: return "figure.mixed.cardio"
         }
     }
@@ -416,8 +421,6 @@ struct WorkoutCardView: View {
         case "cycling": return Color.green
         case "walking": return Color.orange
         case "weight training": return Color.purple
-        case "hiit": return Color.red
-        case "yoga": return Color(hex: "#8A6CEA")
         default: return PureLifeColors.logoGreen
         }
     }

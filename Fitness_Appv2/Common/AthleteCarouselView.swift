@@ -105,16 +105,8 @@ struct AthleteCarouselView: View {
             return ["workout_types/running"] // Reuse similar
         case .cycling:
             return ["workout_types/cycling"]
-        case .swimming:
-            return ["workout_types/swimming"]
         case .strength:
             return ["workout_types/weight_lifting"]
-        case .yoga:
-            return ["workout_types/yoga"]
-        case .hiit:
-            return ["workout_types/hiit"]
-        case .other:
-            return ["athlete1", "athlete2"]
         }
     }
 } 

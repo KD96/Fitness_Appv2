@@ -2,6 +2,15 @@ import Foundation
 import SwiftUI
 import HealthKit
 
+// Modelo para datos de HealthKit
+struct HealthKitData: Codable {
+    var stepsCount: Int = 5324
+    var distance: Double = 3.7
+    var activeEnergy: Double = 420
+    var heartRate: Double = 72
+    var restingHeartRate: Double = 62
+}
+
 class AppDataStore: ObservableObject {
     @Published var currentUser: User
     @Published var socialFeed: [SocialActivity] = []
@@ -20,6 +29,14 @@ class AppDataStore: ObservableObject {
     // HealthKit manager
     private let healthKitManager = HealthKitManager.shared
     
+    // Analytics manager
+    private let analyticsManager = AnalyticsManager.shared
+    
+    // Offline storage
+    private let userDefaultsKey = "AppDataStore_UserData"
+    private let workoutsOfflineKey = "AppDataStore_OfflineWorkouts"
+    private var offlineWorkoutsQueue: [Workout] = []
+    
     // Mock data for MVP
     init() {
         // Create a default user
@@ -28,8 +45,7 @@ class AppDataStore: ObservableObject {
         // Add some sample friends
         friends = [
             User(name: "Alex", profileImage: "person.circle.fill"),
-            User(name: "Jamie", profileImage: "person.circle.fill"),
-            User(name: "Taylor", profileImage: "person.circle.fill")
+            User(name: "Jamie", profileImage: "person.circle.fill")
         ]
         
         // Add some sample social activities
@@ -47,7 +63,7 @@ class AppDataStore: ObservableObject {
         )
         
         let sampleActivity = SocialActivity.createWorkoutActivity(
-            user: friends[0], 
+            user: friends.first!, 
             workout: sampleWorkout
         )
         
@@ -58,6 +74,102 @@ class AppDataStore: ObservableObject {
         
         // Setup HealthKit
         setupHealthKit()
+        
+        // Load any cached data
+        loadCachedData()
+        
+        // Start analytics session
+        analyticsManager.startSession()
+    }
+    
+    deinit {
+        // End analytics session when app is closed
+        analyticsManager.endSession()
+    }
+    
+    // MARK: - Offline Support
+    
+    private func loadCachedData() {
+        // Load user data from UserDefaults
+        if let userData = UserDefaults.standard.data(forKey: userDefaultsKey),
+           let user = try? JSONDecoder().decode(User.self, from: userData) {
+            self.currentUser = user
+        }
+        
+        // Load offline workouts queue
+        if let workoutsData = UserDefaults.standard.data(forKey: workoutsOfflineKey),
+           let workouts = try? JSONDecoder().decode([Workout].self, from: workoutsData) {
+            self.offlineWorkoutsQueue = workouts
+            
+            // Process any offline workouts
+            processOfflineWorkouts()
+        }
+    }
+    
+    private func saveUserToCache() {
+        if let userData = try? JSONEncoder().encode(currentUser) {
+            UserDefaults.standard.set(userData, forKey: userDefaultsKey)
+        }
+    }
+    
+    private func saveOfflineWorkout(_ workout: Workout) {
+        // Add to offline queue
+        offlineWorkoutsQueue.append(workout)
+        
+        // Save to UserDefaults
+        if let workoutsData = try? JSONEncoder().encode(offlineWorkoutsQueue) {
+            UserDefaults.standard.set(workoutsData, forKey: workoutsOfflineKey)
+        }
+    }
+    
+    private func processOfflineWorkouts() {
+        // In a real app, this would sync with a server when online
+        for workout in offlineWorkoutsQueue {
+            // Add workout to user's completed workouts if not already there
+            if !currentUser.completedWorkouts.contains(where: { $0.id == workout.id }) {
+                addWorkoutToUser(workout)
+            }
+        }
+        
+        // Clear the queue after processing
+        offlineWorkoutsQueue.removeAll()
+        UserDefaults.standard.removeObject(forKey: workoutsOfflineKey)
+    }
+    
+    // MARK: - User & Workout Management
+    
+    func updateUser(_ user: User) {
+        self.currentUser = user
+        saveUserToCache()
+    }
+    
+    func addWorkout(_ workout: Workout) {
+        var workoutToAdd = workout
+        workoutToAdd.completed = true
+        
+        // Add workout to user
+        addWorkoutToUser(workoutToAdd)
+        
+        // Save to offline queue for syncing later
+        saveOfflineWorkout(workoutToAdd)
+        
+        // Track analytics
+        analyticsManager.trackWorkoutCompleted(type: workout.type.rawValue, durationMinutes: workout.durationMinutes)
+    }
+    
+    private func addWorkoutToUser(_ workout: Workout) {
+        // Update user with workout
+        currentUser.completeWorkout(workout)
+        
+        // Save changes
+        saveUserToCache()
+    }
+    
+    // Reset user data (for testing and logout)
+    func resetUserData() {
+        currentUser = User(name: "User")
+        UserDefaults.standard.removeObject(forKey: userDefaultsKey)
+        analyticsManager.trackEvent(eventName: "user_reset")
     }
     
     // MARK: - Configuración de Recompensas y Misiones
@@ -74,27 +186,6 @@ class AppDataStore: ObservableObject {
     }
     
     private func generateSampleRewards() {
-        // Recompensas de Crypto
-        availableRewards.append(Reward(
-            title: "10 PURE to Crypto",
-            description: "Convert your PURE tokens to cryptocurrency",
-            partnerName: "PureLife Crypto",
-            partnerLogo: "bitcoinsign.circle.fill",
-            tokenCost: 10,
-            category: .crypto,
-            isFeatured: true,
-            isNew: true
-        ))
-        
-        availableRewards.append(Reward(
-            title: "50 PURE to Crypto",
-            description: "Convert your PURE tokens to cryptocurrency with bonus",
-            partnerName: "PureLife Crypto",
-            partnerLogo: "bitcoinsign.circle.fill",
-            tokenCost: 50,
-            category: .crypto
-        ))
-        
         // Recompensas de Fitness
         availableRewards.append(Reward(
             title: "Running Shoes Discount",
@@ -113,7 +204,7 @@ class AppDataStore: ObservableObject {
             partnerName: "FitGym",
             partnerLogo: "dumbbell.fill",
             tokenCost: 20,
-            discountAmount: 10,
+            discountPercentage: 10,
             category: .fitness
         ))
         
@@ -135,7 +226,7 @@ class AppDataStore: ObservableObject {
             partnerLogo: "fork.knife.circle.fill",
             tokenCost: 30,
             category: .nutrition,
-            isNew: true
+            isFeatured: true
         ))
         
         // Recompensas de Bienestar
@@ -145,30 +236,8 @@ class AppDataStore: ObservableObject {
             partnerName: "ZenMind",
             partnerLogo: "brain.head.profile",
             tokenCost: 18,
-            category: .wellness
-        ))
-        
-        // Recompensas de Experiencias
-        availableRewards.append(Reward(
-            title: "Adventure Park Pass",
-            description: "25% off day pass to Adventure World",
-            partnerName: "Adventure World",
-            partnerLogo: "map.circle.fill",
-            tokenCost: 40,
-            discountPercentage: 25,
-            category: .experiences,
+            category: .wellness,
             isFeatured: true
-        ))
-        
-        // Recompensas de Tecnología
-        availableRewards.append(Reward(
-            title: "Fitness Tracker",
-            description: "$25 off latest model fitness tracker",
-            partnerName: "TechFit",
-            partnerLogo: "applewatch.circle.fill",
-            tokenCost: 35,
-            discountAmount: 25,
-            category: .technology
         ))
     }
     
@@ -191,7 +260,7 @@ class AppDataStore: ObservableObject {
                 type: .daily,
                 requirementType: .duration,
                 targetValue: 20,
-                workoutTypes: [.running, .cycling, .swimming]
+                workoutTypes: [.running, .cycling]
             ),
             Mission(
                 title: "Step Goal",
@@ -219,14 +288,6 @@ class AppDataStore: ObservableObject {
         return false
     }
     
-    func convertTokensToCrypto(amount: Double, to cryptoType: CryptoWallet.CryptoType = .bitcoin) -> Bool {
-        if currentUser.convertTokensToCrypto(amount: amount, to: cryptoType) {
-            saveData()
-            return true
-        }
-        return false
-    }
-    
     // MARK: - Métodos para Misiones
     
     func completeMission(_ mission: Mission) {
@@ -236,13 +297,6 @@ class AppDataStore: ObservableObject {
             // Actualizar tokens y XP del usuario
             currentUser.tokenBalance += mission.rewardTokens
             currentUser.experiencePoints += mission.experiencePoints
-            
-            // Registrar la transacción
-            currentUser.cryptoWallet.addTransaction(
-                amount: mission.rewardTokens,
-                type: .received,
-                description: "Completed mission: \(mission.title)"
-            )
             
             saveData()
         }
@@ -330,13 +384,6 @@ class AppDataStore: ObservableObject {
                 // Award tokens and XP
                 currentUser.tokenBalance += mission.rewardTokens
                 currentUser.experiencePoints += mission.experiencePoints
-                
-                // Register transaction
-                currentUser.cryptoWallet.addTransaction(
-                    amount: mission.rewardTokens,
-                    type: .received,
-                    description: "Completed mission: \(mission.title)"
-                )
             }
         }
     }
@@ -393,40 +440,36 @@ class AppDataStore: ObservableObject {
         return currentUser.completedWorkouts.filter { $0.date >= startDate }
     }
     
-    // MARK: - Reset User Data
+    // MARK: - Analytics Support
     
-    /// Resets user data to a clean state for logout
-    func resetUserData() {
-        // Create a new default user
-        currentUser = User(name: "User")
-        
-        // Reset any necessary app state
-        isHealthKitEnabled = false
-        
-        // Re-generate rewards and missions for the new user
-        setupRewardsAndMissions()
-        
-        // Clear any persisted user data
-        UserDefaults.standard.removeObject(forKey: "userData")
-        
-        // Notify observers about the reset
-        objectWillChange.send()
+    func trackScreenView(screenName: String) {
+        analyticsManager.trackScreenView(screenName: screenName)
     }
+    
+    func trackEvent(eventName: String) {
+        analyticsManager.trackEvent(eventName: eventName)
+    }
+    
+    func trackFeatureUsed(featureName: String) {
+        analyticsManager.trackFeatureUsed(featureName: featureName)
+    }
+    
+    func getAnalyticsReport() -> [String: Any] {
+        return analyticsManager.getAnalyticsReport()
+    }
+    
+    // Get most popular workout type
+    var mostPopularWorkoutType: String? {
+        return analyticsManager.getMostPopularWorkoutType()
+    }
+    
+    // MARK: - Chart Data
     
     // Estructura para datos de gráficos
     struct ChartData: Identifiable {
         var id = UUID()
         var label: String
         var value: Double
-    }
-    
-    // Modelo para datos de HealthKit
-    struct HealthKitData {
-        var stepsCount: Int = 5324
-        var distance: Double = 3.7
-        var activeEnergy: Double = 420
-        var heartRate: Double = 72
-        var restingHeartRate: Double = 62
     }
     
     // Obtener datos para el gráfico según el periodo seleccionado

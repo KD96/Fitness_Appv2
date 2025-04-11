@@ -208,16 +208,6 @@ struct ModernWorkoutCard: View {
                     )
                 )
             }
-        case .swimming:
-            if let laps = workout.laps, laps > 0 {
-                metrics.append(
-                    WorkoutCardMetric(
-                        name: "Laps",
-                        value: Double(laps),
-                        format: "%.0f"
-                    )
-                )
-            }
         case .strength:
             if let sets = workout.sets, sets > 0 {
                 metrics.append(
@@ -243,17 +233,6 @@ struct ModernWorkoutCard: View {
                         name: "Weight",
                         value: weight,
                         format: "%.1f kg"
-                    )
-                )
-            }
-        case .yoga, .hiit, .other:
-            if let intensity = workout.intensity {
-                metrics.append(
-                    WorkoutCardMetric(
-                        name: "Intensity",
-                        value: 0, // Not used for formatted value
-                        format: "",
-                        formattedValue: intensity.rawValue.capitalized
                     )
                 )
             }

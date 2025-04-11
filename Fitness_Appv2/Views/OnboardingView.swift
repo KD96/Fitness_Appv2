@@ -5,7 +5,7 @@ struct OnboardingView: View {
     @Binding var isShowingOnboarding: Bool
     @State private var currentPage = 0
     @State private var userName = ""
-    @State private var selectedGoal: UserPreferences.FitnessGoal = .loseWeight
+    @State private var selectedGoal: UserPreferences.FitnessGoal = .general
     @State private var selectedActivities: [WorkoutType] = []
     
     // Colores de PureLife
@@ -42,26 +42,25 @@ struct OnboardingView: View {
                     welcomeView
                         .tag(0)
                     
-                    // Name page
-                    namePage
+                    // Name and goals page (combined)
+                    nameAndGoalsPage
                         .tag(1)
-                    
-                    // Goals page
-                    goalsPage
-                        .tag(2)
                     
                     // Activities page
                     activitiesPage
-                        .tag(3)
-                    
-                    // Rewards page
-                    rewardsPage
-                        .tag(4)
+                        .tag(2)
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                 
                 // Page indicators
-                pageControl
+                HStack {
+                    ForEach(0..<3) { index in
+                        Circle()
+                            .fill(currentPage == index ? pureLifeBlack : Color.gray.opacity(0.3))
+                            .frame(width: 8, height: 8)
+                    }
+                }
+                .padding()
                 
                 // Navigation buttons
                 HStack {
@@ -88,7 +87,7 @@ struct OnboardingView: View {
                     
                     // Next/Finish button
                     Button(action: {
-                        if currentPage == 4 {
+                        if currentPage == 2 {
                             // Finish onboarding
                             completeOnboarding()
                         } else {
@@ -97,7 +96,7 @@ struct OnboardingView: View {
                             }
                         }
                     }) {
-                        Text(currentPage == 4 ? "Get Started" : "Next")
+                        Text(currentPage == 2 ? "Get Started" : "Next")
                             .font(.headline)
                             .foregroundColor(.white)
                             .padding()
@@ -121,10 +120,11 @@ struct OnboardingView: View {
             
             VStack(spacing: 30) {
                 // Logo
-                Image("Logo")
+                Image(systemName: "figure.run")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(height: 80)
+                    .foregroundColor(pureLifeBlack)
                 
                 // Icono atlético en lugar de imagen
                 ZStack {
@@ -145,7 +145,7 @@ struct OnboardingView: View {
                 .padding(.horizontal, 30)
                 .shadow(radius: 5)
                 
-                Text("Track your fitness journey, earn rewards, and connect with friends.")
+                Text("Track your fitness journey and earn rewards")
                     .font(.system(size: 18, weight: .medium, design: .rounded))
                     .multilineTextAlignment(.center)
                     .foregroundColor(PureLifeColors.textSecondary)
@@ -157,76 +157,44 @@ struct OnboardingView: View {
         }
     }
     
-    private var namePage: some View {
-        VStack(spacing: 30) {
-            Text("What's your name?")
-                .font(.title2)
-                .fontWeight(.bold)
-                .foregroundColor(pureLifeBlack)
-            
-            Image(systemName: "person.crop.circle.fill")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 100, height: 100)
-                .foregroundColor(pureLifeGreen)
-            
-            TextField("Enter your name", text: $userName)
-                .font(.title3)
-                .padding()
-                .background(Color.white)
-                .cornerRadius(10)
-                .padding(.horizontal, 40)
-            
-            Text("We'll use this to personalize your experience")
-                .font(.caption)
-                .foregroundColor(pureLifeBlack.opacity(0.7))
-        }
-        .padding()
-    }
-    
-    private var goalsPage: some View {
+    private var nameAndGoalsPage: some View {
         VStack(spacing: 20) {
-            Text("What's your primary fitness goal?")
+            Text("Let's get to know you")
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(pureLifeBlack)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
             
-            // Icono motivador en lugar de imagen
-            ZStack {
-                RoundedRectangle(cornerRadius: 15)
-                    .fill(LinearGradient(
-                        gradient: Gradient(colors: [Color.orange.opacity(0.2), Color.yellow.opacity(0.2)]),
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ))
-                    .frame(height: 150)
+            // Name field
+            VStack(alignment: .leading) {
+                Text("Your name")
+                    .font(.headline)
+                    .foregroundColor(pureLifeBlack.opacity(0.8))
                 
-                Image(systemName: "figure.strengthtraining.traditional")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(height: 100)
-                    .foregroundColor(.orange)
+                TextField("Enter your name", text: $userName)
+                    .font(.title3)
+                    .padding()
+                    .background(Color.white)
+                    .cornerRadius(10)
             }
-            .padding(.horizontal, 30)
-            .shadow(radius: 3)
+            .padding(.horizontal, 20)
+            .padding(.bottom, 20)
             
-            ScrollView {
-                VStack(spacing: 12) {
-                    ForEach(UserPreferences.FitnessGoal.allCases, id: \.self) { goal in
-                        GoalOptionButton(
-                            goal: goal,
-                            isSelected: selectedGoal == goal,
-                            action: {
-                                selectedGoal = goal
-                            }
-                        )
+            // Goals selection
+            VStack(alignment: .leading) {
+                Text("Your fitness goal")
+                    .font(.headline)
+                    .foregroundColor(pureLifeBlack.opacity(0.8))
+                
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 15) {
+                        ForEach(UserPreferences.FitnessGoal.allCases, id: \.self) { goal in
+                            goalButton(goal)
+                        }
                     }
+                    .padding(.horizontal, 20)
                 }
-                .padding(.horizontal, 30)
             }
-            .frame(height: 250)
+            .padding(.bottom, 20)
         }
         .padding()
     }
@@ -237,268 +205,106 @@ struct OnboardingView: View {
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(pureLifeBlack)
-                .multilineTextAlignment(.center)
             
             Text("Select all that apply")
                 .font(.subheadline)
                 .foregroundColor(pureLifeBlack.opacity(0.7))
             
-            // Icono deportivo en lugar de imagen
-            ZStack {
-                RoundedRectangle(cornerRadius: 15)
-                    .fill(LinearGradient(
-                        gradient: Gradient(colors: [Color.blue.opacity(0.2), Color.cyan.opacity(0.2)]),
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ))
-                    .frame(height: 120)
-                
-                Image(systemName: "figure.run")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(height: 80)
-                    .foregroundColor(.blue)
-            }
-            .padding(.horizontal, 30)
-            .shadow(radius: 3)
-            
-            ScrollView {
-                VStack(alignment: .leading, spacing: 15) {
-                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 15) {
-                        ForEach(WorkoutType.allCases, id: \.self) { activity in
-                            ActivityButton(
-                                activity: activity,
-                                isSelected: selectedActivities.contains(activity),
-                                action: {
-                                    if selectedActivities.contains(activity) {
-                                        selectedActivities.removeAll { $0 == activity }
-                                    } else {
-                                        selectedActivities.append(activity)
-                                    }
-                                }
-                            )
-                        }
-                    }
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 15) {
+                ForEach(WorkoutType.allCases, id: \.self) { activity in
+                    activityButton(activity)
                 }
-                .padding(.horizontal, 20)
             }
-            .frame(height: 220)
+            .padding(.horizontal, 20)
         }
         .padding()
-    }
-    
-    private var rewardsPage: some View {
-        VStack(spacing: 25) {
-            Text("Earn Rewards for Your Activity")
-                .font(.title2)
-                .fontWeight(.bold)
-                .foregroundColor(pureLifeBlack)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-            
-            // Icono de motivación fitness en lugar de imagen
-            ZStack {
-                RoundedRectangle(cornerRadius: 15)
-                    .fill(LinearGradient(
-                        gradient: Gradient(colors: [Color.green.opacity(0.2), Color.mint.opacity(0.2)]),
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ))
-                    .frame(height: 140)
-                
-                Image(systemName: "trophy.fill")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(height: 80)
-                    .foregroundColor(.green)
-            }
-            .padding(.horizontal, 30)
-            .shadow(radius: 3)
-            
-            // Token icon
-            ZStack {
-                Circle()
-                    .fill(pureLifeGreen)
-                    .frame(width: 120, height: 120)
-                
-                Text("PURE")
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(pureLifeBlack)
-            }
-            
-            // Reward items
-            VStack(alignment: .leading, spacing: 15) {
-                FeatureItem(
-                    icon: "bitcoinsign.circle",
-                    title: "Earn Crypto",
-                    description: "Convert your tokens to cryptocurrency"
-                )
-                
-                FeatureItem(
-                    icon: "tag.fill",
-                    title: "Exclusive Discounts",
-                    description: "Unlock partner offers and deals"
-                )
-                
-                FeatureItem(
-                    icon: "star.fill",
-                    title: "Premium Experiences",
-                    description: "Access unique events and content"
-                )
-            }
-            .padding(.horizontal, 30)
-        }
-        .padding()
-    }
-    
-    private var logoView: some View {
-        VStack(spacing: 10) {
-            Text("Track your fitness journey, earn rewards, and connect with friends.")
-                .font(.system(size: 18, weight: .medium, design: .rounded))
-                .multilineTextAlignment(.center)
-                .foregroundColor(PureLifeColors.textSecondary)
-                .padding(.horizontal, 30)
-        }
     }
     
     // MARK: - Helper Views
     
-    private var pageControl: some View {
-        HStack(spacing: 8) {
-            ForEach(0..<5) { i in
-                Circle()
-                    .fill(currentPage == i ? pureLifeBlack : pureLifeBlack.opacity(0.2))
-                    .frame(width: 8, height: 8)
-            }
+    private var logoView: some View {
+        ZStack {
+            Rectangle()
+                .fill(pureLifeGreen)
+                .frame(width: 60, height: 3)
+                .offset(y: -15)
+            
+            Text("FITNESS")
+                .font(.system(size: 11, weight: .heavy))
+                .foregroundColor(pureLifeBlack)
+                .kerning(2)
         }
-        .padding(.bottom, 20)
+        .padding(.bottom, 10)
     }
     
-    private struct GoalOptionButton: View {
-        let goal: UserPreferences.FitnessGoal
-        let isSelected: Bool
-        let action: () -> Void
-        
-        var body: some View {
-            Button(action: action) {
-                HStack {
-                    Image(systemName: goal.icon)
-                        .font(.title3)
-                        .foregroundColor(isSelected ? .white : .primary)
-                        .frame(width: 30)
-                    
-                    Text(goal.rawValue)
-                        .font(.headline)
-                        .foregroundColor(isSelected ? .white : .primary)
-                    
-                    Spacer()
-                    
-                    if isSelected {
-                        Image(systemName: "checkmark")
-                            .foregroundColor(.white)
-                    }
-                }
-                .padding()
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(isSelected ? Color(red: 199/255, green: 227/255, blue: 214/255) : Color.white)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(isSelected ? Color(red: 199/255, green: 227/255, blue: 214/255) : Color.gray.opacity(0.2), lineWidth: 1)
-                )
-            }
-        }
-    }
-    
-    private struct ActivityButton: View {
-        let activity: WorkoutType
-        let isSelected: Bool
-        let action: () -> Void
-        
-        var body: some View {
-            Button(action: action) {
-                VStack(spacing: 12) {
-                    Image(systemName: activity.icon)
-                        .font(.title2)
-                        .foregroundColor(isSelected ? .white : .primary)
-                    
-                    Text(activity.rawValue.capitalized)
-                        .font(.caption)
-                        .foregroundColor(isSelected ? .white : .primary)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(isSelected ? Color(red: 199/255, green: 227/255, blue: 214/255) : Color.white)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(isSelected ? Color(red: 199/255, green: 227/255, blue: 214/255) : Color.gray.opacity(0.2), lineWidth: 1)
-                )
-            }
-        }
-    }
-    
-    private struct FeatureItem: View {
-        let icon: String
-        let title: String
-        let description: String
-        
-        var body: some View {
-            HStack(spacing: 15) {
-                Image(systemName: icon)
-                    .font(.title2)
-                    .foregroundColor(Color.black)
-                    .frame(width: 30)
+    private func goalButton(_ goal: UserPreferences.FitnessGoal) -> some View {
+        Button(action: {
+            selectedGoal = goal
+        }) {
+            VStack {
+                Image(systemName: goal.icon)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 30, height: 30)
+                    .foregroundColor(selectedGoal == goal ? .white : pureLifeBlack)
+                    .padding(10)
+                    .background(selectedGoal == goal ? pureLifeBlack : Color.white)
+                    .clipShape(Circle())
                 
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(title)
-                        .font(.headline)
-                    
-                    Text(description)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                
-                Spacer()
+                Text(goal.rawValue)
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundColor(selectedGoal == goal ? pureLifeBlack : pureLifeBlack.opacity(0.6))
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(width: 80)
             }
-            .padding()
-            .background(Color.white)
-            .cornerRadius(12)
+            .padding(8)
+            .background(selectedGoal == goal ? pureLifeGreen.opacity(0.3) : Color.clear)
+            .cornerRadius(10)
+        }
+    }
+    
+    private func activityButton(_ activity: WorkoutType) -> some View {
+        Button(action: {
+            if selectedActivities.contains(activity) {
+                selectedActivities.removeAll { $0 == activity }
+            } else {
+                selectedActivities.append(activity)
+            }
+        }) {
+            HStack {
+                Image(systemName: activity.icon)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 20, height: 20)
+                    .foregroundColor(selectedActivities.contains(activity) ? .white : pureLifeBlack)
+                
+                Text(activity.rawValue.capitalized)
+                    .font(.callout)
+                    .foregroundColor(selectedActivities.contains(activity) ? .white : pureLifeBlack)
+            }
+            .padding(10)
+            .frame(maxWidth: .infinity)
+            .background(selectedActivities.contains(activity) ? pureLifeBlack : Color.white)
+            .cornerRadius(10)
         }
     }
     
     // MARK: - Actions
     
     private func completeOnboarding() {
-        // Update user data
-        if !userName.isEmpty {
-            dataStore.currentUser.name = userName
-        }
+        // Create user with onboarding data
+        var user = dataStore.currentUser
+        user.name = userName
+        user.userPreferences.fitnessGoal = selectedGoal
+        user.userPreferences.favoriteActivities = selectedActivities
         
-        // Update user preferences
-        dataStore.currentUser.userPreferences.fitnessGoal = selectedGoal
-        if !selectedActivities.isEmpty {
-            dataStore.currentUser.userPreferences.favoriteActivities = selectedActivities
-        }
-        
-        // Add initial bonus tokens
-        dataStore.currentUser.tokenBalance += 10
-        dataStore.currentUser.cryptoWallet.addTransaction(
-            amount: 10,
-            type: .received,
-            description: "Welcome bonus"
-        )
-        
-        // Save data
-        dataStore.saveData()
+        // Update user in data store
+        dataStore.updateUser(user)
         
         // Mark onboarding as completed
         UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
-        
-        // Close onboarding
         isShowingOnboarding = false
     }
 }

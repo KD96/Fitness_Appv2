@@ -236,7 +236,7 @@ struct CommunityView: View {
                 
                 // Si es top 3, muestra un icono atlético en lugar de iniciales
                 if position <= 3 {
-                    Image(systemName: getAthleteIconForPosition(position))
+                    Image(systemName: getIconForPosition(position))
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 30 * scale, height: 30 * scale)
@@ -263,15 +263,15 @@ struct CommunityView: View {
         .frame(maxWidth: .infinity)
     }
     
-    // Función para obtener iconos atléticos según la posición
-    private func getAthleteIconForPosition(_ position: Int) -> String {
+    // Función para obtener iconos según la posición
+    private func getIconForPosition(_ position: Int) -> String {
         switch position {
         case 1:
             return "figure.run"
         case 2:
             return "dumbbell"
         case 3:
-            return "figure.yoga"
+            return "figure.walk"
         default:
             return "figure.mixed.cardio"
         }

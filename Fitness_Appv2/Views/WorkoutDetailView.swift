@@ -256,18 +256,10 @@ struct WorkoutDetailView: View {
             return Color.blue
         case .cycling:
             return Color.orange
-        case .swimming:
-            return Color.cyan
-        case .yoga:
-            return Color.purple
-        case .hiit:
-            return Color.red
         case .strength:
             return Color.green
         case .walking:
             return Color.teal
-        case .other:
-            return Color.gray
         }
     }
     

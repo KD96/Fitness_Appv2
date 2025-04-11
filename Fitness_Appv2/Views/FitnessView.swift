@@ -59,6 +59,10 @@ struct FitnessView: View {
             .sheet(isPresented: $showingHealthKitAuth) {
                 HealthKitAuthView()
             }
+            .onAppear {
+                // Track screen view
+                dataStore.trackScreenView(screenName: "FitnessView")
+            }
         }
     }
     
@@ -190,10 +194,9 @@ struct FitnessView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 16) {
                     workoutTypeCard(.running)
-                    workoutTypeCard(.strength)
-                    workoutTypeCard(.yoga)
+                    workoutTypeCard(.walking)
                     workoutTypeCard(.cycling)
-                    workoutTypeCard(.swimming)
+                    workoutTypeCard(.strength)
                 }
                 .padding(.horizontal, 20)
                 .padding(.vertical, 5)
@@ -517,6 +520,22 @@ struct FitnessView: View {
             .padding(.top, 8)
             .padding(.bottom, 20)
         }
+    }
+    
+    private func startNewWorkout() {
+        // Track button tap
+        dataStore.trackEvent(eventName: "add_workout_tapped")
+        dataStore.trackFeatureUsed(featureName: "workout_creation")
+        
+        showingNewWorkout = true
+    }
+    
+    private func connectHealthApp() {
+        // Track health connection
+        dataStore.trackEvent(eventName: "connect_health_tapped")
+        dataStore.trackFeatureUsed(featureName: "health_integration")
+        
+        showingHealthKitAuth = true
     }
 }
 

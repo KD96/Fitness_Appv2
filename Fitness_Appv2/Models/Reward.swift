@@ -17,32 +17,23 @@ struct Reward: Identifiable, Codable {
     var isNew: Bool = false
     
     enum Category: String, Codable, CaseIterable {
-        case crypto = "Cryptocurrency"
         case fitness = "Fitness Gear"
         case nutrition = "Nutrition"
         case wellness = "Wellness"
-        case experiences = "Experiences"
-        case technology = "Tech Gadgets"
         
         var icon: String {
             switch self {
-            case .crypto: return "bitcoinsign.circle"
             case .fitness: return "figure.run.circle"
             case .nutrition: return "leaf.circle"
             case .wellness: return "heart.circle"
-            case .experiences: return "star.circle"
-            case .technology: return "applewatch.circle"
             }
         }
         
         var color: Color {
             switch self {
-            case .crypto: return Color.orange
             case .fitness: return Color.blue
             case .nutrition: return Color.green
             case .wellness: return Color.purple
-            case .experiences: return Color.pink
-            case .technology: return Color.gray
             }
         }
     }
@@ -76,36 +67,22 @@ struct UserLevel: Codable, Equatable {
             level: 1,
             title: "Beginner",
             requiredPoints: 0,
-            benefits: ["Basic rewards access", "Standard token earning rate"],
+            benefits: ["Basic rewards access"],
             tokenMultiplier: 1.0
         ),
         UserLevel(
             level: 2,
-            title: "Enthusiast",
-            requiredPoints: 100,
-            benefits: ["5% bonus on all tokens", "Access to limited offers"],
-            tokenMultiplier: 1.05
-        ),
-        UserLevel(
-            level: 3,
-            title: "Athlete",
-            requiredPoints: 250,
-            benefits: ["10% bonus on all tokens", "Early access to partner deals", "Exclusive rewards"],
+            title: "Intermediate",
+            requiredPoints: 200,
+            benefits: ["10% bonus on all tokens", "Access to premium rewards"],
             tokenMultiplier: 1.1
         ),
         UserLevel(
-            level: 4,
-            title: "Elite",
+            level: 3,
+            title: "Advanced",
             requiredPoints: 500,
-            benefits: ["15% bonus on all tokens", "Premium partner offers", "VIP experiences"],
-            tokenMultiplier: 1.15
-        ),
-        UserLevel(
-            level: 5,
-            title: "Champion",
-            requiredPoints: 1000,
-            benefits: ["25% bonus on all tokens", "All exclusive benefits", "Special NFT badges"],
-            tokenMultiplier: 1.25
+            benefits: ["20% bonus on all tokens", "All exclusive benefits"],
+            tokenMultiplier: 1.2
         )
     ]
     

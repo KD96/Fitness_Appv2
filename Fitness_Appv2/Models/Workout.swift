@@ -72,22 +72,14 @@ enum WorkoutType: String, Codable, CaseIterable {
     case running
     case walking
     case cycling
-    case swimming
     case strength
-    case yoga
-    case hiit
-    case other
     
     var icon: String {
         switch self {
         case .running: return "figure.run"
         case .walking: return "figure.walk"
         case .cycling: return "figure.outdoor.cycle"
-        case .swimming: return "figure.pool.swim"
         case .strength: return "dumbbell"
-        case .yoga: return "figure.yoga"
-        case .hiit: return "figure.highintensity.intervaltraining"
-        case .other: return "figure.mixed.cardio"
         }
     }
     
@@ -100,16 +92,8 @@ enum WorkoutType: String, Codable, CaseIterable {
             return [.duration, .distance, .calories, .steps, .heartRate]
         case .cycling:
             return [.duration, .distance, .calories, .heartRate]
-        case .swimming:
-            return [.duration, .distance, .calories, .laps, .heartRate]
         case .strength:
             return [.duration, .calories, .sets, .reps, .weight, .heartRate]
-        case .yoga:
-            return [.duration, .calories, .intensity, .heartRate]
-        case .hiit:
-            return [.duration, .calories, .intensity, .heartRate]
-        case .other:
-            return [.duration, .calories, .intensity, .heartRate]
         }
     }
 }

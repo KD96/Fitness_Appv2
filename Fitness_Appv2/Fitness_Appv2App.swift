@@ -12,9 +12,8 @@ struct AthleteImages {
     // Usar SF Symbols en lugar de imágenes externas
     static let runningIcons = ["figure.run", "figure.outdoor.cycle", "figure.hiking"]
     static let strengthIcons = ["dumbbell", "figure.strengthtraining.traditional", "figure.core.training"]
-    static let yogaIcons = ["figure.mind.and.body", "figure.yoga", "figure.cooldown"]
     static let cyclingIcons = ["figure.outdoor.cycle", "bicycle", "figure.rolling"]
-    static let swimmingIcons = ["figure.pool.swim", "drop.fill", "water.waves"]
+    static let walkingIcons = ["figure.walk", "figure.walk.motion", "figure.walk.circle"]
     static let generalIcons = ["figure.mixed.cardio", "heart.fill", "bolt.fill"]
     
     static func getIconForWorkoutType(_ type: WorkoutType) -> String {
@@ -23,19 +22,15 @@ struct AthleteImages {
             return runningIcons.randomElement() ?? "figure.run"
         case .strength:
             return strengthIcons.randomElement() ?? "dumbbell"
-        case .yoga:
-            return yogaIcons.randomElement() ?? "figure.yoga"
         case .cycling:
             return cyclingIcons.randomElement() ?? "bicycle"
-        case .swimming:
-            return swimmingIcons.randomElement() ?? "figure.pool.swim"
-        default:
-            return generalIcons.randomElement() ?? "figure.mixed.cardio"
+        case .walking:
+            return walkingIcons.randomElement() ?? "figure.walk"
         }
     }
     
     static func getRandomAthleteIcon() -> String {
-        let allIcons = runningIcons + strengthIcons + yogaIcons + cyclingIcons + swimmingIcons + generalIcons
+        let allIcons = runningIcons + strengthIcons + cyclingIcons + walkingIcons + generalIcons
         return allIcons.randomElement() ?? "figure.run"
     }
     
@@ -46,14 +41,10 @@ struct AthleteImages {
             return .blue
         case .strength:
             return .orange
-        case .yoga:
-            return .purple
         case .cycling:
             return .green
-        case .swimming:
-            return .cyan
-        default:
-            return .indigo
+        case .walking:
+            return .teal
         }
     }
 }

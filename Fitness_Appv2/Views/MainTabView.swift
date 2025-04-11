@@ -11,7 +11,7 @@ struct MainTabView: View {
                 FitnessView()
                     .tabItem {
                         Image(systemName: "figure.walk")
-                        Text("Fitness")
+                        Text("Dashboard")
                     }
                     .tag(0)
                 
@@ -29,10 +29,10 @@ struct MainTabView: View {
                     }
                     .tag(2)
                 
-                CommunityView()
+                SettingsView()
                     .tabItem {
-                        Image(systemName: "person.3")
-                        Text("Community")
+                        Image(systemName: "gear")
+                        Text("Settings")
                     }
                     .tag(3)
             }

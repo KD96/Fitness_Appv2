@@ -10,9 +10,8 @@ struct User: Identifiable, Codable {
     var workoutStreak: Int = 0
     var completedWorkouts: [Workout] = []
     
-    // Nuevos campos para funcionalidad mejorada
+    // Simplified fields for MVP
     var experiencePoints: Int = 0
-    var cryptoWallet = CryptoWallet()
     var purchasedRewards: [Reward] = []
     var userPreferences = UserPreferences()
     var joinDate = Date()
@@ -35,21 +34,11 @@ struct User: Identifiable, Codable {
         // Actualizar racha de entrenamientos (lógica simplificada)
         workoutStreak += 1
         
-        // Calcular recompensa de tokens con multiplicador de nivel
-        let currentLevel = UserLevel.getCurrentLevel(points: experiencePoints)
+        // Calculate token reward based on duration
         let baseTokens = workout.tokensEarned
-        let bonusTokens = baseTokens * (currentLevel.tokenMultiplier - 1.0)
-        let totalTokens = baseTokens + bonusTokens
         
         // Añadir tokens a balance
-        tokenBalance += totalTokens
-        
-        // Añadir tokens a la wallet
-        cryptoWallet.addTransaction(
-            amount: totalTokens,
-            type: .received,
-            description: "Completed \(workout.type.rawValue) workout"
-        )
+        tokenBalance += baseTokens
         
         // Añadir puntos de experiencia (XP)
         // 10 XP por minuto de ejercicio
@@ -73,27 +62,6 @@ struct User: Identifiable, Codable {
         if tokenBalance >= reward.tokenCost {
             tokenBalance -= reward.tokenCost
             purchasedRewards.append(reward)
-            
-            // Registrar la transacción
-            cryptoWallet.addTransaction(
-                amount: reward.tokenCost,
-                type: .sent,
-                description: "Purchased \(reward.title) from \(reward.partnerName)"
-            )
-            
-            return true
-        }
-        return false
-    }
-    
-    // Convertir tokens a crypto
-    mutating func convertTokensToCrypto(amount: Double, to cryptoType: CryptoWallet.CryptoType) -> Bool {
-        if tokenBalance >= amount {
-            tokenBalance -= amount
-            
-            // Realizar conversión a crypto
-            _ = cryptoWallet.convertTokens(tokenAmount: amount, to: cryptoType)
-            
             return true
         }
         return false
@@ -105,7 +73,6 @@ struct UserPreferences: Codable {
     var fitnessGoal: FitnessGoal = .general
     var favoriteActivities: [WorkoutType] = []
     var receiveNotifications: Bool = true
-    var preferredRewardCategories: [Reward.Category] = []
     var userAppearance: AppearanceMode = .system
     
     enum FitnessGoal: String, Codable, CaseIterable {
@@ -113,7 +80,6 @@ struct UserPreferences: Codable {
         case gainMuscle = "Gain Muscle"
         case improveEndurance = "Improve Endurance"
         case general = "General Fitness"
-        case stressReduction = "Stress Reduction"
         
         var icon: String {
             switch self {
@@ -121,7 +87,6 @@ struct UserPreferences: Codable {
             case .gainMuscle: return "figure.arms.open"
             case .improveEndurance: return "figure.run"
             case .general: return "heart"
-            case .stressReduction: return "brain.head.profile"
             }
         }
     }

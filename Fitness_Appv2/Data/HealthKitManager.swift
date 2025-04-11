@@ -10,10 +10,7 @@ class HealthKitManager: ObservableObject {
         .running,
         .walking,
         .cycling,
-        .swimming,
-        .traditionalStrengthTraining,
-        .yoga,
-        .highIntensityIntervalTraining
+        .traditionalStrengthTraining
     ]
     
     @Published var isAuthorized = false
@@ -276,16 +273,11 @@ class HealthKitManager: ObservableObject {
             return .walking
         case .cycling:
             return .cycling
-        case .swimming:
-            return .swimming
         case .traditionalStrengthTraining:
             return .strength
-        case .yoga:
-            return .yoga
-        case .highIntensityIntervalTraining:
-            return .hiit
         default:
-            return .other
+            // Map any other workout type to the closest match
+            return .running
         }
     }
 } 

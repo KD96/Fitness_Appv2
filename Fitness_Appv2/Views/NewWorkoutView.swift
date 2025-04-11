@@ -320,11 +320,12 @@ struct NewWorkoutView: View {
     
     // Update default values based on workout type
     private func updateMetricsDefaults() {
+        // Reset to defaults based on workout type
         switch workoutType {
         case .running:
             distance = 5.0
             steps = 6000
-            calories = 400
+            calories = 300
         case .walking:
             distance = 3.0
             steps = 4000
@@ -332,24 +333,11 @@ struct NewWorkoutView: View {
         case .cycling:
             distance = 15.0
             calories = 350
-        case .swimming:
-            distance = 1.0
-            laps = 20
-            calories = 300
         case .strength:
             sets = 3
             reps = 12
             weight = 15
             calories = 250
-        case .yoga:
-            intensity = .medium
-            calories = 180
-        case .hiit:
-            intensity = .high
-            calories = 450
-        case .other:
-            intensity = .medium
-            calories = 300
         }
     }
     
