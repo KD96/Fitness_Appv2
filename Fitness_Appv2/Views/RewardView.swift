@@ -12,7 +12,7 @@ struct RewardView: View {
     var body: some View {
         NavigationView {
             UIComponents.TabContentView(
-                backgroundImage: "athlete1",
+                backgroundImage: "women athlete",
                 backgroundOpacity: 0.07,
                 backgroundColor: PureLifeColors.adaptiveBackground(scheme: colorScheme)
             ) {
@@ -29,12 +29,7 @@ struct RewardView: View {
                         // Balance card
                         ZStack(alignment: .bottom) {
                             // Card background with modern design
-                            UIComponents.ModernCard(
-                                cornerRadius: 28,
-                                showAthlete: true,
-                                athleteImage: "athlete2",
-                                athleteOpacity: 0.08
-                            ) {
+                            UIComponents.ModernCard(cornerRadius: 28) {
                                 VStack(spacing: 10) {
                                     Text("Token Balance")
                                         .font(.system(size: 16, weight: .medium, design: .rounded))
@@ -218,20 +213,34 @@ struct RewardView: View {
             }
             .padding(.leading, 20)
             
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 20) {
-                    ForEach(dataStore.featuredRewards) { reward in
-                        // Enhanced featured reward card
-                        FeaturedRewardCard(reward: reward) {
-                            selectedReward = reward
-                            showingPurchaseConfirmation = true
+            GeometryReader { geo in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 16) {
+                        // Use different background images for each featured reward
+                        let backgroundImages = [
+                            "Tennis",
+                            "cycling",
+                            "women athlete"
+                        ]
+                        
+                        ForEach(Array(dataStore.featuredRewards.enumerated()), id: \.element.id) { index, reward in
+                            // Enhanced featured reward card with real photo background
+                            FeaturedRewardCardWithImage(
+                                reward: reward,
+                                backgroundImage: backgroundImages[index % backgroundImages.count],
+                                action: {
+                                    selectedReward = reward
+                                    showingPurchaseConfirmation = true
+                                }
+                            )
+                            .frame(width: geo.size.width * 0.75)
                         }
-                        .frame(width: 300, height: 220)
                     }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
                 }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 10)
             }
+            .frame(height: 240)
         }
     }
     
@@ -407,8 +416,8 @@ struct UserLevelView: View {
                                         endPoint: .trailing
                                     )
                                 )
-                                .frame(width: CGFloat(user.progressToNextLevel) * geometry.size.width, height: 10)
-                                .animation(.easeInOut, value: user.progressToNextLevel)
+                                .frame(width: CGFloat(min(max(user.progressToNextLevel, 0), 1)) * geometry.size.width, height: 10)
+                                .animation(.easeInOut, value: min(max(user.progressToNextLevel, 0), 1))
                         }
                         .frame(height: 10)
                     }
@@ -665,6 +674,109 @@ struct FeaturedRewardCard: View {
                     .padding(24)
                 }
             }
+        }
+    }
+}
+
+struct FeaturedRewardCardWithImage: View {
+    let reward: Reward
+    let backgroundImage: String
+    let action: () -> Void
+    @Environment(\.colorScheme) var colorScheme
+    
+    var body: some View {
+        Button(action: action) {
+            GeometryReader { geo in
+                ZStack {
+                    // Real image background
+                    if let image = UIImage(named: backgroundImage) {
+                        Image(uiImage: image)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: geo.size.width, height: 220)
+                            .cornerRadius(24)
+                            .clipped()
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 24)
+                                    .fill(
+                                        LinearGradient(
+                                            gradient: Gradient(colors: [
+                                                Color.black.opacity(0.7),
+                                                Color.black.opacity(0.3)
+                                            ]),
+                                            startPoint: .bottom,
+                                            endPoint: .top
+                                        )
+                                    )
+                            )
+                    }
+                    
+                    // Content with improved layout
+                    VStack(alignment: .leading, spacing: 12) {
+                        // Header
+                        HStack {
+                            ZStack {
+                                Circle()
+                                    .fill(Color.white.opacity(0.9))
+                                    .frame(width: 36, height: 36)
+                                
+                                Image(systemName: reward.partnerLogo)
+                                    .font(.system(size: 16, weight: .semibold))
+                                    .foregroundColor(reward.category.color)
+                            }
+                            
+                            Text(reward.partnerName)
+                                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                .foregroundColor(.white)
+                            
+                            Spacer()
+                            
+                            if reward.isNew {
+                                TagView(text: "NEW", color: PureLifeColors.success)
+                            }
+                        }
+                        
+                        Spacer()
+                        
+                        // Title
+                        Text(reward.title)
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                            .lineLimit(2)
+                            .fixedSize(horizontal: false, vertical: true)
+                        
+                        // Footer
+                        HStack {
+                            // Discount if any
+                            if let percentage = reward.discountPercentage {
+                                TagView(text: "\(percentage)% OFF", color: PureLifeColors.warning)
+                            } else if let amount = reward.discountAmount {
+                                TagView(text: "$\(Int(amount)) OFF", color: PureLifeColors.warning)
+                            }
+                            
+                            Spacer()
+                            
+                            // Price with improved style
+                            HStack(spacing: 4) {
+                                Image(systemName: "crown.fill")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(PureLifeColors.logoGreen)
+                                
+                                Text(reward.formattedCost)
+                                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                                    .foregroundColor(.white)
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 4)
+                            .background(Color.black.opacity(0.3))
+                            .cornerRadius(14)
+                        }
+                    }
+                    .padding(20)
+                    .frame(width: geo.size.width, height: 220)
+                }
+            }
+            .frame(height: 220)
         }
     }
 }

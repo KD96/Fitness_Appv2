@@ -4,22 +4,36 @@ import SwiftUI
 struct PureLifeColors {
     // MARK: - Primary Palette
     
-    /// Verde principal de la marca, verde mint ajustado para más vibración
-    static let logoGreen = Color(red: 94/255, green: 190/255, blue: 164/255)
+    /// Verde principal de la marca, verde mint ajustado for vibrancy
+    static let logoGreen = Color(red: 82/255, green: 196/255, blue: 164/255)
     
     /// Variante más oscura del verde de la marca
-    static let logoGreenDark = Color(red: 65/255, green: 160/255, blue: 134/255)
+    static let logoGreenDark = Color(red: 58/255, green: 157/255, blue: 130/255)
     
     /// Versión más clara para fondos y áreas grandes
     static let logoGreenLight = Color(red: 226/255, green: 247/255, blue: 240/255)
     
+    // MARK: - Accent Colors (New)
+    
+    /// Blue accent color for fitness activities
+    static let accentBlue = Color(red: 50/255, green: 130/255, blue: 240/255)
+    
+    /// Vibrant coral for energy and motivation
+    static let accentCoral = Color(red: 255/255, green: 111/255, blue: 97/255)
+    
+    /// Deep purple for rewards and achievements
+    static let accentPurple = Color(red: 125/255, green: 95/255, blue: 255/255)
+    
+    /// Accent color for nutrition content
+    static let accentTeal = Color(red: 48/255, green: 170/255, blue: 180/255)
+    
     // MARK: - Background Colors
     
-    /// Fondo principal de la app (claro)
-    static let background = Color(red: 250/255, green: 250/255, blue: 250/255)
+    /// Fondo principal de la app (claro) - slightly warmer
+    static let background = Color(red: 250/255, green: 251/255, blue: 252/255)
     
-    /// Fondo oscuro para modo oscuro o áreas de contraste
-    static let darkBackground = Color(red: 18/255, green: 18/255, blue: 18/255)
+    /// Fondo oscuro para modo oscuro o áreas de contraste - less harsh
+    static let darkBackground = Color(red: 22/255, green: 26/255, blue: 30/255)
     
     // MARK: - Surface Colors
     
@@ -27,37 +41,43 @@ struct PureLifeColors {
     static let surface = Color.white
     
     /// Superficie con elevación para elementos secundarios
-    static let elevatedSurface = Color(red: 245/255, green: 245/255, blue: 245/255)
+    static let elevatedSurface = Color(red: 246/255, green: 248/255, blue: 250/255)
     
     /// Superficie oscura para modo oscuro o áreas de contraste
-    static let darkSurface = Color(red: 32/255, green: 32/255, blue: 34/255)
+    static let darkSurface = Color(red: 34/255, green: 38/255, blue: 42/255)
     
     /// Superficie oscura secundaria
-    static let darkSurfaceSecondary = Color(red: 48/255, green: 48/255, blue: 50/255)
+    static let darkSurfaceSecondary = Color(red: 44/255, green: 48/255, blue: 54/255)
     
     // MARK: - Text Colors
     
-    /// Texto principal
-    static let textPrimary = Color(red: 30/255, green: 30/255, blue: 30/255)
+    /// Texto principal - slightly softer
+    static let textPrimary = Color(red: 32/255, green: 36/255, blue: 40/255)
     
-    /// Texto secundario para labels menos importantes
-    static let textSecondary = Color(red: 115/255, green: 115/255, blue: 120/255)
+    /// Texto secundario para labels menos importantes - warmer gray
+    static let textSecondary = Color(red: 120/255, green: 125/255, blue: 135/255)
     
-    /// Texto para modo oscuro
-    static let darkTextPrimary = Color.white
+    /// Texto terciario para hint text y placeholders - new!
+    static let textTertiary = Color(red: 160/255, green: 165/255, blue: 175/255)
     
-    /// Texto secundario para modo oscuro
-    static let darkTextSecondary = Color(red: 185/255, green: 185/255, blue: 195/255)
+    /// Texto para modo oscuro - slightly less harsh
+    static let darkTextPrimary = Color(red: 245/255, green: 248/255, blue: 250/255)
+    
+    /// Texto secundario para modo oscuro - warmer gray
+    static let darkTextSecondary = Color(red: 190/255, green: 195/255, blue: 205/255)
+    
+    /// Texto terciario para modo oscuro - new!
+    static let darkTextTertiary = Color(red: 140/255, green: 145/255, blue: 155/255)
     
     // MARK: - UI Element Colors
     
-    /// Color para divisores y bordes
-    static let divider = Color(red: 230/255, green: 230/255, blue: 230/255)
+    /// Color para divisores y bordes - subtler
+    static let divider = Color(red: 235/255, green: 238/255, blue: 242/255)
     
-    /// Divider for dark mode
-    static let darkDivider = Color(red: 70/255, green: 70/255, blue: 75/255)
+    /// Divider for dark mode - subtler
+    static let darkDivider = Color(red: 60/255, green: 65/255, blue: 70/255)
     
-    /// Gradiente principal para botones y acentos
+    /// Gradiente principal para botones y acentos - more vibrant
     static let accentGradient = LinearGradient(
         gradient: Gradient(colors: [logoGreen, logoGreenDark]),
         startPoint: .leading,
@@ -66,24 +86,54 @@ struct PureLifeColors {
     
     /// Gradiente secundario para fondos sutiles
     static let subtleGradient = LinearGradient(
-        gradient: Gradient(colors: [logoGreenLight.opacity(0.5), logoGreenLight.opacity(0.2)]),
+        gradient: Gradient(colors: [logoGreenLight.opacity(0.6), logoGreenLight.opacity(0.2)]),
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+    
+    // MARK: - New Gradients for Modern UI
+    
+    /// Blue fitness gradient
+    static let blueGradient = LinearGradient(
+        gradient: Gradient(colors: [accentBlue, accentBlue.opacity(0.7)]),
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+    
+    /// Purple rewards gradient
+    static let purpleGradient = LinearGradient(
+        gradient: Gradient(colors: [accentPurple, accentPurple.opacity(0.7)]),
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+    
+    /// Coral energy gradient
+    static let coralGradient = LinearGradient(
+        gradient: Gradient(colors: [accentCoral, accentCoral.opacity(0.7)]),
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+    
+    /// Teal nutrition gradient
+    static let tealGradient = LinearGradient(
+        gradient: Gradient(colors: [accentTeal, accentTeal.opacity(0.7)]),
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
     
     // MARK: - Semantic Colors
     
-    /// Color para elementos de éxito
-    static let success = Color(red: 72/255, green: 190/255, blue: 126/255)
+    /// Color para elementos de éxito - warmer green
+    static let success = Color(red: 68/255, green: 190/255, blue: 124/255)
     
-    /// Color para advertencias
-    static let warning = Color(red: 245/255, green: 158/255, blue: 11/255)
+    /// Color para advertencias - warmer orange
+    static let warning = Color(red: 250/255, green: 155/255, blue: 55/255)
     
-    /// Color para errores
-    static let error = Color(red: 239/255, green: 68/255, blue: 68/255)
+    /// Color para errores - less harsh red
+    static let error = Color(red: 245/255, green: 75/255, blue: 75/255)
     
-    /// Color para información
-    static let info = Color(red: 59/255, green: 130/255, blue: 246/255)
+    /// Color para información - warmer blue
+    static let info = Color(red: 65/255, green: 145/255, blue: 250/255)
     
     // MARK: - Modern UI Component Tokens
     
@@ -100,15 +150,15 @@ struct PureLifeColors {
     static let cardBorder = divider
     static let cardShadow = Color.black.opacity(0.04)
     
-    // Efecto de glassmorphism
-    static let glassMorphism = Color.white.opacity(0.85)
-    static let darkGlassMorphism = Color.black.opacity(0.7)
+    // Efecto de glassmorphism - more subtle
+    static let glassMorphism = Color.white.opacity(0.8)
+    static let darkGlassMorphism = Color.black.opacity(0.65)
     
     // Campos de texto
     static let inputBackground = Color.white
     static let inputBorder = divider
     static let inputText = textPrimary
-    static let inputPlaceholder = textSecondary
+    static let inputPlaceholder = textTertiary
     
     // Estados de navegación
     static let tabBarActive = logoGreen
@@ -122,28 +172,29 @@ struct PureLifeColors {
         switch level {
         case 1:
             // Subtle elevation (cards, clickable items)
-            return ShadowModifier(radius: 4, y: 1, scheme: scheme)
+            return ShadowModifier(radius: 6, y: 1, opacity: 0.05, scheme: scheme)
         case 2:
             // Medium elevation (floating elements, popovers)
-            return ShadowModifier(radius: 8, y: 2, scheme: scheme)
+            return ShadowModifier(radius: 10, y: 2, opacity: 0.08, scheme: scheme)
         case 3:
             // High elevation (dialogs, modals)
-            return ShadowModifier(radius: 16, y: 3, scheme: scheme)
+            return ShadowModifier(radius: 18, y: 3, opacity: 0.12, scheme: scheme)
         default:
             // Default to level 1
-            return ShadowModifier(radius: 4, y: 1, scheme: scheme)
+            return ShadowModifier(radius: 6, y: 1, opacity: 0.05, scheme: scheme)
         }
     }
     
     private struct ShadowModifier: ViewModifier {
         let radius: CGFloat
         let y: CGFloat
+        let opacity: Double
         let scheme: ColorScheme
         
         func body(content: Content) -> some View {
             let color = scheme == .dark ? 
-                Color.black.opacity(0.2) : 
-                Color.black.opacity(0.1)
+                Color.black.opacity(opacity * 2) : 
+                Color.black.opacity(opacity)
             
             return content
                 .shadow(color: color, radius: radius, x: 0, y: y)
@@ -194,6 +245,11 @@ struct PureLifeColors {
         adaptiveColor(light: textSecondary, dark: darkTextSecondary, scheme: scheme)
     }
     
+    /// Adaptive text tertiary color
+    static func adaptiveTextTertiary(scheme: ColorScheme) -> Color {
+        adaptiveColor(light: textTertiary, dark: darkTextTertiary, scheme: scheme)
+    }
+    
     /// Adaptive card shadow color
     static func adaptiveCardShadow(scheme: ColorScheme) -> Color {
         adaptiveColor(light: Color.black.opacity(0.04), dark: Color.black.opacity(0.1), scheme: scheme)
@@ -212,17 +268,17 @@ struct PureLifeColors {
     // MARK: - Card Styles
     
     /// Modern card style with customizable corner radius and padding
-    static func modernCard(cornerRadius: CGFloat = 20, padding: CGFloat = 16, scheme: ColorScheme) -> some ViewModifier {
+    static func modernCard(cornerRadius: CGFloat = 16, padding: CGFloat = 16, scheme: ColorScheme) -> some ViewModifier {
         ModernCardStyle(cornerRadius: cornerRadius, padding: padding, scheme: scheme)
     }
     
     /// Glass effect card style
-    static func glassCard(cornerRadius: CGFloat = 24, padding: CGFloat = 16, scheme: ColorScheme) -> some ViewModifier {
+    static func glassCard(cornerRadius: CGFloat = 20, padding: CGFloat = 16, scheme: ColorScheme) -> some ViewModifier {
         GlassCardStyle(cornerRadius: cornerRadius, padding: padding, scheme: scheme)
     }
     
     /// Outline card style with brand color
-    static func outlineCard(cornerRadius: CGFloat = 20, padding: CGFloat = 16, scheme: ColorScheme) -> some ViewModifier {
+    static func outlineCard(cornerRadius: CGFloat = 16, padding: CGFloat = 16, scheme: ColorScheme) -> some ViewModifier {
         OutlineCardStyle(cornerRadius: cornerRadius, padding: padding, scheme: scheme)
     }
     
@@ -238,7 +294,7 @@ struct PureLifeColors {
                 .cornerRadius(cornerRadius)
                 .shadow(
                     color: PureLifeColors.adaptiveCardShadow(scheme: scheme),
-                    radius: 6,
+                    radius: 10,
                     x: 0,
                     y: 2
                 )
@@ -254,13 +310,27 @@ struct PureLifeColors {
             content
                 .padding(padding)
                 .background(
-                    PureLifeColors.adaptiveGlass(scheme: scheme)
-                        .background(.ultraThinMaterial)
+                    ZStack {
+                        PureLifeColors.adaptiveGlass(scheme: scheme)
+                        
+                        // Add subtle gradient overlay
+                        LinearGradient(
+                            gradient: Gradient(
+                                colors: [
+                                    Color.white.opacity(scheme == .dark ? 0.05 : 0.25),
+                                    Color.white.opacity(scheme == .dark ? 0.02 : 0.1)
+                                ]
+                            ),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    }
+                    .background(.ultraThinMaterial)
                 )
                 .cornerRadius(cornerRadius)
                 .shadow(
                     color: PureLifeColors.adaptiveCardShadow(scheme: scheme),
-                    radius: 8,
+                    radius: 12,
                     x: 0,
                     y: 4
                 )
@@ -279,11 +349,23 @@ struct PureLifeColors {
                 .cornerRadius(cornerRadius)
                 .overlay(
                     RoundedRectangle(cornerRadius: cornerRadius)
-                        .stroke(PureLifeColors.logoGreen.opacity(0.5), lineWidth: 1.5)
+                        .stroke(
+                            LinearGradient(
+                                gradient: Gradient(
+                                    colors: [
+                                        PureLifeColors.logoGreen.opacity(0.7),
+                                        PureLifeColors.logoGreen.opacity(0.4)
+                                    ]
+                                ),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1.5
+                        )
                 )
                 .shadow(
                     color: PureLifeColors.adaptiveCardShadow(scheme: scheme),
-                    radius: 4,
+                    radius: 6,
                     x: 0,
                     y: 2
                 )

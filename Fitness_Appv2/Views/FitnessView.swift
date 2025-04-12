@@ -8,10 +8,13 @@ struct FitnessView: View {
     @State private var showingHealthKitAuth = false
     @Environment(\.colorScheme) var colorScheme
     
+    // Reference to HealthKitManager for activity data
+    private let healthKitManager = HealthKitManager.shared
+    
     var body: some View {
         NavigationView {
             UIComponents.TabContentView(
-                backgroundImage: "athlete_banner",
+                backgroundImage: "fitness_background",
                 backgroundOpacity: 0.07,
                 backgroundColor: PureLifeColors.adaptiveBackground(scheme: colorScheme)
             ) {
@@ -81,48 +84,81 @@ struct FitnessView: View {
             }
             .padding(.horizontal, 20)
             
-            // Icono hero en lugar de imagen
-            ZStack(alignment: .bottomLeading) {
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(LinearGradient(
-                        gradient: Gradient(colors: [PureLifeColors.logoGreen.opacity(0.3), Color.blue.opacity(0.2)]),
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ))
-                    .frame(height: 200)
-                
-                // Overlay gradient
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(LinearGradient(
-                        gradient: Gradient(colors: [.black.opacity(0.6), .clear]),
+            // Hero card with real image background
+            GeometryReader { geo in
+                ZStack(alignment: .bottomLeading) {
+                    // Real image background
+                    if let image = UIImage(named: "couple athlete") {
+                        Image(uiImage: image)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: geo.size.width, height: 200)
+                            .clipped()
+                            .cornerRadius(16)
+                    } else {
+                        // Fallback gradient background
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        PureLifeColors.accentBlue.opacity(0.7),
+                                        PureLifeColors.accentPurple.opacity(0.6)
+                                    ]),
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .frame(width: geo.size.width, height: 200)
+                    }
+                    
+                    // Overlay gradient for text contrast
+                    LinearGradient(
+                        gradient: Gradient(colors: [.black.opacity(0.7), .clear]),
                         startPoint: .bottom,
                         endPoint: .center
-                    ))
-                    .frame(height: 200)
-                
-                // Workout icon
-                Image(systemName: "figure.run")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(height: 100)
-                    .foregroundColor(.white.opacity(0.8))
-                    .padding(.trailing, 20)
-                    .padding(.top, 20)
-                    .frame(maxWidth: .infinity, alignment: .trailing)
-                
-                Text("Start Your Fitness Journey")
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    )
+                    .frame(width: geo.size.width, height: 200)
+                    .cornerRadius(16)
+                    
+                    // Card content
+                    VStack(alignment: .leading, spacing: 10) {
+                        Spacer()
+                        Text("Start your fitness journey")
+                            .font(.system(size: 22, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                            .shadow(color: Color.black.opacity(0.3), radius: 2, x: 0, y: 1)
+                        
+                        Button(action: {
+                            showingNewWorkout = true
+                            dataStore.trackEvent(eventName: "hero_add_workout_button_tapped")
+                        }) {
+                            HStack {
+                                Image(systemName: "plus")
+                                    .font(.system(size: 14, weight: .bold))
+                                
+                                Text("Add Workout")
+                                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                            }
+                            .foregroundColor(.white)
+                            .padding(.vertical, 12)
+                            .padding(.horizontal, 18)
+                            .background(PureLifeColors.logoGreen)
+                            .cornerRadius(30)
+                            .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
+                        }
+                    }
                     .padding(20)
+                }
+                .frame(width: geo.size.width, height: 200)
             }
+            .frame(height: 200)
             .padding(.horizontal, 20)
-            .shadow(radius: 5)
         }
     }
     
     private var userStatsCard: some View {
         UIComponents.GlassMorphicCard(cornerRadius: 24) {
-            VStack(spacing: 18) {
+            VStack(spacing: 15) {
                 // Stats counters
                 HStack(spacing: 0) {
                     // Token balance
@@ -159,26 +195,26 @@ struct FitnessView: View {
                         color: Color.orange
                     )
                 }
-                .padding(.horizontal, 24)
-                .padding(.vertical, 20)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 15)
             }
         }
     }
     
     private func statItem(title: String, value: String, icon: String, color: Color) -> some View {
-        VStack(spacing: 8) {
-            HStack(spacing: 6) {
+        VStack(spacing: 6) {
+            HStack(spacing: 4) {
                 Image(systemName: icon)
-                    .font(.system(size: 15))
+                    .font(.system(size: 14))
                     .foregroundColor(color)
                 
                 Text(value)
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
                     .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
             }
             
             Text(title)
-                .font(.system(size: 14, design: .rounded))
+                .font(.system(size: 13, design: .rounded))
                 .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
         }
         .frame(maxWidth: .infinity)
@@ -191,25 +227,30 @@ struct FitnessView: View {
                 .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
                 .padding(.horizontal, 20)
             
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 16) {
-                    workoutTypeCard(.running)
-                    workoutTypeCard(.walking)
-                    workoutTypeCard(.cycling)
-                    workoutTypeCard(.strength)
+            GeometryReader { geo in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 16) {
+                        workoutTypeCard(.running, geometry: geo)
+                        workoutTypeCard(.walking, geometry: geo)
+                        workoutTypeCard(.cycling, geometry: geo)
+                        workoutTypeCard(.strength, geometry: geo)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 5)
                 }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 5)
             }
+            .frame(height: 140)
         }
     }
     
-    private func workoutTypeCard(_ type: WorkoutType) -> some View {
-        Button(action: {
+    private func workoutTypeCard(_ type: WorkoutType, geometry: GeometryProxy) -> some View {
+        let cardWidth = min(geometry.size.width * 0.25, 100)
+        
+        return Button(action: {
             // Show workout creation with pre-selected type
             showingNewWorkout = true
         }) {
-            VStack(alignment: .center, spacing: 10) {
+            VStack(alignment: .center, spacing: 8) {
                 // Icon with gradient background
                 ZStack {
                     Circle()
@@ -223,10 +264,10 @@ struct FitnessView: View {
                                 endPoint: .bottomTrailing
                             )
                         )
-                        .frame(width: 90, height: 90)
+                        .frame(width: cardWidth * 0.8, height: cardWidth * 0.8)
                     
                     Image(systemName: AthleteImages.getIconForWorkoutType(type))
-                        .font(.system(size: 36))
+                        .font(.system(size: cardWidth * 0.3))
                         .foregroundColor(AthleteImages.getColorForWorkoutType(type))
                 }
                 .overlay(
@@ -240,74 +281,117 @@ struct FitnessView: View {
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             ),
-                            lineWidth: 2
+                            lineWidth: 1.5
                         )
                 )
-                .shadow(radius: 3)
+                .shadow(color: AthleteImages.getColorForWorkoutType(type).opacity(0.2), radius: 6, x: 0, y: 3)
                 
                 Text(type.rawValue.capitalized)
-                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
+                    .multilineTextAlignment(.center)
+                    .lineLimit(1)
             }
-            .frame(width: 110)
-            .padding(.vertical, 10)
+            .frame(width: cardWidth)
+            .padding(.vertical, 8)
         }
+        .buttonStyle(PlainButtonStyle())
     }
     
     private var weeklyActivityCard: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            // Title and period selector
-            VStack(spacing: 12) {
+        UIComponents.ModernCard(cornerRadius: 20) {
+            VStack(alignment: .leading, spacing: 14) {
                 HStack {
-                    Text("Activity Progress")
-                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                    Text("Weekly Activity")
+                        .font(.system(size: 17, weight: .bold, design: .rounded))
                         .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
                     
                     Spacer()
                     
                     if dataStore.isHealthKitEnabled {
-                        HStack(spacing: 5) {
-                            Text("Apple Health")
-                                .font(.system(size: 13, design: .rounded))
-                                .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
-                            
-                            Image(systemName: "heart.fill")
-                                .foregroundColor(.red)
-                                .font(.caption)
-                        }
+                        Text("Apple Health")
+                            .font(.system(size: 13, design: .rounded))
+                            .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
+                        
+                        Image(systemName: "heart.fill")
+                            .foregroundColor(.red)
+                            .font(.caption)
                     }
                 }
+                .padding(.bottom, 2)
                 
-                // Period selector pills
-                HStack(spacing: 10) {
-                    ForEach(["Week", "Month", "Year"], id: \.self) { period in
-                        Text(period)
-                            .font(.system(size: 14, weight: period == "Week" ? .bold : .medium, design: .rounded))
-                            .foregroundColor(period == "Week" ? 
-                                           PureLifeColors.logoGreen : 
-                                           PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
-                            .padding(.vertical, 6)
-                            .padding(.horizontal, 14)
-                            .background(
-                                RoundedRectangle(cornerRadius: 20)
-                                    .fill(period == "Week" ? 
-                                        PureLifeColors.logoGreen.opacity(0.15) : 
-                                        Color.clear)
-                            )
+                // Weekly activity graph
+                HStack(alignment: .bottom, spacing: 8) {
+                    ForEach(0..<7) { index in
+                        VStack(spacing: 8) {
+                            // Activity bar
+                            let activityLevel = getActivityLevel(for: index)
+                            ZStack(alignment: .bottom) {
+                                // Placeholder background
+                                Rectangle()
+                                    .foregroundColor(PureLifeColors.adaptiveSurfaceSecondary(scheme: colorScheme))
+                                    .frame(width: 28, height: 100)
+                                    .cornerRadius(8)
+                                
+                                // Activity level indicator
+                                if activityLevel > 0 {
+                                    Rectangle()
+                                        .foregroundColor(activityColor(activityLevel))
+                                        .frame(width: 28, height: max(0, min(activityLevel * 100, 100)))
+                                        .cornerRadius(8)
+                                }
+                            }
+                            
+                            // Day label
+                            Text(dayOfWeek(for: index))
+                                .font(.system(size: 12, weight: .medium, design: .rounded))
+                                .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
+                        }
+                        .frame(maxWidth: .infinity)
                     }
-                    
-                    Spacer()
                 }
+                .padding(.top, 4)
             }
-            .padding(.horizontal, 24)
-            .padding(.top, 24)
-            
-            // Chart view
-            WeeklyActivityView()
-                .padding(.horizontal, 12)
-                .padding(.bottom, 24)
+            .padding(16)
         }
-        .modifier(PureLifeColors.modernCard(cornerRadius: 24, padding: 0, scheme: colorScheme))
+    }
+    
+    // Obtener el nivel de actividad del HealthKitManager si está disponible
+    private func getActivityLevel(for index: Int) -> Double {
+        if dataStore.isHealthKitEnabled {
+            let value = healthKitManager.weeklyActivityLevels[index]
+            // Proteger contra NaN y valores negativos
+            if value.isNaN || value < 0 || !value.isFinite {
+                return 0
+            }
+            return min(max(value, 0), 1) // Ensure value is between 0 and 1
+        } else {
+            // Valores simulados si HealthKit no está disponible
+            let simulatedLevels: [Double] = [0.3, 0.7, 0.5, 0.8, 0.2, 0.9, 0.6]
+            return simulatedLevels[index]
+        }
+    }
+    
+    // Color según el nivel de actividad
+    private func activityColor(_ level: Double) -> Color {
+        // Validación adicional para evitar problemas con valores extremos
+        let safeLevel = max(0, min(level, 1))
+        
+        if safeLevel < 0.3 {
+            return PureLifeColors.logoGreen.opacity(0.3)
+        } else if safeLevel < 0.7 {
+            return PureLifeColors.logoGreen.opacity(0.8)
+        } else {
+            return PureLifeColors.logoGreen
+        }
+    }
+    
+    // Devuelve la etiqueta del día de la semana para un índice dado
+    private func dayOfWeek(for index: Int) -> String {
+        let days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+        let today = Calendar.current.component(.weekday, from: Date()) - 1 // 0-based index
+        let dayIndex = (today + index) % 7
+        return days[dayIndex]
     }
     
     private var healthConnectBanner: some View {
@@ -374,34 +458,24 @@ struct FitnessView: View {
                 
                 Button(action: {
                     showingNewWorkout = true
+                    dataStore.trackEvent(eventName: "add_workout_from_recent_section")
                 }) {
-                    HStack(spacing: 6) {
-                        Text("Add")
-                            .font(.system(size: 15, weight: .medium, design: .rounded))
+                    HStack(spacing: 5) {
+                        Image(systemName: "plus")
+                            .font(.system(size: 12, weight: .bold))
                         
-                        Image(systemName: "plus.circle.fill")
-                            .font(.system(size: 15))
+                        Text("Add")
+                            .font(.system(size: 14, weight: .semibold, design: .rounded))
                     }
-                    .foregroundColor(.white)
-                    .padding(.vertical, 8)
-                    .padding(.horizontal, 14)
-                    .background(
-                        LinearGradient(
-                            gradient: Gradient(colors: [
-                                PureLifeColors.logoGreen,
-                                PureLifeColors.logoGreen.opacity(0.8)
-                            ]),
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
+                    .foregroundColor(PureLifeColors.logoGreen)
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 12)
+                    .background(PureLifeColors.logoGreen.opacity(0.12))
                     .cornerRadius(20)
-                    .shadow(color: PureLifeColors.logoGreen.opacity(0.3), radius: 5, x: 0, y: 2)
                 }
             }
             .padding(.horizontal, 20)
             
-            // Workout list or empty state
             if dataStore.currentUser.completedWorkouts.isEmpty {
                 emptyWorkoutsView
             } else {
@@ -494,31 +568,31 @@ struct FitnessView: View {
     }
     
     private var recentWorkoutsList: some View {
-        VStack(spacing: 16) {
-            ForEach(dataStore.currentUser.completedWorkouts.sorted(by: { $0.date > $1.date }).prefix(3)) { workout in
-                ModernWorkoutCard(workout: workout, onTap: {
+        VStack(spacing: 12) {
+            ForEach(dataStore.currentUser.completedWorkouts.prefix(3)) { workout in
+                ModernWorkoutCard(workout: workout) {
                     selectedWorkout = workout
-                }, showDetails: false, imageHeight: 100)
+                    dataStore.trackEvent(eventName: "view_workout_from_dashboard")
+                }
                 .padding(.horizontal, 20)
             }
             
-            // View all button
+            // See all button
             Button(action: {
-                // Navigate to workouts tab
+                // Change tab to workouts list
+                dataStore.trackEvent(eventName: "view_all_workouts_from_dashboard")
             }) {
-                Text("View All Workouts")
-                    .font(.system(size: 15, weight: .medium, design: .rounded))
-                    .foregroundColor(PureLifeColors.logoGreen)
-                    .padding(.vertical, 12)
-                    .frame(maxWidth: .infinity)
-                    .background(
-                        RoundedRectangle(cornerRadius: 20)
-                            .strokeBorder(PureLifeColors.logoGreen.opacity(0.3), lineWidth: 1.5)
-                    )
+                HStack {
+                    Text("View All Workouts")
+                        .font(.system(size: 15, weight: .medium, design: .rounded))
+                    
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12))
+                }
+                .foregroundColor(PureLifeColors.logoGreen)
+                .padding(.vertical, 16)
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 8)
-            .padding(.bottom, 20)
+            .frame(maxWidth: .infinity)
         }
     }
     
@@ -622,10 +696,10 @@ struct WeeklyActivityView: View {
         if dataStore.isHealthKitEnabled {
             let value = healthKitManager.weeklyActivityLevels[index]
             // Proteger contra NaN y valores negativos
-            if value.isNaN || value < 0 {
+            if value.isNaN || value < 0 || !value.isFinite {
                 return 0
             }
-            return value
+            return min(max(value, 0), 1) // Ensure value is between 0 and 1
         } else {
             // Valores simulados si HealthKit no está disponible
             let simulatedLevels: [Double] = [0.3, 0.7, 0.5, 0.8, 0.2, 0.9, 0.6]

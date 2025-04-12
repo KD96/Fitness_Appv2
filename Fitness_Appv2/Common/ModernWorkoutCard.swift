@@ -2,311 +2,284 @@ import SwiftUI
 
 struct ModernWorkoutCard: View {
     let workout: Workout
-    var onTap: (() -> Void)? = nil
-    var showDetails: Bool = true
-    var imageHeight: CGFloat = 150
-    
+    let onTap: () -> Void
     @Environment(\.colorScheme) var colorScheme
     
+    // Propiedades derivadas
+    private var colorForWorkoutType: Color {
+        switch workout.type {
+        case .running:
+            return .blue
+        case .cycling:
+            return .orange
+        case .strength:
+            return .green
+        case .walking:
+            return .teal
+        }
+    }
+    
+    private var backgroundImage: String {
+        switch workout.type {
+        case .running:
+            return "running"
+        case .cycling:
+            return "cycling"
+        case .walking:
+            return "Bike"
+        case .strength:
+            return "weight_lifting"
+        }
+    }
+    
     var body: some View {
-        Button(action: {
-            onTap?()
-        }) {
-            UIComponents.GlassMorphicCard(cornerRadius: 24) {
-                VStack(spacing: 0) {
-                    // Header with athlete image
-                    ZStack(alignment: .bottomLeading) {
-                        // Athlete image for the workout type
-                        if let image = UIImage(named: AthleteCarouselView.getWorkoutTypeImages(workout.type).first ?? "") {
-                            Image(uiImage: image)
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(height: imageHeight)
-                                .clipped()
-                        } else {
-                            // Fallback gradient
-                            Rectangle()
+        Button(action: onTap) {
+            cardContent
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+    
+    private var cardContent: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .bottom) {
+                // Background image for the workout type
+                if let image = UIImage(named: backgroundImage) {
+                    Image(uiImage: image)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: geo.size.width, height: 200)
+                        .clipped()
+                        .cornerRadius(16)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
                                 .fill(
                                     LinearGradient(
                                         gradient: Gradient(colors: [
-                                            PureLifeColors.logoGreen.opacity(0.8),
-                                            PureLifeColors.logoGreen.opacity(0.4)
+                                            colorForWorkoutType.opacity(0.7),
+                                            colorForWorkoutType.opacity(0.1)
                                         ]),
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
+                                        startPoint: .bottom,
+                                        endPoint: .top
                                     )
                                 )
-                                .frame(height: imageHeight)
-                        }
-                        
-                        // Gradient overlay for better text visibility
-                        LinearGradient(
-                            gradient: Gradient(colors: [
-                                Color.black.opacity(0.0),
-                                Color.black.opacity(0.6)
-                            ]),
-                            startPoint: .top,
-                            endPoint: .bottom
                         )
-                        .frame(height: imageHeight)
-                        
-                        // Workout type and duration
-                        VStack(alignment: .leading, spacing: 6) {
-                            // Badges for duration and calories
-                            HStack(spacing: 8) {
-                                metricBadge(
-                                    icon: "clock.fill",
-                                    text: "\(workout.durationMinutes) min"
-                                )
+                }
+                
+                // Workout details
+                VStack(alignment: .leading, spacing: 0) {
+                    // Bottom section with metrics
+                    VStack(alignment: .leading, spacing: 16) {
+                        // Top info section
+                        HStack(spacing: 16) {
+                            // Workout type icon
+                            ZStack {
+                                Circle()
+                                    .fill(Color.white.opacity(0.9))
+                                    .frame(width: 45, height: 45)
                                 
-                                metricBadge(
-                                    icon: "flame.fill",
-                                    text: "\(Int(workout.caloriesBurned)) cal"
-                                )
-                                
-                                if let distance = workout.distance, distance > 0 {
-                                    metricBadge(
-                                        icon: "map.fill",
-                                        text: String(format: "%.1f km", distance)
-                                    )
-                                }
+                                Image(systemName: workout.type.icon)
+                                    .font(.system(size: 18, weight: .bold))
+                                    .foregroundColor(colorForWorkoutType)
                             }
                             
-                            Text(workout.type.rawValue.capitalized)
-                                .font(.system(size: 24, weight: .bold, design: .rounded))
-                                .foregroundColor(.white)
-                                .shadow(color: Color.black.opacity(0.5), radius: 2, x: 0, y: 1)
-                                .padding(.top, 4)
-                        }
-                        .padding(20)
-                    }
-                    
-                    // Workout details
-                    if showDetails {
-                        VStack(alignment: .leading, spacing: 16) {
-                            // Date with icon
-                            HStack(spacing: 10) {
-                                Image(systemName: "calendar")
-                                    .foregroundColor(PureLifeColors.logoGreen)
+                            // Workout details
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(workout.name)
+                                    .font(.system(size: 17, weight: .bold, design: .rounded))
+                                    .foregroundColor(.white)
                                 
-                                Text(formattedDate(workout.date))
-                                    .font(.system(size: 15, weight: .medium, design: .rounded))
-                                    .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
-                                
-                                Spacer()
+                                Text(formatDate(workout.date))
+                                    .font(.system(size: 13, design: .rounded))
+                                    .foregroundColor(.white.opacity(0.9))
+                            }
+                            
+                            Spacer()
+                            
+                            // Completion indicator or duration
+                            VStack(alignment: .trailing, spacing: 2) {
+                                HStack(spacing: 4) {
+                                    if workout.completed {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .foregroundColor(PureLifeColors.success)
+                                            .font(.system(size: 12))
+                                    }
+                                    
+                                    Text("\(workout.durationMinutes) min")
+                                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                                        .foregroundColor(workout.completed ? 
+                                                       PureLifeColors.success : 
+                                                       Color.white)
+                                }
                                 
                                 // Tokens earned
-                                HStack(spacing: 4) {
-                                    Image(systemName: "crown.fill")
-                                        .foregroundColor(PureLifeColors.logoGreen)
-                                        .font(.system(size: 15))
-                                    
-                                    Text("+\(String(format: "%.1f", workout.tokensEarned))")
-                                        .font(.system(size: 16, weight: .bold, design: .rounded))
-                                        .foregroundColor(PureLifeColors.logoGreen)
-                                }
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 5)
-                                .background(PureLifeColors.logoGreen.opacity(0.1))
-                                .cornerRadius(10)
-                            }
-                            
-                            // Notes if available
-                            if let notes = workout.notes, !notes.isEmpty {
-                                VStack(alignment: .leading, spacing: 6) {
-                                    Text("Notes")
-                                        .font(.system(size: 15, weight: .semibold, design: .rounded))
-                                        .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
-                                    
-                                    Text(notes)
-                                        .font(.system(size: 14, design: .rounded))
-                                        .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
-                                        .lineLimit(2)
-                                }
-                            }
-                            
-                            // Additional metrics if available
-                            let metrics = getRelevantMetrics()
-                            if !metrics.isEmpty {
-                                HStack(spacing: 12) {
-                                    ForEach(metrics, id: \.name) { metric in
-                                        metricItem(metric: metric)
+                                if workout.completed {
+                                    HStack(spacing: 2) {
+                                        Image(systemName: "leaf.fill")
+                                            .font(.system(size: 10))
+                                            .foregroundColor(PureLifeColors.logoGreen)
+                                        
+                                        Text("+\(Int(workout.tokensEarned))")
+                                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                                            .foregroundColor(PureLifeColors.logoGreen)
                                     }
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(Color.white.opacity(0.9))
+                                    .cornerRadius(10)
                                 }
                             }
                         }
-                        .padding(20)
+                        
+                        // Metrics - compact version
+                        HStack(spacing: geo.size.width * 0.05) {
+                            ForEach(relevantMetrics.prefix(3), id: \.self) { metric in
+                                metricView(for: metric)
+                            }
+                        }
                     }
+                    .padding(16)
+                    .background(
+                        Rectangle()
+                            .fill(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        Color.black.opacity(0.7),
+                                        Color.black.opacity(0.4)
+                                    ]),
+                                    startPoint: .bottom,
+                                    endPoint: .top
+                                )
+                            )
+                    )
                 }
             }
-        }
-    }
-    
-    // Helper method to format date
-    private func formattedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
-    }
-    
-    // Helper to create metric badges
-    private func metricBadge(icon: String, text: String) -> some View {
-        HStack(spacing: 4) {
-            Image(systemName: icon)
-                .font(.system(size: 10, weight: .semibold))
-            
-            Text(text)
-                .font(.system(size: 12, weight: .semibold, design: .rounded))
-        }
-        .foregroundColor(.white)
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .background(Color.black.opacity(0.3))
-        .cornerRadius(12)
-    }
-    
-    // Helper to create detailed metric items
-    private func metricItem(metric: WorkoutCardMetric) -> some View {
-        VStack(spacing: 4) {
-            Text(metric.name)
-                .font(.system(size: 13, design: .rounded))
-                .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
-            
-            Text(metric.formattedValue)
-                .font(.system(size: 16, weight: .bold, design: .rounded))
-                .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 8)
-        .background(PureLifeColors.adaptiveSurfaceSecondary(scheme: colorScheme))
-        .cornerRadius(12)
-    }
-    
-    // Helper to get relevant metrics for this workout
-    private func getRelevantMetrics() -> [WorkoutCardMetric] {
-        var metrics: [WorkoutCardMetric] = []
-        
-        // Add specific metrics based on the workout type
-        switch workout.type {
-        case .running, .walking, .cycling:
-            if let distance = workout.distance, distance > 0 {
-                metrics.append(
-                    WorkoutCardMetric(
-                        name: "Distance",
-                        value: distance,
-                        format: "%.2f km"
-                    )
-                )
-            }
-            if let steps = workout.steps, steps > 0 {
-                metrics.append(
-                    WorkoutCardMetric(
-                        name: "Steps",
-                        value: Double(steps),
-                        format: "%.0f"
-                    )
-                )
-            }
-        case .strength:
-            if let sets = workout.sets, sets > 0 {
-                metrics.append(
-                    WorkoutCardMetric(
-                        name: "Sets",
-                        value: Double(sets),
-                        format: "%.0f"
-                    )
-                )
-            }
-            if let reps = workout.reps, reps > 0 {
-                metrics.append(
-                    WorkoutCardMetric(
-                        name: "Reps",
-                        value: Double(reps),
-                        format: "%.0f"
-                    )
-                )
-            }
-            if let weight = workout.weight, weight > 0 {
-                metrics.append(
-                    WorkoutCardMetric(
-                        name: "Weight",
-                        value: weight,
-                        format: "%.1f kg"
-                    )
-                )
-            }
-        }
-        
-        // Add heart rate if available
-        if let heartRateData = workout.heartRate {
-            metrics.append(
-                WorkoutCardMetric(
-                    name: "Heart Rate",
-                    value: Double(heartRateData.average),
-                    format: "%.0f bpm"
-                )
+            .frame(height: 200)
+            .cornerRadius(16)
+            .shadow(
+                color: PureLifeColors.adaptiveCardShadow(scheme: colorScheme),
+                radius: 8,
+                x: 0,
+                y: 3
             )
         }
-        
-        return metrics
+        .frame(height: 200)
     }
-}
-
-// Helper struct for workout metrics (renombrada para evitar conflictos)
-struct WorkoutCardMetric {
-    let name: String
-    let value: Double
-    let format: String
-    let formattedValue: String
     
-    init(name: String, value: Double, format: String, formattedValue: String = "") {
-        self.name = name
-        self.value = value
-        self.format = format
-        if formattedValue.isEmpty {
-            self.formattedValue = String(format: format, value)
-        } else {
-            self.formattedValue = formattedValue
+    private func metricView(for metric: WorkoutMetric) -> some View {
+        VStack(spacing: 3) {
+            // Icon
+            Image(systemName: metric.icon)
+                .font(.system(size: 14))
+                .foregroundColor(.white)
+            
+            // Value
+            Text(valueForMetric(metric))
+                .font(.system(size: 13, weight: .medium, design: .rounded))
+                .foregroundColor(.white)
+            
+            // Label
+            Text(metric.rawValue)
+                .font(.system(size: 11, design: .rounded))
+                .foregroundColor(.white.opacity(0.9))
+        }
+        .frame(maxWidth: .infinity)
+    }
+    
+    // MARK: - Helper Methods
+    
+    private var relevantMetrics: [WorkoutMetric] {
+        // Just show 3 key metrics
+        var metrics = workout.type.relevantMetrics
+        return Array(metrics.prefix(3))
+    }
+    
+    private func valueForMetric(_ metric: WorkoutMetric) -> String {
+        switch metric {
+        case .duration:
+            return "\(workout.durationMinutes) min"
+        case .distance:
+            guard let distance = workout.distance else { return "0 km" }
+            return String(format: "%.1f km", distance)
+        case .calories:
+            return "\(Int(workout.caloriesBurned))"
+        case .steps:
+            guard let steps = workout.steps else { return "0" }
+            return "\(steps)"
+        case .heartRate:
+            guard let heartRate = workout.heartRate?.average else { return "0 bpm" }
+            return "\(heartRate) bpm"
+        case .laps:
+            guard let laps = workout.laps else { return "0" }
+            return "\(laps)"
+        case .reps:
+            guard let reps = workout.reps else { return "0" }
+            return "\(reps)"
+        case .sets:
+            guard let sets = workout.sets else { return "0" }
+            return "\(sets)"
+        case .weight:
+            guard let weight = workout.weight else { return "0 kg" }
+            return "\(Int(weight)) kg"
+        case .intensity:
+            return workout.intensity?.rawValue ?? "Medium"
         }
     }
+    
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        
+        // If it's today, show the time
+        if Calendar.current.isDateInToday(date) {
+            formatter.dateStyle = .none
+            formatter.timeStyle = .short
+            return "Today, \(formatter.string(from: date))"
+        }
+        
+        // If it's yesterday
+        if Calendar.current.isDateInYesterday(date) {
+            formatter.dateStyle = .none
+            formatter.timeStyle = .short
+            return "Yesterday, \(formatter.string(from: date))"
+        }
+        
+        // Otherwise show the full date
+        formatter.dateFormat = "MMM d, h:mm a"
+        return formatter.string(from: date)
+    }
 }
 
-// Preview provider
 struct ModernWorkoutCard_Previews: PreviewProvider {
     static var previews: some View {
         VStack {
             ModernWorkoutCard(
                 workout: Workout(
-                    id: UUID(),
                     name: "Morning Run",
                     type: .running,
-                    durationMinutes: 35,
+                    durationMinutes: 30,
                     date: Date(),
-                    caloriesBurned: 320,
-                    tokensEarned: 12.5,
-                    notes: "Felt great today, maintained good pace.",
+                    caloriesBurned: 280,
+                    tokensEarned: 8.0,
                     distance: 4.2,
                     completed: true
                 )
-            )
+            ) {
+                // Implementation of onTap
+            }
             
             ModernWorkoutCard(
                 workout: Workout(
-                    id: UUID(),
                     name: "Strength Training",
                     type: .strength,
-                    durationMinutes: 60,
+                    durationMinutes: 45,
                     date: Date().addingTimeInterval(-86400),
-                    caloriesBurned: 450,
-                    tokensEarned: 18.0,
-                    notes: "Focused on upper body.",
-                    completed: true
+                    caloriesBurned: 350,
+                    tokensEarned: 12.0,
+                    completed: false
                 )
-            )
+            ) {
+                // Implementation of onTap
+            }
         }
         .padding()
-        .background(PureLifeColors.adaptiveBackground(scheme: .light))
-        .previewLayout(.sizeThatFits)
     }
 } 

@@ -3,6 +3,7 @@ import UIKit
 
 struct WorkoutDetailView: View {
     @Environment(\.presentationMode) var presentationMode
+    @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var dataStore: AppDataStore
     @State private var showingDeleteConfirmation = false
     
@@ -23,9 +24,9 @@ struct WorkoutDetailView: View {
                 // Notes section if available
                 if let notes = workout.notes, !notes.isEmpty {
                     UIComponents.Card(title: "Notes", icon: "note.text") {
-                        Typography.paragraph(
-                            Text(notes)
-                        )
+                        Text(notes)
+                            .font(.system(size: PureLifeTypography.body1, design: .rounded))
+                            .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
                     }
                     .padding(.horizontal, Spacing.screenHorizontalPadding)
                 }
@@ -46,7 +47,7 @@ struct WorkoutDetailView: View {
             
             ToolbarItem(placement: .principal) {
                 Text(workout.name)
-                    .font(Typography.font(size: Typography.FontSize.lg, weight: Typography.FontWeight.bold))
+                    .font(.system(size: PureLifeTypography.heading4, weight: .bold, design: .rounded))
                     .foregroundColor(PureLifeColors.textPrimary)
             }
         }
@@ -65,39 +66,71 @@ struct WorkoutDetailView: View {
     
     // MARK: - UI Components
     
+    private var backgroundImage: String {
+        switch workout.type {
+        case .running:
+            return "running"
+        case .cycling:
+            return "cycling"
+        case .walking:
+            return "Bike"
+        case .strength:
+            return "weight_lifting"
+        }
+    }
+    
     private var headerSection: some View {
         VStack(spacing: 0) {
-            // Icono del tipo de entrenamiento en lugar de imagen
+            // Real image for workout type
             ZStack(alignment: .center) {
-                // Fondo con gradiente
-                Rectangle()
-                    .fill(LinearGradient(
-                        gradient: Gradient(colors: [typeColor.opacity(0.3), typeColor.opacity(0.1)]),
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ))
-                    .frame(height: 180)
+                // Background image
+                if let image = UIImage(named: backgroundImage) {
+                    Image(uiImage: image)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(height: 180)
+                } else {
+                    // Fallback gradient background
+                    Rectangle()
+                        .fill(LinearGradient(
+                            gradient: Gradient(colors: [typeColor.opacity(0.3), typeColor.opacity(0.1)]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ))
+                        .frame(height: 180)
+                }
                 
-                // Overlay gradient
+                // Overlay gradient for better text visibility
                 LinearGradient(
-                    gradient: Gradient(colors: [.black.opacity(0.4), .clear, .black.opacity(0.5)]),
+                    gradient: Gradient(colors: [.black.opacity(0.6), .clear, .black.opacity(0.6)]),
                     startPoint: .top,
                     endPoint: .bottom
                 )
                 .frame(height: 180)
                 
-                // Icono grande del tipo de entrenamiento
-                Image(systemName: AthleteImages.getIconForWorkoutType(workout.type))
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(height: 100)
-                    .foregroundColor(.white.opacity(0.8))
+                // Workout type icon with improved visibility
+                ZStack {
+                    Circle()
+                        .fill(Color.white.opacity(0.2))
+                        .frame(width: 120, height: 120)
+                    
+                    Circle()
+                        .fill(Color.white.opacity(0.3))
+                        .frame(width: 100, height: 100)
+                    
+                    Image(systemName: AthleteImages.getIconForWorkoutType(workout.type))
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(height: 60)
+                        .foregroundColor(.white)
+                }
+                .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
             }
             .cornerRadius(16, corners: [.topLeft, .topRight])
             
             UIComponents.Card(title: "", cornerRadius: 0) {
                 HStack(spacing: 15) {
-                    // Icono del tipo de workout
+                    // Workout type icon
                     ZStack {
                         Circle()
                             .fill(typeColor.opacity(0.15))
@@ -202,50 +235,54 @@ struct WorkoutDetailView: View {
     private var actionsSection: some View {
         VStack(spacing: Spacing.md) {
             UIComponents.PrimaryButton(
-                text: "Complete Workout",
+                title: "Complete Workout",
+                icon: "checkmark.circle.fill",
                 action: {
                     withAnimation(.spring()) {
                         // Mark workout as completed logic would go here
                         // dataStore.markWorkoutAsCompleted(workout)
                     }
-                },
-                iconName: "checkmark.circle.fill"
+                }
             )
             
             HStack(spacing: Spacing.md) {
                 UIComponents.SecondaryButton(
-                    text: "Edit",
+                    title: "Edit",
+                    icon: "pencil",
                     action: {
                         // Edit workout logic would go here
-                    },
-                    iconName: "pencil"
+                    }
                 )
                 
                 UIComponents.SecondaryButton(
-                    text: "Delete",
+                    title: "Delete",
+                    icon: "trash",
                     action: {
                         withAnimation {
                             showingDeleteConfirmation = true
                         }
-                    },
-                    iconName: "trash"
+                    }
                 )
             }
         }
     }
     
     private var backButton: some View {
-        UIComponents.IconButton(
-            iconName: "chevron.left",
-            action: {
-                withAnimation {
-                    presentationMode.wrappedValue.dismiss()
-                }
-            },
-            iconColor: PureLifeColors.logoGreen,
-            backgroundColor: PureLifeColors.logoGreen.opacity(0.2),
-            size: 36
-        )
+        Button(action: {
+            withAnimation {
+                presentationMode.wrappedValue.dismiss()
+            }
+        }) {
+            ZStack {
+                Circle()
+                    .fill(PureLifeColors.logoGreen.opacity(0.2))
+                    .frame(width: 36, height: 36)
+                
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(PureLifeColors.logoGreen)
+            }
+        }
     }
     
     // MARK: - Helpers

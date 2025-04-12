@@ -2,6 +2,8 @@ import Foundation
 import SwiftUI
 import HealthKit
 
+// MARK: - HealthKit Data Model
+
 // Modelo para datos de HealthKit
 struct HealthKitData: Codable {
     var stepsCount: Int = 5324
@@ -11,31 +13,28 @@ struct HealthKitData: Codable {
     var restingHeartRate: Double = 62
 }
 
+// MARK: - App Data Store
+
 class AppDataStore: ObservableObject {
+    // MARK: - Published Properties
+    
     @Published var currentUser: User
     @Published var socialFeed: [SocialActivity] = []
     @Published var friends: [User] = []
-    
-    // New social connection properties
     @Published var suggestedUsers: [User] = []
     @Published var upcomingEvents: [FitnessEvent] = []
     @Published var pendingFriendRequests: [User] = []
-    
     @Published var isHealthKitEnabled = false
-    
-    // Nuevas propiedades para recompensas y gamificación
     @Published var availableRewards: [Reward] = []
     @Published var featuredRewards: [Reward] = []
     @Published var dailyMissions: [Mission] = []
     @Published var selectedRewardCategory: Reward.Category?
-    
-    // Datos de HealthKit
     @Published var healthKitData: HealthKitData = HealthKitData()
     
-    // HealthKit manager
-    private let healthKitManager = HealthKitManager.shared
+    // MARK: - Private Properties
     
-    // Analytics manager
+    // Managers
+    private let healthKitManager = HealthKitManager.shared
     private let analyticsManager = AnalyticsManager.shared
     
     // Offline storage
@@ -43,10 +42,39 @@ class AppDataStore: ObservableObject {
     private let workoutsOfflineKey = "AppDataStore_OfflineWorkouts"
     private var offlineWorkoutsQueue: [Workout] = []
     
+    // Batch updates helper
+    private var updateBatch = 0
+    private var isPerformingBatchUpdates = false
+    
+    // MARK: - Initialization
+    
     // Mock data for MVP
     init() {
         // Create a default user
         currentUser = User(name: "User")
+        
+        // Setup initial data
+        setupInitialData()
+        
+        // Setup HealthKit
+        setupHealthKit()
+        
+        // Load any cached data
+        loadCachedData()
+        
+        // Start analytics session
+        analyticsManager.startSession()
+    }
+    
+    deinit {
+        // End analytics session when app is closed
+        analyticsManager.endSession()
+    }
+    
+    // MARK: - Setup Methods
+    
+    private func setupInitialData() {
+        beginBatchUpdates()
         
         // Add some sample friends
         friends = [
@@ -113,24 +141,31 @@ class AppDataStore: ObservableObject {
         // Inicializar recompensas y misiones
         setupRewardsAndMissions()
         
-        // Setup HealthKit
-        setupHealthKit()
-        
-        // Load any cached data
-        loadCachedData()
-        
-        // Start analytics session
-        analyticsManager.startSession()
+        endBatchUpdates()
     }
     
-    deinit {
-        // End analytics session when app is closed
-        analyticsManager.endSession()
+    // MARK: - Batch Updates Management
+    
+    private func beginBatchUpdates() {
+        updateBatch += 1
+        isPerformingBatchUpdates = true
+    }
+    
+    private func endBatchUpdates() {
+        updateBatch -= 1
+        if updateBatch == 0 {
+            isPerformingBatchUpdates = false
+            // Trigger a single update when batch completes
+            objectWillChange.send()
+        }
     }
     
     // MARK: - Offline Support
     
     private func loadCachedData() {
+        // Batch data loading to minimize UI updates
+        beginBatchUpdates()
+        
         // Load user data from UserDefaults
         if let userData = UserDefaults.standard.data(forKey: userDefaultsKey),
            let user = try? JSONDecoder().decode(User.self, from: userData) {
@@ -145,6 +180,8 @@ class AppDataStore: ObservableObject {
             // Process any offline workouts
             processOfflineWorkouts()
         }
+        
+        endBatchUpdates()
     }
     
     private func saveUserToCache() {

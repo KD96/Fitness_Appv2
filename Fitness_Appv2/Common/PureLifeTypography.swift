@@ -1,261 +1,410 @@
 import SwiftUI
 
-/// Sistema de tipografía para la experiencia "PureLife"
-enum Typography {
+/// Sistema tipográfico para la app de fitness
+struct PureLifeTypography {
+    // MARK: - Primary Font Families
+    
+    // Regular text uses system rounded for a friendly, modern feel
+    static let bodyFamily = Font.Design.rounded
+    
+    // Display text (headers) can use a more dynamic font
+    static let displayFamily = Font.Design.rounded
+    
     // MARK: - Font Sizes
     
-    enum FontSize {
-        /// Texto extra pequeño (10pt)
-        static let xs: CGFloat = 10
-        
-        /// Texto pequeño (12pt)
-        static let sm: CGFloat = 12
-        
-        /// Texto base (14pt)
-        static let base: CGFloat = 14
-        
-        /// Texto mediano (16pt)
-        static let md: CGFloat = 16
-        
-        /// Texto grande (18pt)
-        static let lg: CGFloat = 18
-        
-        /// Título pequeño (20pt)
-        static let xl: CGFloat = 20
-        
-        /// Título mediano (24pt)
-        static let xxl: CGFloat = 24
-        
-        /// Título grande (28pt)
-        static let xxxl: CGFloat = 28
-        
-        /// Título principal (32pt)
-        static let xxxxl: CGFloat = 32
-        
-        /// Título hero (40pt)
-        static let xxxxxl: CGFloat = 40
-    }
-    
-    // MARK: - Font Weights
-    
-    enum FontWeight {
-        /// Regular (400)
-        static let regular = Font.Weight.regular
-        
-        /// Medium (500)
-        static let medium = Font.Weight.medium
-        
-        /// Semibold (600)
-        static let semibold = Font.Weight.semibold
-        
-        /// Bold (700)
-        static let bold = Font.Weight.bold
-        
-        /// Heavy (800)
-        static let heavy = Font.Weight.heavy
-    }
-    
-    // MARK: - Line Heights
-    
-    enum LineHeight {
-        /// Compacto (1.0)
-        static let compact: CGFloat = 1.0
-        
-        /// Estándar (1.2)
-        static let standard: CGFloat = 1.2
-        
-        /// Relajado (1.5)
-        static let relaxed: CGFloat = 1.5
-        
-        /// Espaciado (1.8)
-        static let loose: CGFloat = 1.8
-    }
+    // Modern font scale with better hierarchy
+    static let display1: CGFloat = 40  // Very large headers
+    static let display2: CGFloat = 32  // Primary headers
+    static let heading1: CGFloat = 28  // Section headers
+    static let heading2: CGFloat = 24  // Secondary headers
+    static let heading3: CGFloat = 20  // Subsection headers
+    static let heading4: CGFloat = 18  // Card headers
+    static let heading5: CGFloat = 16  // Minor headers
+    static let body1: CGFloat = 16     // Primary body text
+    static let body2: CGFloat = 15     // Secondary body text
+    static let caption1: CGFloat = 14  // Primary captions
+    static let caption2: CGFloat = 13  // Secondary captions
+    static let small: CGFloat = 12     // Small text, disclaimers
+    static let micro: CGFloat = 11     // Very small text, legal
     
     // MARK: - Letter Spacing
     
-    enum LetterSpacing {
-        /// Apretado (-0.5)
-        static let tight: CGFloat = -0.5
-        
-        /// Normal (0)
-        static let normal: CGFloat = 0
-        
-        /// Ligeramente expandido (0.5)
-        static let wide: CGFloat = 0.5
-        
-        /// Expandido para títulos y etiquetas (1.0)
-        static let expanded: CGFloat = 1.0
-    }
+    static let tightSpacing: CGFloat = -0.5
+    static let normalSpacing: CGFloat = 0
+    static let looseSpacing: CGFloat = 0.5
+    
+    // MARK: - Line Heights
+    
+    static let tightLineHeight: CGFloat = 1.15
+    static let normalLineHeight: CGFloat = 1.25
+    static let looseLineHeight: CGFloat = 1.5
+    
+    // MARK: - Font Weights
+    
+    static let ultraLight: Font.Weight = .ultraLight
+    static let thin: Font.Weight = .thin
+    static let light: Font.Weight = .light
+    static let regular: Font.Weight = .regular
+    static let medium: Font.Weight = .medium
+    static let semibold: Font.Weight = .semibold
+    static let bold: Font.Weight = .bold
+    static let heavy: Font.Weight = .heavy
+    static let black: Font.Weight = .black
     
     // MARK: - Text Styles
     
-    /// Fuente de sistema redondeada con tamaño y peso personalizados
-    static func font(size: CGFloat, weight: Font.Weight = .regular) -> Font {
-        return .system(size: size, weight: weight, design: .rounded)
+    // Display Styles (Large headers)
+    
+    static var display1Style: Font {
+        .system(size: display1, weight: bold, design: displayFamily)
     }
     
-    /// Modificador para dar formato a textos largos (párrafos)
-    struct ParagraphStyle: ViewModifier {
-        let size: CGFloat
-        let weight: Font.Weight
-        let lineHeight: CGFloat
+    static var display2Style: Font {
+        .system(size: display2, weight: bold, design: displayFamily)
+    }
+    
+    // Heading Styles
+    
+    static var heading1Style: Font {
+        .system(size: heading1, weight: bold, design: displayFamily)
+    }
+    
+    static var heading2Style: Font {
+        .system(size: heading2, weight: semibold, design: displayFamily)
+    }
+    
+    static var heading3Style: Font {
+        .system(size: heading3, weight: semibold, design: displayFamily)
+    }
+    
+    static var heading4Style: Font {
+        .system(size: heading4, weight: semibold, design: displayFamily)
+    }
+    
+    static var heading5Style: Font {
+        .system(size: heading5, weight: medium, design: displayFamily)
+    }
+    
+    // Body Text Styles
+    
+    static var body1Style: Font {
+        .system(size: body1, weight: regular, design: bodyFamily)
+    }
+    
+    static var body1EmphasisStyle: Font {
+        .system(size: body1, weight: medium, design: bodyFamily)
+    }
+    
+    static var body2Style: Font {
+        .system(size: body2, weight: regular, design: bodyFamily)
+    }
+    
+    static var body2EmphasisStyle: Font {
+        .system(size: body2, weight: medium, design: bodyFamily)
+    }
+    
+    // Caption Styles
+    
+    static var caption1Style: Font {
+        .system(size: caption1, weight: regular, design: bodyFamily)
+    }
+    
+    static var caption1EmphasisStyle: Font {
+        .system(size: caption1, weight: medium, design: bodyFamily)
+    }
+    
+    static var caption2Style: Font {
+        .system(size: caption2, weight: regular, design: bodyFamily)
+    }
+    
+    // Small Text Styles
+    
+    static var smallStyle: Font {
+        .system(size: small, weight: regular, design: bodyFamily)
+    }
+    
+    static var smallEmphasisStyle: Font {
+        .system(size: small, weight: medium, design: bodyFamily)
+    }
+    
+    static var microStyle: Font {
+        .system(size: micro, weight: regular, design: bodyFamily)
+    }
+    
+    // MARK: - Typography Modifiers
+    
+    // Heading modifiers with better spacing and weights
+    
+    struct Display1: ViewModifier {
         let color: Color
-        let tracking: CGFloat
-        
-        init(
-            size: CGFloat,
-            weight: Font.Weight = .regular,
-            lineHeight: CGFloat = LineHeight.relaxed,
-            color: Color = PureLifeColors.textPrimary,
-            tracking: CGFloat = LetterSpacing.normal
-        ) {
-            self.size = size
-            self.weight = weight
-            self.lineHeight = lineHeight
-            self.color = color
-            self.tracking = tracking
-        }
         
         func body(content: Content) -> some View {
             content
-                .font(.system(size: size, weight: weight, design: .rounded))
-                .lineSpacing((lineHeight - 1.0) * size)
-                .tracking(tracking)
+                .font(PureLifeTypography.display1Style)
+                .foregroundColor(color)
+                .lineSpacing(4)
+                .tracking(tightSpacing)
+        }
+    }
+    
+    struct Display2: ViewModifier {
+        let color: Color
+        
+        func body(content: Content) -> some View {
+            content
+                .font(PureLifeTypography.display2Style)
+                .foregroundColor(color)
+                .lineSpacing(2)
+                .tracking(tightSpacing)
+        }
+    }
+    
+    struct Heading1: ViewModifier {
+        let color: Color
+        
+        func body(content: Content) -> some View {
+            content
+                .font(PureLifeTypography.heading1Style)
+                .foregroundColor(color)
+                .lineSpacing(2)
+                .tracking(tightSpacing)
+        }
+    }
+    
+    struct Heading2: ViewModifier {
+        let color: Color
+        
+        func body(content: Content) -> some View {
+            content
+                .font(PureLifeTypography.heading2Style)
+                .foregroundColor(color)
+                .lineSpacing(1)
+                .tracking(tightSpacing)
+        }
+    }
+    
+    struct Heading3: ViewModifier {
+        let color: Color
+        
+        func body(content: Content) -> some View {
+            content
+                .font(PureLifeTypography.heading3Style)
+                .foregroundColor(color)
+                .tracking(tightSpacing)
+        }
+    }
+    
+    struct Heading4: ViewModifier {
+        let color: Color
+        
+        func body(content: Content) -> some View {
+            content
+                .font(PureLifeTypography.heading4Style)
                 .foregroundColor(color)
         }
     }
     
-    // MARK: - Modern Typography Presets
-    
-    /// Título hero para pantallas principales
-    static func hero(_ content: some View, color: Color = PureLifeColors.textPrimary) -> some View {
-        content
-            .font(font(size: FontSize.xxxxxl, weight: FontWeight.bold))
-            .tracking(LetterSpacing.tight)
-            .foregroundColor(color)
+    struct Heading5: ViewModifier {
+        let color: Color
+        
+        func body(content: Content) -> some View {
+            content
+                .font(PureLifeTypography.heading5Style)
+                .foregroundColor(color)
+        }
     }
     
-    /// Título principal grande 
-    static func h1(_ content: some View, color: Color = PureLifeColors.textPrimary) -> some View {
-        content
-            .font(font(size: FontSize.xxxxl, weight: FontWeight.bold))
-            .tracking(LetterSpacing.tight)
-            .foregroundColor(color)
+    // Body modifiers with improved readability
+    
+    struct Body1: ViewModifier {
+        let color: Color
+        
+        func body(content: Content) -> some View {
+            content
+                .font(PureLifeTypography.body1Style)
+                .foregroundColor(color)
+                .lineSpacing(3)
+        }
     }
     
-    /// Título secundario
-    static func h2(_ content: some View, color: Color = PureLifeColors.textPrimary) -> some View {
-        content
-            .font(font(size: FontSize.xxxl, weight: FontWeight.bold))
-            .tracking(LetterSpacing.tight)
-            .foregroundColor(color)
+    struct Body1Emphasis: ViewModifier {
+        let color: Color
+        
+        func body(content: Content) -> some View {
+            content
+                .font(PureLifeTypography.body1EmphasisStyle)
+                .foregroundColor(color)
+                .lineSpacing(3)
+        }
     }
     
-    /// Título de sección
-    static func h3(_ content: some View, color: Color = PureLifeColors.textPrimary) -> some View {
-        content
-            .font(font(size: FontSize.xxl, weight: FontWeight.bold))
-            .tracking(LetterSpacing.tight)
-            .foregroundColor(color)
+    struct Body2: ViewModifier {
+        let color: Color
+        
+        func body(content: Content) -> some View {
+            content
+                .font(PureLifeTypography.body2Style)
+                .foregroundColor(color)
+                .lineSpacing(2)
+        }
     }
     
-    /// Título para tarjetas y subsecciones
-    static func h4(_ content: some View, color: Color = PureLifeColors.textPrimary) -> some View {
-        content
-            .font(font(size: FontSize.xl, weight: FontWeight.semibold))
-            .tracking(LetterSpacing.normal)
-            .foregroundColor(color)
+    struct Body2Emphasis: ViewModifier {
+        let color: Color
+        
+        func body(content: Content) -> some View {
+            content
+                .font(PureLifeTypography.body2EmphasisStyle)
+                .foregroundColor(color)
+                .lineSpacing(2)
+        }
     }
     
-    /// Título para elementos pequeños
-    static func h5(_ content: some View, color: Color = PureLifeColors.textPrimary) -> some View {
-        content
-            .font(font(size: FontSize.lg, weight: FontWeight.semibold))
-            .tracking(LetterSpacing.normal)
-            .foregroundColor(color)
+    // Caption modifiers
+    
+    struct Caption1: ViewModifier {
+        let color: Color
+        
+        func body(content: Content) -> some View {
+            content
+                .font(PureLifeTypography.caption1Style)
+                .foregroundColor(color)
+                .lineSpacing(1)
+        }
     }
     
-    /// Texto de cuerpo grande (enfatizado)
-    static func bodyLarge(_ content: some View, color: Color = PureLifeColors.textPrimary) -> some View {
-        content
-            .font(font(size: FontSize.md, weight: FontWeight.medium))
-            .tracking(LetterSpacing.normal)
-            .foregroundColor(color)
+    struct Caption1Emphasis: ViewModifier {
+        let color: Color
+        
+        func body(content: Content) -> some View {
+            content
+                .font(PureLifeTypography.caption1EmphasisStyle)
+                .foregroundColor(color)
+                .lineSpacing(1)
+        }
     }
     
-    /// Texto de cuerpo estándar
-    static func body(_ content: some View, color: Color = PureLifeColors.textPrimary) -> some View {
-        content
-            .font(font(size: FontSize.base, weight: FontWeight.regular))
-            .tracking(LetterSpacing.normal)
-            .foregroundColor(color)
+    struct Caption2: ViewModifier {
+        let color: Color
+        
+        func body(content: Content) -> some View {
+            content
+                .font(PureLifeTypography.caption2Style)
+                .foregroundColor(color)
+                .lineSpacing(1)
+        }
     }
     
-    /// Texto pequeño para información secundaria
-    static func small(_ content: some View, color: Color = PureLifeColors.textSecondary) -> some View {
-        content
-            .font(font(size: FontSize.sm, weight: FontWeight.regular))
-            .tracking(LetterSpacing.normal)
-            .foregroundColor(color)
+    // Small modifiers
+    
+    struct Small: ViewModifier {
+        let color: Color
+        
+        func body(content: Content) -> some View {
+            content
+                .font(PureLifeTypography.smallStyle)
+                .foregroundColor(color)
+        }
     }
     
-    /// Texto para etiquetas y metadatos (todo en mayúsculas)
-    static func caption(_ content: some View, color: Color = PureLifeColors.textSecondary) -> some View {
-        content
-            .font(font(size: FontSize.xs, weight: FontWeight.medium))
-            .tracking(LetterSpacing.expanded)
-            .foregroundColor(color)
-            .textCase(.uppercase)
+    struct SmallEmphasis: ViewModifier {
+        let color: Color
+        
+        func body(content: Content) -> some View {
+            content
+                .font(PureLifeTypography.smallEmphasisStyle)
+                .foregroundColor(color)
+        }
     }
     
-    /// Texto destacado con acento visual
-    static func highlight(_ content: some View) -> some View {
-        content
-            .font(font(size: FontSize.base, weight: FontWeight.semibold))
-            .foregroundColor(PureLifeColors.logoGreen)
+    struct Micro: ViewModifier {
+        let color: Color
+        
+        func body(content: Content) -> some View {
+            content
+                .font(PureLifeTypography.microStyle)
+                .foregroundColor(color)
+        }
+    }
+}
+
+// MARK: - Extension for View to apply typography modifiers
+extension View {
+    // Display styles
+    
+    func display1Style(color: Color = PureLifeColors.textPrimary) -> some View {
+        modifier(PureLifeTypography.Display1(color: color))
     }
     
-    /// Párrafo con buen espaciado para lecturas largas
-    static func paragraph(_ content: some View, color: Color = PureLifeColors.textPrimary) -> some View {
-        content.modifier(ParagraphStyle(
-            size: FontSize.base,
-            weight: FontWeight.regular,
-            lineHeight: LineHeight.relaxed,
-            color: color
-        ))
+    func display2Style(color: Color = PureLifeColors.textPrimary) -> some View {
+        modifier(PureLifeTypography.Display2(color: color))
     }
     
-    // MARK: - Botones y elementos interactivos
+    // Heading styles
     
-    /// Estilo para botones principales
-    static func primaryButton(_ content: some View) -> some View {
-        content
-            .font(font(size: FontSize.md, weight: FontWeight.semibold))
-            .tracking(LetterSpacing.wide)
+    func heading1Style(color: Color = PureLifeColors.textPrimary) -> some View {
+        modifier(PureLifeTypography.Heading1(color: color))
     }
     
-    /// Estilo para botones secundarios
-    static func secondaryButton(_ content: some View) -> some View {
-        content
-            .font(font(size: FontSize.md, weight: FontWeight.medium))
-            .tracking(LetterSpacing.wide)
+    func heading2Style(color: Color = PureLifeColors.textPrimary) -> some View {
+        modifier(PureLifeTypography.Heading2(color: color))
     }
     
-    /// Etiqueta para elementos interactivos
-    static func actionLabel(_ content: some View, color: Color = PureLifeColors.logoGreen) -> some View {
-        content
-            .font(font(size: FontSize.sm, weight: FontWeight.semibold))
-            .tracking(LetterSpacing.normal)
-            .foregroundColor(color)
+    func heading3Style(color: Color = PureLifeColors.textPrimary) -> some View {
+        modifier(PureLifeTypography.Heading3(color: color))
     }
     
-    // MARK: - Adaptative Typography
+    func heading4Style(color: Color = PureLifeColors.textPrimary) -> some View {
+        modifier(PureLifeTypography.Heading4(color: color))
+    }
     
-    /// Texto adaptativo que cambia según el modo claro/oscuro
-    static func adaptiveText(_ content: some View, lightColor: Color, darkColor: Color, scheme: ColorScheme) -> some View {
-        content
-            .foregroundColor(
-                scheme == .dark ? darkColor : lightColor
-            )
+    func heading5Style(color: Color = PureLifeColors.textPrimary) -> some View {
+        modifier(PureLifeTypography.Heading5(color: color))
+    }
+    
+    // Body styles
+    
+    func body1Style(color: Color = PureLifeColors.textPrimary) -> some View {
+        modifier(PureLifeTypography.Body1(color: color))
+    }
+    
+    func body1EmphasisStyle(color: Color = PureLifeColors.textPrimary) -> some View {
+        modifier(PureLifeTypography.Body1Emphasis(color: color))
+    }
+    
+    func body2Style(color: Color = PureLifeColors.textPrimary) -> some View {
+        modifier(PureLifeTypography.Body2(color: color))
+    }
+    
+    func body2EmphasisStyle(color: Color = PureLifeColors.textPrimary) -> some View {
+        modifier(PureLifeTypography.Body2Emphasis(color: color))
+    }
+    
+    // Caption styles
+    
+    func caption1Style(color: Color = PureLifeColors.textSecondary) -> some View {
+        modifier(PureLifeTypography.Caption1(color: color))
+    }
+    
+    func caption1EmphasisStyle(color: Color = PureLifeColors.textSecondary) -> some View {
+        modifier(PureLifeTypography.Caption1Emphasis(color: color))
+    }
+    
+    func caption2Style(color: Color = PureLifeColors.textSecondary) -> some View {
+        modifier(PureLifeTypography.Caption2(color: color))
+    }
+    
+    // Small styles
+    
+    func smallStyle(color: Color = PureLifeColors.textSecondary) -> some View {
+        modifier(PureLifeTypography.Small(color: color))
+    }
+    
+    func smallEmphasisStyle(color: Color = PureLifeColors.textSecondary) -> some View {
+        modifier(PureLifeTypography.SmallEmphasis(color: color))
+    }
+    
+    func microStyle(color: Color = PureLifeColors.textSecondary) -> some View {
+        modifier(PureLifeTypography.Micro(color: color))
     }
 } 
