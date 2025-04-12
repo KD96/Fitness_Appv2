@@ -96,6 +96,13 @@ struct User: Identifiable, Codable {
     var userPreferences = UserPreferences()
     var joinDate = Date()
     
+    // New social connection properties
+    var pendingFriendRequests: [UUID] = []
+    var sentFriendRequests: [UUID] = []
+    var connectedEvents: [UUID] = [] // IDs of events the user has joined
+    var bio: String = ""
+    var socialPrivacySettings = SocialPrivacySettings()
+    
     // Propiedad computada para obtener el primer nombre
     var firstName: String {
         return name.components(separatedBy: " ").first ?? name
@@ -146,6 +153,50 @@ struct User: Identifiable, Codable {
         }
         return false
     }
+    
+    // New methods for social features
+    
+    // Send a friend request to another user
+    mutating func sendFriendRequest(to userId: UUID) {
+        if !sentFriendRequests.contains(userId) && !friends.contains(userId) {
+            sentFriendRequests.append(userId)
+        }
+    }
+    
+    // Accept a friend request from another user
+    mutating func acceptFriendRequest(from userId: UUID) {
+        if pendingFriendRequests.contains(userId) {
+            // Remove from pending requests
+            pendingFriendRequests.removeAll { $0 == userId }
+            
+            // Add to friends
+            if !friends.contains(userId) {
+                friends.append(userId)
+            }
+        }
+    }
+    
+    // Decline a friend request
+    mutating func declineFriendRequest(from userId: UUID) {
+        pendingFriendRequests.removeAll { $0 == userId }
+    }
+    
+    // Remove a friend
+    mutating func removeFriend(_ userId: UUID) {
+        friends.removeAll { $0 == userId }
+    }
+    
+    // Join an event
+    mutating func joinEvent(_ eventId: UUID) {
+        if !connectedEvents.contains(eventId) {
+            connectedEvents.append(eventId)
+        }
+    }
+    
+    // Leave an event
+    mutating func leaveEvent(_ eventId: UUID) {
+        connectedEvents.removeAll { $0 == eventId }
+    }
 }
 
 // Estructura para preferencias de usuario
@@ -183,5 +234,29 @@ struct UserPreferences: Codable {
             case .system: return "gear"
             }
         }
+    }
+}
+
+// New structure for social privacy settings
+struct SocialPrivacySettings: Codable {
+    var showWorkoutsToFriends: Bool = true
+    var showWorkoutsToPublic: Bool = false
+    var allowFriendRequests: Bool = true
+    var showRewardsActivity: Bool = true
+    var showRealName: Bool = true
+    
+    // Default initializer
+    init(
+        showWorkoutsToFriends: Bool = true,
+        showWorkoutsToPublic: Bool = false,
+        allowFriendRequests: Bool = true,
+        showRewardsActivity: Bool = true,
+        showRealName: Bool = true
+    ) {
+        self.showWorkoutsToFriends = showWorkoutsToFriends
+        self.showWorkoutsToPublic = showWorkoutsToPublic
+        self.allowFriendRequests = allowFriendRequests
+        self.showRewardsActivity = showRewardsActivity
+        self.showRealName = showRealName
     }
 } 

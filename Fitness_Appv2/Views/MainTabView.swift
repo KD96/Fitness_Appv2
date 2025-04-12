@@ -21,26 +21,33 @@ struct MainTabView: View {
                 }
                 .tag(1)
             
+            CommunityView()
+                .tabItem {
+                    Image(systemName: "person.3.fill")
+                    Text("Community")
+                }
+                .tag(2)
+            
             NutritionView()
                 .tabItem {
                     Image(systemName: "fork.knife")
                     Text("Nutrition")
                 }
-                .tag(2)
+                .tag(3)
             
             RewardView()
                 .tabItem {
                     Image(systemName: "gift")
                     Text("Rewards")
                 }
-                .tag(3)
+                .tag(4)
             
             SettingsView()
                 .tabItem {
                     Image(systemName: "gear")
                     Text("Settings")
                 }
-                .tag(4)
+                .tag(5)
         }
         .accentColor(PureLifeColors.logoGreen)
         .onAppear {
@@ -60,7 +67,7 @@ struct MainTabView: View {
             appearance.backgroundColor = UIColor(PureLifeColors.darkBackground)
         } else {
             // Configurar apariencia para modo claro
-            appearance.backgroundColor = UIColor.white
+            appearance.backgroundColor = UIColor.black
         }
         
         // Configurar colores de los items

@@ -15,6 +15,12 @@ class AppDataStore: ObservableObject {
     @Published var currentUser: User
     @Published var socialFeed: [SocialActivity] = []
     @Published var friends: [User] = []
+    
+    // New social connection properties
+    @Published var suggestedUsers: [User] = []
+    @Published var upcomingEvents: [FitnessEvent] = []
+    @Published var pendingFriendRequests: [User] = []
+    
     @Published var isHealthKitEnabled = false
     
     // Nuevas propiedades para recompensas y gamificación
@@ -68,6 +74,41 @@ class AppDataStore: ObservableObject {
         )
         
         socialFeed = [sampleActivity]
+        
+        // Create sample suggested users with similar interests
+        suggestedUsers = [
+            User(name: "Emma Wilson", profileImage: "person.circle.fill"),
+            User(name: "Michael Brown", profileImage: "person.circle.fill"),
+            User(name: "Sophie Chen", profileImage: "person.circle.fill")
+        ]
+        
+        // Create sample upcoming events
+        upcomingEvents = [
+            FitnessEvent(
+                name: "5K Group Run",
+                description: "Join us for a friendly 5K run in the park. All levels welcome!",
+                eventType: .running,
+                date: Calendar.current.date(byAdding: .day, value: 5, to: Date())!,
+                duration: 60,
+                location: "Central Park",
+                isVirtual: false,
+                maxParticipants: 20,
+                creatorId: friends.first!.id,
+                imageIcon: "figure.run"
+            ),
+            FitnessEvent(
+                name: "Strength Training Workshop",
+                description: "Learn proper form and techniques for effective strength training.",
+                eventType: .strength,
+                date: Calendar.current.date(byAdding: .day, value: 7, to: Date())!,
+                duration: 90,
+                location: "Virtual Zoom Session",
+                isVirtual: true,
+                maxParticipants: 15,
+                creatorId: currentUser.id,
+                imageIcon: "dumbbell.fill"
+            )
+        ]
         
         // Inicializar recompensas y misiones
         setupRewardsAndMissions()
@@ -525,6 +566,141 @@ class AppDataStore: ObservableObject {
             return maxValue * 1.2
         }
         return 10.0 // Valor predeterminado si no hay datos
+    }
+    
+    // MARK: - Social Connection Methods
+    
+    // Get suggested users based on similar interests
+    func getSuggestedUsersWithSimilarInterests() -> [User] {
+        // In a real app, this would query a database of users with similar interests
+        // For the MVP, we'll return our sample data
+        return suggestedUsers
+    }
+    
+    // Send a friend request to another user
+    func sendFriendRequest(to user: User) {
+        // Update current user
+        currentUser.sendFriendRequest(to: user.id)
+        
+        // In a real app, this would also create a notification for the recipient
+        
+        // Create a pending request for the recipient (would be handled server-side in a real app)
+        // This is just for demo purposes in the MVP
+        var recipientUser = user
+        recipientUser.pendingFriendRequests.append(currentUser.id)
+        
+        // Update the suggested users list if the user is in it
+        if let index = suggestedUsers.firstIndex(where: { $0.id == user.id }) {
+            suggestedUsers[index] = recipientUser
+        }
+        
+        // Save changes
+        saveData()
+    }
+    
+    // Accept a friend request
+    func acceptFriendRequest(from user: User) {
+        // Update current user
+        currentUser.acceptFriendRequest(from: user.id)
+        
+        // Add to friends list
+        if !friends.contains(where: { $0.id == user.id }) {
+            friends.append(user)
+        }
+        
+        // Remove from pending requests
+        pendingFriendRequests.removeAll(where: { $0.id == user.id })
+        
+        // Create social activity
+        let friendActivity = SocialActivity.createFriendsActivity(user: currentUser, friend: user)
+        socialFeed.insert(friendActivity, at: 0)
+        
+        // Save changes
+        saveData()
+    }
+    
+    // Decline a friend request
+    func declineFriendRequest(from user: User) {
+        // Update current user
+        currentUser.declineFriendRequest(from: user.id)
+        
+        // Remove from pending requests
+        pendingFriendRequests.removeAll(where: { $0.id == user.id })
+        
+        // Save changes
+        saveData()
+    }
+    
+    // Create a new event
+    func createEvent(_ event: FitnessEvent) {
+        // Add to upcoming events
+        upcomingEvents.append(event)
+        
+        // Save changes
+        saveData()
+    }
+    
+    // Join an event
+    func joinEvent(_ event: FitnessEvent) {
+        // Find the event
+        if let index = upcomingEvents.firstIndex(where: { $0.id == event.id }) {
+            // Update the event with the new participant
+            var updatedEvent = event
+            updatedEvent.participants.append(currentUser.id)
+            upcomingEvents[index] = updatedEvent
+            
+            // Update user
+            currentUser.joinEvent(event.id)
+            
+            // Create social activity
+            let eventActivity = SocialActivity.createJoinedEventActivity(
+                user: currentUser,
+                eventId: event.id,
+                eventName: event.name
+            )
+            socialFeed.insert(eventActivity, at: 0)
+            
+            // Save changes
+            saveData()
+        }
+    }
+    
+    // Leave an event
+    func leaveEvent(_ event: FitnessEvent) {
+        // Find the event
+        if let index = upcomingEvents.firstIndex(where: { $0.id == event.id }) {
+            // Update the event by removing the participant
+            var updatedEvent = event
+            updatedEvent.participants.removeAll(where: { $0 == currentUser.id })
+            upcomingEvents[index] = updatedEvent
+            
+            // Update user
+            currentUser.leaveEvent(event.id)
+            
+            // Save changes
+            saveData()
+        }
+    }
+    
+    // Get upcoming events the user has joined
+    func getUserEvents() -> [FitnessEvent] {
+        return upcomingEvents.filter { event in
+            return currentUser.connectedEvents.contains(event.id)
+        }
+    }
+    
+    // Get user's pending friend requests
+    func getPendingFriendRequests() -> [User] {
+        // In a real app, this would query users whose IDs are in currentUser.pendingFriendRequests
+        // For the MVP, we'll just use our sample users and filter based on IDs
+        return pendingFriendRequests
+    }
+    
+    // Track analytics for social activities
+    func trackSocialActivity(type: String) {
+        // Using our own trackEvent method instead of calling analyticsManager directly
+        // This method properly handles the parameters
+        trackEvent(eventName: "social_activity", parameters: ["type": type])
     }
 }
 

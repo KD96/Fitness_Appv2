@@ -27,7 +27,7 @@ struct CommunityView: View {
     ]
     
     enum Tab {
-        case leaderboard, friends
+        case leaderboard, friends, connect
     }
     
     var body: some View {
@@ -45,8 +45,10 @@ struct CommunityView: View {
                 // Content based on selected tab
                 if selectedTab == .leaderboard {
                     leaderboardContent
-                } else {
+                } else if selectedTab == .friends {
                     friendsContent
+                } else {
+                    connectContent
                 }
             }
         }
@@ -63,6 +65,7 @@ struct CommunityView: View {
         HStack(spacing: 0) {
             tabButton(title: "Leaderboard", tab: .leaderboard)
             tabButton(title: "Friends", tab: .friends)
+            tabButton(title: "Connect", tab: .connect)
         }
         .background(
             RoundedRectangle(cornerRadius: 20)
@@ -540,6 +543,335 @@ struct CommunityView: View {
                 .shadow(color: PureLifeColors.adaptiveCardShadow(scheme: colorScheme), radius: 6, x: 0, y: 3)
         )
         .padding(.horizontal, 20)
+    }
+    
+    // MARK: - Connect Content
+    
+    private var connectContent: some View {
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: 24) {
+                // Banner explaining the feature
+                connectBanner
+                
+                // Interest selection
+                interestSelectionSection
+                
+                // People with similar interests
+                similarInterestUsersSection
+                
+                // Upcoming events
+                upcomingEventsSection
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 30)
+        }
+    }
+    
+    private var connectBanner: some View {
+        ZStack(alignment: .bottomLeading) {
+            RoundedRectangle(cornerRadius: 16)
+                .fill(LinearGradient(
+                    gradient: Gradient(colors: [Color.purple.opacity(0.3), Color.blue.opacity(0.3)]),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                ))
+                .frame(height: 160)
+            
+            // Overlay gradient
+            RoundedRectangle(cornerRadius: 16)
+                .fill(LinearGradient(
+                    gradient: Gradient(colors: [.black.opacity(0.7), .clear]),
+                    startPoint: .bottom,
+                    endPoint: .center
+                ))
+                .frame(height: 160)
+            
+            // Large icon
+            Image(systemName: "person.2.wave.2.fill")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(height: 60)
+                .foregroundColor(.white.opacity(0.3))
+                .padding(.trailing, 20)
+                .padding(.top, 20)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+            
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Find Your Fitness Tribe")
+                    .font(.system(size: 22, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                
+                Text("Connect with people who share your interests")
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .foregroundColor(.white.opacity(0.9))
+            }
+            .padding(20)
+        }
+        .shadow(radius: 5)
+    }
+    
+    private var interestSelectionSection: some View {
+        VStack(spacing: 16) {
+            Text("Your Fitness Interests")
+                .font(.system(size: 20, weight: .bold, design: .rounded))
+                .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            // Interest tags
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 140))], spacing: 12) {
+                ForEach(WorkoutType.allCases, id: \.self) { workoutType in
+                    interestTag(workoutType: workoutType, isSelected: dataStore.currentUser.userPreferences.favoriteActivities.contains(workoutType))
+                }
+                
+                // Goal tag
+                interestTag(
+                    title: dataStore.currentUser.userPreferences.fitnessGoal.rawValue,
+                    icon: dataStore.currentUser.userPreferences.fitnessGoal.icon,
+                    isSelected: true,
+                    color: .blue
+                )
+            }
+        }
+    }
+    
+    private func interestTag(workoutType: WorkoutType, isSelected: Bool) -> some View {
+        interestTag(
+            title: workoutType.rawValue.capitalized,
+            icon: workoutType.icon,
+            isSelected: isSelected,
+            color: AthleteImages.getColorForWorkoutType(workoutType)
+        )
+    }
+    
+    private func interestTag(title: String, icon: String, isSelected: Bool, color: Color) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.system(size: 14))
+                .foregroundColor(isSelected ? .white : color)
+            
+            Text(title)
+                .font(.system(size: 14, weight: .medium, design: .rounded))
+                .foregroundColor(isSelected ? .white : PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
+        }
+        .padding(10)
+        .frame(height: 40)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(isSelected ? color : color.opacity(0.1))
+        )
+        .shadow(color: isSelected ? color.opacity(0.3) : Color.clear, radius: 4, x: 0, y: 2)
+    }
+    
+    private var similarInterestUsersSection: some View {
+        VStack(spacing: 16) {
+            Text("People You Might Like")
+                .font(.system(size: 20, weight: .bold, design: .rounded))
+                .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            // Sample users with similar interests
+            ForEach(getSuggestedUsers()) { user in
+                suggestedUserCard(user: user)
+            }
+        }
+    }
+    
+    private func getSuggestedUsers() -> [User] {
+        // In a real app, this would fetch users with similar interests
+        // Here we're creating sample data
+        return [
+            User(
+                name: "Chris Evans",
+                profileImage: "person.crop.circle.fill",
+                tokenBalance: 320,
+                workoutStreak: 12,
+                experiencePoints: 2500
+            ),
+            User(
+                name: "Jessica Rogers",
+                profileImage: "person.crop.circle.fill",
+                tokenBalance: 280,
+                workoutStreak: 8,
+                experiencePoints: 1800
+            ),
+            User(
+                name: "Mark Banner",
+                profileImage: "person.crop.circle.fill",
+                tokenBalance: 340,
+                workoutStreak: 15,
+                experiencePoints: 3200
+            )
+        ]
+    }
+    
+    private func suggestedUserCard(user: User) -> some View {
+        HStack(spacing: 16) {
+            // User avatar
+            ZStack {
+                Circle()
+                    .fill(PureLifeColors.logoGreen.opacity(0.15))
+                    .frame(width: 56, height: 56)
+                
+                Image(systemName: AthleteImages.getRandomAthleteIcon())
+                    .font(.system(size: 22))
+                    .foregroundColor(PureLifeColors.logoGreen)
+            }
+            
+            // User info
+            VStack(alignment: .leading, spacing: 8) {
+                Text(user.name)
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
+                
+                // Common interests
+                HStack(spacing: 8) {
+                    ForEach(getRandomInterests(), id: \.self) { interest in
+                        Text(interest)
+                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                            .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(PureLifeColors.adaptiveSurfaceSecondary(scheme: colorScheme))
+                            )
+                    }
+                }
+            }
+            
+            Spacer()
+            
+            // Connect button
+            Button(action: {
+                // Action to connect with this user
+            }) {
+                Text("Connect")
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .foregroundColor(.white)
+                    .padding(.vertical, 8)
+                    .padding(.horizontal, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(PureLifeColors.logoGreen)
+                    )
+                    .shadow(color: PureLifeColors.logoGreen.opacity(0.3), radius: 4, x: 0, y: 2)
+            }
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(PureLifeColors.adaptiveSurface(scheme: colorScheme))
+                .shadow(color: PureLifeColors.adaptiveCardShadow(scheme: colorScheme), radius: 6, x: 0, y: 3)
+        )
+    }
+    
+    private func getRandomInterests() -> [String] {
+        // Generate random workout types and goals as shared interests
+        let allInterests = WorkoutType.allCases.map { $0.rawValue.capitalized } + 
+                           UserPreferences.FitnessGoal.allCases.map { $0.rawValue }
+        
+        return Array(allInterests.shuffled().prefix(2))
+    }
+    
+    private var upcomingEventsSection: some View {
+        VStack(spacing: 16) {
+            Text("Upcoming Events")
+                .font(.system(size: 20, weight: .bold, design: .rounded))
+                .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            // Sample events
+            VStack(spacing: 12) {
+                eventCard(
+                    title: "5K Group Run",
+                    date: "Next Saturday, 8:00 AM",
+                    icon: "figure.run",
+                    color: .blue,
+                    participants: 12
+                )
+                
+                eventCard(
+                    title: "Strength Training Workshop",
+                    date: "Sunday, 10:00 AM",
+                    icon: "dumbbell.fill",
+                    color: .orange,
+                    participants: 8
+                )
+                
+                Button(action: {
+                    // Action to view all events
+                }) {
+                    Text("View All Events")
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundColor(PureLifeColors.logoGreen)
+                        .padding(.vertical, 12)
+                        .frame(maxWidth: .infinity)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(PureLifeColors.logoGreen.opacity(0.1))
+                        )
+                }
+            }
+        }
+    }
+    
+    private func eventCard(title: String, date: String, icon: String, color: Color, participants: Int) -> some View {
+        HStack(spacing: 16) {
+            // Event icon
+            ZStack {
+                Circle()
+                    .fill(color.opacity(0.15))
+                    .frame(width: 50, height: 50)
+                
+                Image(systemName: icon)
+                    .font(.system(size: 22))
+                    .foregroundColor(color)
+            }
+            
+            // Event info
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .foregroundColor(PureLifeColors.adaptiveTextPrimary(scheme: colorScheme))
+                
+                Text(date)
+                    .font(.system(size: 14, design: .rounded))
+                    .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
+                
+                HStack(spacing: 4) {
+                    Image(systemName: "person.fill")
+                        .font(.system(size: 12))
+                    
+                    Text("\(participants) participants")
+                        .font(.system(size: 12, design: .rounded))
+                }
+                .foregroundColor(PureLifeColors.adaptiveTextSecondary(scheme: colorScheme))
+            }
+            
+            Spacer()
+            
+            // Join button
+            Button(action: {
+                // Action to join this event
+            }) {
+                Text("Join")
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .foregroundColor(.white)
+                    .padding(.vertical, 8)
+                    .padding(.horizontal, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(color)
+                    )
+                    .shadow(color: color.opacity(0.3), radius: 4, x: 0, y: 2)
+            }
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(PureLifeColors.adaptiveSurface(scheme: colorScheme))
+                .shadow(color: PureLifeColors.adaptiveCardShadow(scheme: colorScheme), radius: 6, x: 0, y: 3)
+        )
     }
 }
 
