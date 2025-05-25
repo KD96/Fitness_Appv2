@@ -93,4 +93,5 @@ iOSInjectionProject/
 .DS_Store
 
 # API Keys and Secrets
-Fitness_Appv2/Networking/APIConfig.swift 
+Fitness_Appv2/Networking/APIConfig.swift
+Fitness_Appv2/Config/Secrets.xcconfig 
