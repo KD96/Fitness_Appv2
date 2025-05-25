@@ -14,10 +14,10 @@ struct SupabaseConfig {
     // MARK: - Supabase Configuration
     
     /// Supabase project URL
-    static let supabaseURL = URL(string: "https://your-project-id.supabase.co")!
+    static let supabaseURL = URL(string: Environment.current.supabaseURL)!
     
     /// Supabase anon key (public key)
-    static let supabaseAnonKey = "your-anon-key-here"
+    static let supabaseAnonKey = Environment.current.anonKey
     
     // MARK: - Supabase Client
     
@@ -103,18 +103,18 @@ extension SupabaseConfig {
         var supabaseURL: String {
             switch self {
             case .development:
-                return "https://your-dev-project-id.supabase.co"
+                return "http://127.0.0.1:54321" // Local Supabase
             case .staging:
                 return "https://your-staging-project-id.supabase.co"
             case .production:
-                return "https://your-prod-project-id.supabase.co"
+                return "https://pbnzchrhqibmdtyiibhx.supabase.co"
             }
         }
         
         var anonKey: String {
             switch self {
             case .development:
-                return "your-dev-anon-key"
+                return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"
             case .staging:
                 return "your-staging-anon-key"
             case .production:
