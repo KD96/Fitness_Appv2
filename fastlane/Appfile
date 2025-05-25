@@ -1,0 +1,10 @@
+# App Store Connect Configuration
+app_identifier("com.purelife.fitness") # The bundle identifier of your app
+apple_id("your-apple-id@example.com") # Your Apple ID email address
+
+# Team configuration
+itc_team_id("YOUR_ITC_TEAM_ID") # App Store Connect Team ID
+team_id("YOUR_TEAM_ID") # Developer Portal Team ID
+
+# For more information about the Appfile, see:
+#     https://docs.fastlane.tools/advanced/#appfile 

@@ -1,0 +1,300 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Description of what the lane does"
+  
+  # Configuration
+  SCHEME = "Fitness_Appv2"
+  WORKSPACE = "Fitness_Appv2.xcworkspace"
+  PROJECT = "Fitness_Appv2.xcodeproj"
+  
+  # App Store Connect Configuration
+  APP_IDENTIFIER = "com.purelife.fitness"
+  TEAM_ID = ENV["TEAM_ID"] || "YOUR_TEAM_ID"
+  ITC_TEAM_ID = ENV["ITC_TEAM_ID"] || "YOUR_ITC_TEAM_ID"
+  
+  before_all do
+    # Ensure we're on the right branch
+    ensure_git_status_clean
+    
+    # Set up environment
+    setup_ci if ENV['CI']
+    
+    # Clear derived data
+    clear_derived_data
+  end
+
+  desc "Run tests"
+  lane :test do
+    run_tests(
+      workspace: WORKSPACE,
+      scheme: SCHEME,
+      devices: ["iPhone 15 Pro"],
+      clean: true
+    )
+  end
+
+  desc "Build for testing"
+  lane :build_for_testing do
+    gym(
+      workspace: WORKSPACE,
+      scheme: SCHEME,
+      configuration: "Debug",
+      skip_archive: true,
+      skip_codesigning: true,
+      clean: true
+    )
+  end
+
+  desc "Beta distribution to TestFlight"
+  lane :beta do
+    # Increment build number
+    increment_build_number(
+      xcodeproj: PROJECT
+    )
+    
+    # Get certificates and provisioning profiles
+    match(
+      type: "appstore",
+      app_identifier: APP_IDENTIFIER,
+      team_id: TEAM_ID,
+      readonly: true
+    )
+    
+    # Build the app
+    gym(
+      workspace: WORKSPACE,
+      scheme: SCHEME,
+      configuration: "Release",
+      export_method: "app-store",
+      export_options: {
+        provisioningProfiles: {
+          APP_IDENTIFIER => "match AppStore #{APP_IDENTIFIER}"
+        }
+      },
+      clean: true,
+      include_bitcode: false,
+      include_symbols: true
+    )
+    
+    # Upload to TestFlight
+    upload_to_testflight(
+      team_id: ITC_TEAM_ID,
+      skip_waiting_for_build_processing: false,
+      skip_submission: true,
+      notify_external_testers: false,
+      changelog: "New beta build with latest features and improvements."
+    )
+    
+    # Clean up
+    clean_build_artifacts
+    
+    # Commit version bump
+    commit_version_bump(
+      message: "Version bump for TestFlight build",
+      xcodeproj: PROJECT
+    )
+    
+    # Add git tag
+    add_git_tag(
+      tag: "beta/#{get_version_number(xcodeproj: PROJECT)}/#{get_build_number(xcodeproj: PROJECT)}"
+    )
+    
+    # Push to git
+    push_to_git_remote
+  end
+
+  desc "Release to App Store"
+  lane :release do
+    # Ensure we're on main branch
+    ensure_git_branch(branch: 'main')
+    
+    # Run tests first
+    test
+    
+    # Increment version number
+    increment_version_number(
+      xcodeproj: PROJECT,
+      bump_type: "patch"
+    )
+    
+    # Increment build number
+    increment_build_number(
+      xcodeproj: PROJECT
+    )
+    
+    # Get certificates and provisioning profiles
+    match(
+      type: "appstore",
+      app_identifier: APP_IDENTIFIER,
+      team_id: TEAM_ID,
+      readonly: true
+    )
+    
+    # Build the app
+    gym(
+      workspace: WORKSPACE,
+      scheme: SCHEME,
+      configuration: "Release",
+      export_method: "app-store",
+      export_options: {
+        provisioningProfiles: {
+          APP_IDENTIFIER => "match AppStore #{APP_IDENTIFIER}"
+        }
+      },
+      clean: true,
+      include_bitcode: false,
+      include_symbols: true
+    )
+    
+    # Upload to App Store Connect
+    upload_to_app_store(
+      team_id: ITC_TEAM_ID,
+      force: true,
+      reject_if_possible: true,
+      skip_metadata: false,
+      skip_screenshots: false,
+      submit_for_review: false,
+      automatic_release: false,
+      submission_information: {
+        add_id_info_limits_tracking: true,
+        add_id_info_serves_ads: false,
+        add_id_info_tracks_action: false,
+        add_id_info_tracks_install: false,
+        add_id_info_uses_idfa: false,
+        content_rights_has_rights: true,
+        content_rights_contains_third_party_content: false,
+        export_compliance_platform: 'ios',
+        export_compliance_compliance_required: false,
+        export_compliance_encryption_updated: false,
+        export_compliance_app_type: nil,
+        export_compliance_uses_encryption: false,
+        export_compliance_is_exempt: false,
+        export_compliance_contains_third_party_cryptography: false,
+        export_compliance_contains_proprietary_cryptography: false,
+        export_compliance_available_on_french_store: false
+      }
+    )
+    
+    # Clean up
+    clean_build_artifacts
+    
+    # Commit version bump
+    commit_version_bump(
+      message: "Version bump for App Store release v#{get_version_number(xcodeproj: PROJECT)}",
+      xcodeproj: PROJECT
+    )
+    
+    # Add git tag
+    add_git_tag(
+      tag: "v#{get_version_number(xcodeproj: PROJECT)}"
+    )
+    
+    # Push to git
+    push_to_git_remote
+  end
+
+  desc "Download certificates and provisioning profiles"
+  lane :certificates do
+    match(
+      type: "development",
+      app_identifier: APP_IDENTIFIER,
+      team_id: TEAM_ID
+    )
+    
+    match(
+      type: "appstore",
+      app_identifier: APP_IDENTIFIER,
+      team_id: TEAM_ID
+    )
+  end
+
+  desc "Register new device"
+  lane :register_device do |options|
+    device_name = options[:name]
+    device_udid = options[:udid]
+    
+    register_devices(
+      devices: {
+        device_name => device_udid
+      }
+    )
+    
+    # Refresh provisioning profiles
+    match(
+      type: "development",
+      app_identifier: APP_IDENTIFIER,
+      team_id: TEAM_ID,
+      force_for_new_devices: true
+    )
+  end
+
+  desc "Take screenshots for App Store"
+  lane :screenshots do
+    capture_screenshots(
+      workspace: WORKSPACE,
+      scheme: SCHEME,
+      devices: [
+        "iPhone 15 Pro Max",
+        "iPhone 15 Pro",
+        "iPhone SE (3rd generation)"
+      ],
+      languages: ["en-US"],
+      clear_previous_screenshots: true,
+      override_status_bar: true,
+      localize_simulator: true
+    )
+    
+    # Upload screenshots to App Store Connect
+    upload_to_app_store(
+      team_id: ITC_TEAM_ID,
+      skip_binary_upload: true,
+      skip_metadata: true
+    )
+  end
+
+  desc "Update metadata"
+  lane :metadata do
+    upload_to_app_store(
+      team_id: ITC_TEAM_ID,
+      skip_binary_upload: true,
+      skip_screenshots: true,
+      force: true
+    )
+  end
+
+  # Error handling
+  error do |lane, exception|
+    # Clean up on error
+    clean_build_artifacts
+    
+    # Notify about the error
+    puts "❌ Lane #{lane} failed with exception: #{exception}"
+    
+    # Reset git changes if needed
+    reset_git_repo(force: true) if git_status_clean == false
+  end
+
+  after_all do |lane|
+    # This block is called, only if the executed lane was successful
+    puts "✅ Lane #{lane} completed successfully!"
+    
+    # Clean up
+    clean_build_artifacts
+  end
+end 
