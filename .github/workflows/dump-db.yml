@@ -1,0 +1,375 @@
+name: Database Analytics Dump
+
+on:
+  # Run daily at 2 AM UTC
+  schedule:
+    - cron: '0 2 * * *'
+  
+  # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      dump_type:
+        description: 'Type of dump to perform'
+        required: true
+        default: 'analytics'
+        type: choice
+        options:
+          - analytics
+          - metrics
+          - full
+          - crash_reports
+      
+      retention_days:
+        description: 'Days of data to include'
+        required: false
+        default: '7'
+        type: string
+
+env:
+  SUPABASE_PROJECT_ID: pbnzchrhqibmdtyiibhx
+  SUPABASE_URL: https://pbnzchrhqibmdtyiibhx.supabase.co
+
+jobs:
+  dump-analytics:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install Supabase CLI
+        run: |
+          npm install -g @supabase/cli@latest
+          supabase --version
+          
+      - name: Setup PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+          
+      - name: Create dump directory
+        run: |
+          mkdir -p dumps
+          echo "DUMP_DATE=$(date +%Y%m%d_%H%M%S)" >> $GITHUB_ENV
+          echo "RETENTION_DAYS=${{ github.event.inputs.retention_days || '7' }}" >> $GITHUB_ENV
+          echo "DUMP_TYPE=${{ github.event.inputs.dump_type || 'analytics' }}" >> $GITHUB_ENV
+          
+      - name: Generate Analytics Dump
+        if: env.DUMP_TYPE == 'analytics' || env.DUMP_TYPE == 'full'
+        env:
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          # Create analytics dump SQL
+          cat > dumps/analytics_dump_${DUMP_DATE}.sql << 'EOF'
+          -- Analytics Dump Generated: $(date)
+          -- Retention Period: ${RETENTION_DAYS} days
+          -- Project: ${SUPABASE_PROJECT_ID}
+          
+          \echo 'Starting Analytics Dump...'
+          
+          -- User Analytics Summary
+          \echo 'Generating User Analytics...'
+          \copy (
+            SELECT 
+              DATE_TRUNC('day', created_at) as signup_date,
+              COUNT(*) as new_users,
+              COUNT(*) FILTER (WHERE last_active > NOW() - INTERVAL '7 days') as active_users_7d,
+              COUNT(*) FILTER (WHERE last_active > NOW() - INTERVAL '30 days') as active_users_30d
+            FROM users 
+            WHERE created_at >= NOW() - INTERVAL '${RETENTION_DAYS} days'
+            GROUP BY DATE_TRUNC('day', created_at)
+            ORDER BY signup_date DESC
+          ) TO 'user_analytics_${DUMP_DATE}.csv' WITH CSV HEADER;
+          
+          -- Workout Analytics Summary
+          \echo 'Generating Workout Analytics...'
+          \copy (
+            SELECT 
+              DATE_TRUNC('day', start_time) as workout_date,
+              workout_type,
+              COUNT(*) as total_workouts,
+              AVG(duration_minutes) as avg_duration,
+              AVG(calories_burned) as avg_calories,
+              AVG(tokens_earned) as avg_tokens,
+              COUNT(DISTINCT user_id) as unique_users
+            FROM workouts 
+            WHERE start_time >= NOW() - INTERVAL '${RETENTION_DAYS} days'
+            GROUP BY DATE_TRUNC('day', start_time), workout_type
+            ORDER BY workout_date DESC, total_workouts DESC
+          ) TO 'workout_analytics_${DUMP_DATE}.csv' WITH CSV HEADER;
+          
+          -- Token Economy Analytics
+          \echo 'Generating Token Analytics...'
+          \copy (
+            SELECT 
+              DATE_TRUNC('day', created_at) as date,
+              'workout_earned' as transaction_type,
+              SUM(tokens_earned) as total_tokens,
+              COUNT(*) as transaction_count,
+              AVG(tokens_earned) as avg_tokens_per_transaction
+            FROM workouts 
+            WHERE created_at >= NOW() - INTERVAL '${RETENTION_DAYS} days'
+            GROUP BY DATE_TRUNC('day', created_at)
+            
+            UNION ALL
+            
+            SELECT 
+              DATE_TRUNC('day', redeemed_at) as date,
+              'reward_redeemed' as transaction_type,
+              -SUM(cost_tokens) as total_tokens,
+              COUNT(*) as transaction_count,
+              AVG(cost_tokens) as avg_tokens_per_transaction
+            FROM user_rewards 
+            WHERE redeemed_at >= NOW() - INTERVAL '${RETENTION_DAYS} days'
+            ORDER BY date DESC
+          ) TO 'token_analytics_${DUMP_DATE}.csv' WITH CSV HEADER;
+          
+          -- Social Activity Analytics
+          \echo 'Generating Social Analytics...'
+          \copy (
+            SELECT 
+              DATE_TRUNC('day', created_at) as activity_date,
+              activity_type,
+              COUNT(*) as total_activities,
+              COUNT(DISTINCT user_id) as unique_users
+            FROM social_activities 
+            WHERE created_at >= NOW() - INTERVAL '${RETENTION_DAYS} days'
+            GROUP BY DATE_TRUNC('day', created_at), activity_type
+            ORDER BY activity_date DESC, total_activities DESC
+          ) TO 'social_analytics_${DUMP_DATE}.csv' WITH CSV HEADER;
+          
+          \echo 'Analytics dump completed successfully!'
+          EOF
+          
+          # Execute the dump
+          PGPASSWORD="${SUPABASE_SERVICE_ROLE_KEY}" psql \
+            -h db.${SUPABASE_PROJECT_ID}.supabase.co \
+            -p 5432 \
+            -U postgres \
+            -d postgres \
+            -f dumps/analytics_dump_${DUMP_DATE}.sql
+            
+      - name: Generate Metrics Dump
+        if: env.DUMP_TYPE == 'metrics' || env.DUMP_TYPE == 'full'
+        env:
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          # Create metrics dump SQL
+          cat > dumps/metrics_dump_${DUMP_DATE}.sql << 'EOF'
+          -- Metrics Dump Generated: $(date)
+          -- Retention Period: ${RETENTION_DAYS} days
+          
+          \echo 'Starting Metrics Dump...'
+          
+          -- Performance Metrics Summary
+          \echo 'Generating Performance Metrics...'
+          \copy (
+            SELECT * FROM performance_metrics_summary 
+            WHERE metric_hour >= NOW() - INTERVAL '${RETENTION_DAYS} days'
+          ) TO 'performance_metrics_${DUMP_DATE}.csv' WITH CSV HEADER;
+          
+          -- App Metrics Stats
+          \echo 'Generating App Metrics Stats...'
+          \copy (
+            SELECT * FROM get_metrics_stats(
+              NOW() - INTERVAL '${RETENTION_DAYS} days',
+              NOW()
+            )
+          ) TO 'metrics_stats_${DUMP_DATE}.csv' WITH CSV HEADER;
+          
+          -- Device Distribution
+          \echo 'Generating Device Analytics...'
+          \copy (
+            SELECT 
+              device_info->>'model' as device_model,
+              device_info->>'system_version' as ios_version,
+              app_version,
+              COUNT(*) as metric_count,
+              COUNT(DISTINCT user_id) as unique_users
+            FROM app_metrics 
+            WHERE timestamp >= NOW() - INTERVAL '${RETENTION_DAYS} days'
+            GROUP BY 
+              device_info->>'model',
+              device_info->>'system_version',
+              app_version
+            ORDER BY metric_count DESC
+          ) TO 'device_analytics_${DUMP_DATE}.csv' WITH CSV HEADER;
+          
+          \echo 'Metrics dump completed successfully!'
+          EOF
+          
+          # Execute the dump
+          PGPASSWORD="${SUPABASE_SERVICE_ROLE_KEY}" psql \
+            -h db.${SUPABASE_PROJECT_ID}.supabase.co \
+            -p 5432 \
+            -U postgres \
+            -d postgres \
+            -f dumps/metrics_dump_${DUMP_DATE}.sql
+            
+      - name: Generate Crash Reports Dump
+        if: env.DUMP_TYPE == 'crash_reports' || env.DUMP_TYPE == 'full'
+        env:
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          # Create crash reports dump SQL
+          cat > dumps/crash_dump_${DUMP_DATE}.sql << 'EOF'
+          -- Crash Reports Dump Generated: $(date)
+          -- Retention Period: ${RETENTION_DAYS} days
+          
+          \echo 'Starting Crash Reports Dump...'
+          
+          -- Crash Reports Summary
+          \echo 'Generating Crash Reports Summary...'
+          \copy (
+            SELECT * FROM crash_reports_summary 
+            WHERE crash_date >= NOW() - INTERVAL '${RETENTION_DAYS} days'
+          ) TO 'crash_reports_summary_${DUMP_DATE}.csv' WITH CSV HEADER;
+          
+          -- Detailed Crash Data
+          \echo 'Generating Detailed Crash Data...'
+          \copy (
+            SELECT 
+              id,
+              timestamp,
+              app_version,
+              device_info->>'model' as device_model,
+              device_info->>'system_version' as ios_version,
+              data->>'crash_signal' as crash_signal,
+              data->>'crash_exception_type' as exception_type,
+              data->>'crash_termination_reason' as termination_reason,
+              jsonb_array_length(data->'stack_trace') as stack_trace_frames
+            FROM app_metrics 
+            WHERE type = 'crash' 
+              AND timestamp >= NOW() - INTERVAL '${RETENTION_DAYS} days'
+            ORDER BY timestamp DESC
+          ) TO 'crash_details_${DUMP_DATE}.csv' WITH CSV HEADER;
+          
+          \echo 'Crash reports dump completed successfully!'
+          EOF
+          
+          # Execute the dump
+          PGPASSWORD="${SUPABASE_SERVICE_ROLE_KEY}" psql \
+            -h db.${SUPABASE_PROJECT_ID}.supabase.co \
+            -p 5432 \
+            -U postgres \
+            -d postgres \
+            -f dumps/crash_dump_${DUMP_DATE}.sql
+            
+      - name: Cleanup Old Metrics
+        env:
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          # Clean up metrics older than 90 days
+          PGPASSWORD="${SUPABASE_SERVICE_ROLE_KEY}" psql \
+            -h db.${SUPABASE_PROJECT_ID}.supabase.co \
+            -p 5432 \
+            -U postgres \
+            -d postgres \
+            -c "SELECT cleanup_old_metrics(90);"
+            
+      - name: Compress dumps
+        run: |
+          cd dumps
+          tar -czf analytics_dump_${DUMP_DATE}.tar.gz *.csv *.sql
+          ls -la
+          
+      - name: Upload dump artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: database-dump-${{ env.DUMP_DATE }}
+          path: dumps/analytics_dump_${{ env.DUMP_DATE }}.tar.gz
+          retention-days: 30
+          
+      - name: Generate summary report
+        run: |
+          cat > dumps/dump_summary_${DUMP_DATE}.md << EOF
+          # Database Dump Summary
+          
+          **Date:** $(date)
+          **Type:** ${DUMP_TYPE}
+          **Retention:** ${RETENTION_DAYS} days
+          **Project:** ${SUPABASE_PROJECT_ID}
+          
+          ## Files Generated
+          
+          $(ls -la dumps/*.csv 2>/dev/null | awk '{print "- " $9 " (" $5 " bytes)"}' || echo "No CSV files generated")
+          
+          ## Dump Statistics
+          
+          - **Total files:** $(ls dumps/*.csv 2>/dev/null | wc -l)
+          - **Total size:** $(du -sh dumps/ | cut -f1)
+          - **Compressed size:** $(ls -lh dumps/*.tar.gz | awk '{print $5}')
+          
+          ## Next Steps
+          
+          1. Download the artifact from GitHub Actions
+          2. Review the analytics data
+          3. Update monitoring dashboards if needed
+          4. Check for any anomalies in crash reports
+          
+          ---
+          *Generated by GitHub Actions workflow*
+          EOF
+          
+          cat dumps/dump_summary_${DUMP_DATE}.md
+          
+      - name: Create Issue on Failures
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Database Dump Failed - ${new Date().toISOString().split('T')[0]}`,
+              body: `
+              ## Database Dump Failure
+              
+              **Workflow:** ${context.workflow}
+              **Run ID:** ${context.runId}
+              **Date:** ${new Date().toISOString()}
+              **Dump Type:** ${{ env.DUMP_TYPE }}
+              
+              The automated database dump has failed. Please check the workflow logs and investigate.
+              
+              ### Possible Causes
+              - Database connection issues
+              - Invalid service role key
+              - Query timeout
+              - Disk space issues
+              
+              ### Action Required
+              1. Check workflow logs: https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}
+              2. Verify Supabase service role key
+              3. Test database connectivity
+              4. Re-run the workflow manually if needed
+              
+              /cc @${context.actor}
+              `,
+              labels: ['bug', 'database', 'automation']
+            })
+            
+  notify-completion:
+    needs: dump-analytics
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: Notify Success
+        if: needs.dump-analytics.result == 'success'
+        run: |
+          echo "✅ Database dump completed successfully!"
+          echo "Artifacts are available for download in the workflow run."
+          
+      - name: Notify Failure
+        if: needs.dump-analytics.result == 'failure'
+        run: |
+          echo "❌ Database dump failed!"
+          echo "An issue has been created automatically."
+          exit 1 

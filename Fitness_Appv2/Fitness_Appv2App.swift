@@ -57,6 +57,12 @@ struct Fitness_Appv2App: App {
     @State private var userColorScheme: ColorScheme? = nil
     @State private var isShowingOnboarding = false
     
+    // Initialize MetricsManager for crash logging and performance monitoring
+    @available(iOS 13.0, *)
+    private var metricsManager: MetricsManager {
+        MetricsManager.shared
+    }
+    
     init() {
         // Cambiar el nombre que aparece en la barra de navegación
         UINavigationBar.appearance().largeTitleTextAttributes = [.foregroundColor: UIColor(PureLifeColors.textPrimary)]
@@ -65,6 +71,13 @@ struct Fitness_Appv2App: App {
         // Check if onboarding has been completed
         let hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
         self._isShowingOnboarding = State(initialValue: !hasCompletedOnboarding)
+        
+        // Initialize metrics collection
+        if #available(iOS 13.0, *) {
+            // MetricsManager will automatically start collecting metrics
+            _ = MetricsManager.shared
+            print("📊 MetricsManager initialized for crash logging and performance monitoring")
+        }
     }
     
     var body: some Scene {
@@ -78,6 +91,13 @@ struct Fitness_Appv2App: App {
                         .environmentObject(dataStore)
                         .onAppear {
                             updateColorScheme()
+                            
+                            // Upload pending metrics when app becomes active
+                            if #available(iOS 13.0, *) {
+                                Task {
+                                    await metricsManager.uploadPendingMetrics()
+                                }
+                            }
                         }
                         .onChange(of: dataStore.currentUser.userPreferences.userAppearance) { _, _ in
                             updateColorScheme()
@@ -88,6 +108,14 @@ struct Fitness_Appv2App: App {
             .onReceive(NotificationCenter.default.publisher(for: Notification.Name("LogoutAndShowOnboarding"))) { _ in
                 // Show onboarding when receiving the logout notification
                 isShowingOnboarding = true
+            }
+            .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+                // Upload metrics when app enters foreground
+                if #available(iOS 13.0, *) {
+                    Task {
+                        await metricsManager.uploadPendingMetrics()
+                    }
+                }
             }
         }
     }
